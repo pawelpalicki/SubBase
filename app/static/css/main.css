@@ -1,0 +1,1305 @@
+/* ===== GLOBALNE STYLE (aktualizacja zmiennych i body) ===== */
+:root {
+    --btn-primary-color: #0d6efd;
+    --btn-secondary-color: #6c757d;
+    --btn-success-color: #198754;
+    --card-border-color: rgba(0, 0, 0, 0.1);
+
+    /* Nowe zmienne dla paska nawigacyjnego */
+    --navbar-bg-start: #ffffff;
+    --navbar-bg-end: #f8f9fa; /* Bootstrap 'bg-light' color */
+    --navbar-border-color: #dee2e6; /* Bootstrap 'border-color' */
+    --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --navbar-link-color: #343a40; /* Ciemniejszy dla lepszego kontrastu na jasnym tle */
+    --navbar-link-hover-color: #007bff; /* Główny kolor akcentu (Bootstrap primary) */
+    --navbar-link-active-color: #0056b3; /* Ciemniejszy odcień primary dla aktywnego linku */
+    --navbar-brand-color: #004085; /* Ciemnoniebieski dla brandu, np. wzięty z alert-info Bootstrapa */
+
+    /* ===== ZMIENNE TRYBU CIEMNEGO ===== */
+    --dark-body-bg: #1a1a1a;
+    --dark-surface-bg: #2c2c2c;
+    --dark-surface-light-bg: #383838;
+    --dark-text-primary: #e0e0e0;
+    --dark-text-secondary: #b3b3b3;
+    --dark-border-color: #444444;
+    --dark-input-bg: #333333;
+    --dark-input-border: #555555;
+    --dark-input-focus-border: #007bff; /* Można zachować primary lub dostosować */
+    --dark-input-placeholder: #888888;
+    --dark-primary-color: #4dabf7;
+    --dark-primary-hover-color: #74c0fc;
+    --dark-secondary-color: #868e96;
+    --dark-secondary-hover-color: #adb5bd;
+    --dark-success-color: #40c057;
+    --dark-danger-color: #fa5252;
+    --dark-warning-color: #fab005;
+    --dark-info-color: #3bc9db;
+    --dark-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --dark-select2-bg: #333333;
+    --dark-select2-border: #555555;
+    --dark-select2-dropdown-bg: #2c2c2c;
+    --dark-select2-dropdown-border: #444444;
+    --dark-select2-choice-bg: #404040;
+    --dark-select2-highlight-bg: #007bff; /* Można użyć --dark-primary-color */
+}
+
+body {
+    background-color: #f8f9fa; /* Domyślne tło dla trybu jasnego */
+    color: #212529; /* Domyślny kolor tekstu dla trybu jasnego */
+    position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== STYLE TRYBU CIEMNEGO ===== */
+
+/* ----- GLOBALNE STYLE CIEMNE ----- */
+html[data-theme="dark"] body {
+    background-color: var(--dark-body-bg);
+    color: var(--dark-text-primary);
+}
+
+html[data-theme="dark"] a {
+    color: var(--dark-primary-color);
+}
+
+html[data-theme="dark"] a:hover {
+    color: var(--dark-primary-hover-color);
+}
+
+html[data-theme="dark"] .text-muted {
+    color: var(--dark-text-secondary) !important;
+}
+
+/* ----- PASEK NAWIGACYJNY CIEMNY ----- */
+html[data-theme="dark"] .custom-navbar-style {
+    background: linear-gradient(to bottom, var(--dark-surface-bg), #222222);
+    border-bottom: 1px solid var(--dark-border-color);
+    box-shadow: var(--dark-shadow);
+}
+
+html[data-theme="dark"] .custom-navbar-style .navbar-brand {
+    color: var(--dark-primary-color);
+}
+
+html[data-theme="dark"] .custom-navbar-style .navbar-brand .bi {
+    color: var(--dark-primary-color);
+}
+
+html[data-theme="dark"] .custom-navbar-style .nav-link {
+    color: var(--dark-text-secondary);
+}
+
+html[data-theme="dark"] .custom-navbar-style .nav-link:hover,
+html[data-theme="dark"] .custom-navbar-style .nav-link:focus {
+    color: var(--dark-primary-hover-color);
+    background-color: rgba(77, 171, 247, 0.1);
+}
+
+html[data-theme="dark"] .custom-navbar-style .nav-link.active {
+    color: var(--dark-primary-color);
+    background-color: rgba(77, 171, 247, 0.15);
+}
+
+html[data-theme="dark"] .custom-navbar-style .dropdown-menu {
+    background-color: var(--dark-surface-bg);
+    border: 1px solid var(--dark-border-color);
+    box-shadow: var(--dark-shadow);
+}
+
+html[data-theme="dark"] .custom-navbar-style .dropdown-item {
+    color: var(--dark-text-secondary);
+}
+
+html[data-theme="dark"] .custom-navbar-style .dropdown-item:hover,
+html[data-theme="dark"] .custom-navbar-style .dropdown-item:focus {
+    color: var(--dark-primary-hover-color);
+    background-color: var(--dark-surface-light-bg);
+}
+
+html[data-theme="dark"] .custom-navbar-style .dropdown-item:active {
+    background-color: var(--dark-primary-color);
+    color: var(--dark-surface-bg);
+}
+
+html[data-theme="dark"] .custom-navbar-style .btn-primary {
+    background-color: var(--dark-primary-color);
+    border-color: var(--dark-primary-color);
+    color: #000;
+}
+html[data-theme="dark"] .custom-navbar-style .btn-primary:hover {
+    background-color: var(--dark-primary-hover-color);
+    border-color: var(--dark-primary-hover-color);
+}
+
+html[data-theme="dark"] .custom-navbar-style .btn-outline-secondary {
+    color: var(--dark-text-secondary);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .custom-navbar-style .btn-outline-secondary:hover {
+    background-color: var(--dark-surface-light-bg);
+    color: var(--dark-primary-hover-color);
+    border-color: var(--dark-border-color);
+}
+
+html[data-theme="dark"] .custom-navbar-style .navbar-toggler {
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .custom-navbar-style .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(224, 224, 224, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+
+/* ----- KARTY CIEMNE ----- */
+html[data-theme="dark"] .card {
+    background-color: var(--dark-surface-bg);
+    border: 1px solid var(--dark-border-color);
+    box-shadow: var(--dark-shadow);
+    color: var(--dark-text-primary); /* Główny kolor tekstu dla karty */
+}
+
+html[data-theme="dark"] .card .card { /* Zagnieżdżone karty */
+    background-color: var(--dark-surface-light-bg);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .card-header {
+    background-color: #333333;
+    border-bottom: 1px solid var(--dark-border-color);
+    color: var(--dark-text-primary); /* Kolor tekstu dla nagłówka karty */
+}
+
+/* POPRAWKA: Dodatkowa reguła dla nagłówków (h1-h6) wewnątrz kart */
+html[data-theme="dark"] .card h1,
+html[data-theme="dark"] .card h2,
+html[data-theme="dark"] .card h3,
+html[data-theme="dark"] .card h4,
+html[data-theme="dark"] .card h5, /* Również obejmuje h5 w .card-header, co jest w porządku */
+html[data-theme="dark"] .card h6 {
+    color: var(--dark-text-primary); /* Upewnia się, że nagłówki w karcie mają jasny kolor */
+}
+
+
+html[data-theme="dark"] .company-form-content .card-header.bg-dark {
+    background-color: #222222 !important;
+    color: var(--dark-text-primary) !important;
+}
+
+html[data-theme="dark"] .list-group-item {
+    background-color: var(--dark-surface-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+
+html[data-theme="dark"] .accordion-button {
+    background-color: var(--dark-surface-light-bg);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background-color: var(--dark-primary-color);
+    color: var(--dark-surface-bg); /* Tekst na tle primary */
+}
+html[data-theme="dark"] .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e0e0e0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+html[data-theme="dark"] .accordion-button:not(.collapsed)::after {
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232c2c2c'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+html[data-theme="dark"] .accordion-item {
+    border-color: var(--dark-border-color);
+    background-color: var(--dark-surface-bg); /* Dodane dla spójności */
+}
+html[data-theme="dark"] .accordion-body {
+    background-color: var(--dark-surface-bg);
+    color: var(--dark-text-primary);
+}
+
+/* ----- PRZYCISKI CIEMNE ----- */
+html[data-theme="dark"] .btn-primary {
+    background-color: var(--dark-primary-color);
+    border-color: var(--dark-primary-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-primary:hover {
+    background-color: var(--dark-primary-hover-color);
+    border-color: var(--dark-primary-hover-color);
+    color: #000;
+}
+
+html[data-theme="dark"] .btn-secondary {
+    background-color: var(--dark-secondary-color);
+    border-color: var(--dark-secondary-color);
+    color: #fff; /* Lub #000 jeśli --dark-secondary-color jest bardzo jasny */
+}
+html[data-theme="dark"] .btn-secondary:hover {
+    background-color: var(--dark-secondary-hover-color);
+    border-color: var(--dark-secondary-hover-color);
+}
+
+html[data-theme="dark"] .btn-success {
+    background-color: var(--dark-success-color);
+    border-color: var(--dark-success-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-danger {
+    background-color: var(--dark-danger-color);
+    border-color: var(--dark-danger-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-warning {
+    background-color: var(--dark-warning-color);
+    border-color: var(--dark-warning-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-info {
+    background-color: var(--dark-info-color);
+    border-color: var(--dark-info-color);
+    color: #000;
+}
+
+html[data-theme="dark"] .btn-outline-secondary {
+    color: var(--dark-text-secondary);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .btn-outline-secondary:hover {
+    color: var(--dark-text-primary);
+    background-color: var(--dark-secondary-color);
+    border-color: var(--dark-secondary-color);
+}
+
+html[data-theme="dark"] .badge.bg-primary { background-color: var(--dark-primary-color) !important; color: #000 !important; }
+html[data-theme="dark"] .badge.bg-secondary { background-color: var(--dark-secondary-color) !important; color: #fff !important; }
+html[data-theme="dark"] .badge.bg-success { background-color: var(--dark-success-color) !important; color: #000 !important; }
+html[data-theme="dark"] .badge.bg-danger { background-color: var(--dark-danger-color) !important; color: #000 !important; }
+html[data-theme="dark"] .badge.bg-warning { background-color: var(--dark-warning-color) !important; color: #000 !important; }
+html[data-theme="dark"] .badge.bg-info { background-color: var(--dark-info-color) !important; color: #000 !important; }
+
+
+/* ----- FORMULARZE I POLA CIEMNE ----- */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-input-border);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .form-control::placeholder {
+    color: var(--dark-input-placeholder);
+}
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-input-focus-border);
+    color: var(--dark-text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(77, 171, 247, 0.25); /* Użyj koloru --dark-primary-color w formacie RGBA */
+}
+
+html[data-theme="dark"] .input-group-text {
+    background-color: var(--dark-surface-light-bg);
+    border-color: var(--dark-input-border);
+    color: var(--dark-text-secondary);
+}
+
+html[data-theme="dark"] .form-check-input {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-input-border);
+}
+html[data-theme="dark"] .form-check-input:checked {
+    background-color: var(--dark-primary-color);
+    border-color: var(--dark-primary-color);
+}
+html[data-theme="dark"] .form-check-label {
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .form-check.border {
+    border-color: var(--dark-border-color) !important;
+}
+html[data-theme="dark"] .form-check:hover {
+    background-color: var(--dark-surface-light-bg);
+}
+
+/* Pola formularza w dodawaniu firmy */
+html[data-theme="dark"] .adres-form,
+html[data-theme="dark"] .telefon-form,
+html[data-theme="dark"] .email-form,
+html[data-theme="dark"] .osoba-form,
+html[data-theme="dark"] .ocena-form {
+    background-color: var(--dark-surface-light-bg);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .adres-form:hover,
+html[data-theme="dark"] .telefon-form:hover,
+html[data-theme="dark"] .email-form:hover,
+html[data-theme="dark"] .osoba-form:hover,
+html[data-theme="dark"] .ocena-form:hover {
+    background-color: #404040; /* Nieco jaśniejsze od --dark-surface-light-bg */
+}
+
+
+/* ----- SELECT2 CIEMNY ----- */
+html[data-theme="dark"] .select2-container--default .select2-selection--single,
+html[data-theme="dark"] .select2-container--default .select2-selection--multiple {
+    background-color: var(--dark-select2-bg);
+    border-color: var(--dark-select2-border) !important;
+    color: var(--dark-text-primary);
+}
+
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--dark-input-placeholder);
+}
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--dark-text-secondary) transparent transparent transparent;
+}
+
+html[data-theme="dark"] .select2-dropdown {
+    background-color: var(--dark-select2-dropdown-bg);
+    border-color: var(--dark-select2-dropdown-border);
+}
+
+html[data-theme="dark"] .select2-dropdown .select2-search__field {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-input-border);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .select2-dropdown .select2-search__field:focus {
+    border-color: var(--dark-input-focus-border);
+}
+
+html[data-theme="dark"] .select2-results__option {
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .select2-results__option--highlighted[aria-selected],
+html[data-theme="dark"] .select2-results__option:hover { /* Zmienione dla lepszego kontrastu */
+    background-color: var(--dark-surface-light-bg);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .select2-results__option[aria-selected="true"] {
+    background-color: var(--dark-select2-highlight-bg);
+    color: #fff;
+}
+
+html[data-theme="dark"] .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--dark-select2-choice-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--dark-text-secondary);
+}
+html[data-theme="dark"] .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: var(--dark-text-primary);
+}
+
+
+/* ----- TABELE CIEMNE ----- */
+html[data-theme="dark"] .table {
+    color: var(--dark-text-primary);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .table th,
+html[data-theme="dark"] .table td {
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-accent-bg: var(--dark-surface-light-bg);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: #444444; /* Ciemniejszy hover */
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .company-row:hover {
+    background-color: var(--dark-surface-light-bg) !important;
+}
+html[data-theme="dark"] .company-details td {
+    background-color: var(--dark-surface-bg); /* Tło dla szczegółów firmy */
+}
+
+/* Responsywna tabela "stacking" ciemna */
+html[data-theme="dark"] .table-responsive-stacking th {
+    background-color: #3a3a3a; /* Ciemniejszy nagłówek */
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .table-responsive-stacking td {
+    border-color: var(--dark-border-color); /* Upewnij się, że ramki są widoczne */
+}
+html[data-theme="dark"] .table-responsive-stacking tr {
+    background-color: var(--dark-surface-bg); /* Tło dla wiersza-karty mobilnej */
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .table-responsive-stacking.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--dark-surface-bg); /* Spójność dla pasów */
+}
+html[data-theme="dark"] .table-responsive-stacking.table-striped > tbody > tr:nth-of-type(2n+1) > * {
+    --bs-table-accent-bg: transparent; /* Reset pasów Bootstrapa */
+}
+html[data-theme="dark"] .table-responsive-stacking td::before {
+    color: var(--dark-text-secondary); /* Kolor etykiety */
+}
+
+
+/* ----- MODALE CIEMNE ----- */
+html[data-theme="dark"] .modal-content {
+    background-color: var(--dark-surface-bg);
+    color: var(--dark-text-primary);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .modal-footer {
+    border-top-color: var(--dark-border-color);
+}
+html[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Biały X */
+}
+
+/* ----- ALERTY CIEMNE ----- */
+html[data-theme="dark"] .alert { /* Ogólne dla alertów, jeśli potrzebne */
+    border-width: 1px;
+}
+html[data-theme="dark"] .alert-success {
+    background-color: #102d1a; color: #a3cfbb; border-color: #1a4a2a;
+}
+html[data-theme="dark"] .alert-danger {
+    background-color: #3b0f14; color: #f1b8be; border-color: #58151c;
+}
+html[data-theme="dark"] .alert-warning {
+    background-color: #332701; color: #ffecb5; border-color: #664d03;
+}
+html[data-theme="dark"] .alert-info {
+    background-color: #021a20; color: #a1e9f7; border-color: #032830;
+}
+html[data-theme="dark"] .alert-secondary {
+    background-color: #25292d; color: #c8cbce; border-color: #41464b;
+}
+
+
+/* ----- FILTR MOBILNY CIEMNY ----- */
+html[data-theme="dark"] #mobile-filter-overlay {
+    background-color: rgba(0,0,0,0.8); /* Ciemniejsze tło */
+}
+html[data-theme="dark"] .mobile-filter-content {
+    background-color: var(--dark-surface-bg);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] .mobile-filter-header {
+    border-bottom-color: var(--dark-border-color);
+}
+
+
+/* ----- FORMULARZ OVERLAY (Dodaj nowy typ) CIEMNY ----- */
+html[data-theme="dark"] #overlay-form-container { /* Dodane dla tła overlay */
+    background-color: rgba(0,0,0,0.7);
+}
+html[data-theme="dark"] #overlay-form-container .card {
+    background-color: var(--dark-surface-bg);
+    border-color: var(--dark-border-color);
+}
+html[data-theme="dark"] #overlay-form-container .card-header {
+    background-color: var(--dark-surface-light-bg);
+    border-bottom-color: var(--dark-border-color);
+}
+html[data-theme="dark"] #overlay-form-container #overlay-input {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-input-border);
+    color: var(--dark-text-primary);
+}
+html[data-theme="dark"] #overlay-form-container #overlay-input:focus {
+    border-color: var(--dark-input-focus-border);
+    box-shadow: 0 0 0 0.25rem rgba(77, 171, 247, 0.25); /* Użyj koloru --dark-primary-color w formacie RGBA */
+}
+
+/* ===== POPRAWKA DLA AUTOFILL W TRYBIE CIEMNYM ===== */
+
+/* Resetowanie stylów autofill dla trybu ciemnego */
+html[data-theme="dark"] .form-control:-webkit-autofill,
+html[data-theme="dark"] .form-control:-webkit-autofill:hover,
+html[data-theme="dark"] .form-control:-webkit-autofill:focus,
+html[data-theme="dark"] .form-control:-webkit-autofill:active,
+html[data-theme="dark"] .form-select:-webkit-autofill,
+html[data-theme="dark"] .form-select:-webkit-autofill:hover,
+html[data-theme="dark"] .form-select:-webkit-autofill:focus,
+html[data-theme="dark"] .form-select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--dark-input-bg) inset !important;
+    -webkit-text-fill-color: var(--dark-text-primary) !important;
+    background-color: var(--dark-input-bg) !important;
+    border-color: var(--dark-input-border) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Dodatkowa reguła dla focus state z autofill */
+html[data-theme="dark"] .form-control:-webkit-autofill:focus,
+html[data-theme="dark"] .form-select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--dark-input-bg) inset !important;
+    border-color: var(--dark-input-focus-border) !important;
+    box-shadow: 0 0 0 0.25rem rgba(77, 171, 247, 0.25), 0 0 0 1000px var(--dark-input-bg) inset !important;
+}
+
+/* Alternatywne podejście dla przeglądarek nie obsługujących -webkit-autofill */
+html[data-theme="dark"] input:-internal-autofill-selected,
+html[data-theme="dark"] input:-internal-autofill-previewed {
+    background-color: var(--dark-input-bg) !important;
+    color: var(--dark-text-primary) !important;
+}
+
+/* Dodatkowa reguła dla Select2 z autofill (jeśli używane) */
+html[data-theme="dark"] .select2-container--default .select2-selection--single:-webkit-autofill,
+html[data-theme="dark"] .select2-container--default .select2-selection--multiple:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--dark-select2-bg) inset !important;
+    -webkit-text-fill-color: var(--dark-text-primary) !important;
+    background-color: var(--dark-select2-bg) !important;
+}
+
+/* ===== ISTNIEJĄCE STYLE (upewnij się, że nie ma konfliktów, przejrzyj w razie potrzeby) ===== */
+/* ... (wszystkie pozostałe istniejące style z main.css) ... */
+
+/* NOWE STYLE PASKA NAWIGACYJNEGO (istniejące, dostosowane w sekcji ciemnej) */
+.custom-navbar-style {
+    background: linear-gradient(to bottom, var(--navbar-bg-start), var(--navbar-bg-end));
+    border-bottom: 1px solid var(--navbar-border-color);
+    box-shadow: var(--navbar-shadow);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.custom-navbar-style .navbar-brand {
+    color: var(--navbar-brand-color);
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.custom-navbar-style .navbar-brand .bi {
+    color: var(--navbar-brand-color);
+    font-size: 1.5rem;
+    vertical-align: text-bottom;
+    margin-right: 0.3rem;
+}
+
+.custom-navbar-style .nav-link {
+    color: var(--navbar-link-color);
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    margin: 0 0.2rem;
+    border-radius: 0.375rem;
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.custom-navbar-style .nav-link:hover,
+.custom-navbar-style .nav-link:focus {
+    color: var(--navbar-link-hover-color);
+    background-color: rgba(0, 123, 255, 0.06);
+}
+
+.custom-navbar-style .nav-link.active {
+    color: var(--navbar-link-active-color);
+    font-weight: 600;
+    background-color: rgba(0, 123, 255, 0.08);
+}
+
+.custom-navbar-style .dropdown-menu {
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--navbar-border-color);
+    margin-top: 0.5rem;
+}
+
+.custom-navbar-style .dropdown-item {
+    color: var(--navbar-link-color);
+    padding: 0.6rem 1.2rem;
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.custom-navbar-style .dropdown-item:hover,
+.custom-navbar-style .dropdown-item:focus {
+    color: var(--navbar-link-hover-color);
+    background-color: rgba(0, 123, 255, 0.08);
+}
+
+.custom-navbar-style .dropdown-item:active {
+    background-color: var(--navbar-link-hover-color);
+    color: #fff;
+}
+
+.custom-navbar-style .btn-sm {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.custom-navbar-style .btn-primary {
+    background-color: var(--navbar-link-hover-color);
+    border-color: var(--navbar-link-hover-color);
+    color: #fff;
+}
+.custom-navbar-style .btn-primary:hover {
+    background-color: var(--navbar-link-active-color);
+    border-color: var(--navbar-link-active-color);
+}
+
+.custom-navbar-style .btn-outline-secondary {
+    color: var(--navbar-link-color);
+    border-color: #ced4da;
+}
+.custom-navbar-style .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    color: var(--navbar-link-active-color);
+    border-color: #ced4da;
+}
+
+.custom-navbar-style .navbar-toggler {
+    border-color: rgba(0,0,0,0.1);
+}
+
+/* ===== KOLUMNY ===== */
+.left-column {
+  position: sticky;
+  top: 70px; /* Dostosuj do wysokości paska nawigacyjnego */
+  max-height: calc(100vh - 100px); /* Dostosuj do wysokości paska nawigacyjnego i marginesów */
+}
+
+.left-column .card {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-column .card-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+
+/* ===== KARTY ===== */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Zwiększony cień dla lepszego efektu */
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--card-border-color); /* Użycie zmiennej */
+    overflow: hidden; /* Zapobiega wystawaniu zawartości poza zaokrąglone rogi */
+    transition: all 0.3s ease; /* Płynne przejścia dla hover itp. */
+}
+
+/* Zagnieżdżone karty w formularzu firmy */
+.card .card {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); /* Mniejszy cień dla zagnieżdżonych kart */
+}
+
+/* ===== PRZYCISKI - SPÓJNE STYLE ===== */
+.card-header .btn,
+.mobile-filter-content .btn {
+    height: 32px; /* Ustalona wysokość dla spójności */
+    display: inline-flex; /* Umożliwia wyrównanie ikon i tekstu */
+    align-items: center; /* Wyrównanie w pionie */
+    justify-content: center; /* Wyrównanie w poziomie */
+    gap: 0.5rem; /* Odstęp między ikoną a tekstem */
+    font-weight: 500; /* Średnia grubość czcionki */
+    border-radius: 0.375rem; /* Zaokrąglenie Bootstrapa */
+    transition: all 0.2s ease; /* Płynne przejścia */
+    padding: 0.375rem 0.75rem; /* Standardowy padding Bootstrapa */
+}
+
+/* Przyciski w nagłówku prawej kolumny */
+.right-column .card-header .btn {
+    min-width: 120px; /* Minimalna szerokość dla lepszego wyglądu */
+}
+
+/* Przyciski w formularzu filtrowania  mobile */
+.mobile-filter-content .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    justify-content: center;
+}
+
+/* Przyciski w formularzu filtrowania (lewa kolumna) */
+.left-column .card-body .btn {
+    width: 48%; /* Zmniejszono szerokość, żeby zmieściły się obok siebie */
+    margin-bottom: 0.5rem;
+    justify-content: center;
+    display: inline-block; /* Sprawiają, że elementy ustawiają się inline */
+}
+
+/* Przyciski w formularzu dodawania firmy */
+.card-body button[type="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Styl dla kontenera przycisków */
+.d-grid.gap-2.mt-4,
+.d-flex.justify-content-between {
+    display: flex !important; /* Nadpisuje d-grid */
+    flex-wrap: wrap;
+    justify-content: space-between; /* Równomierne rozłożenie na szerokości */
+    gap: 8px; /* Odstęp między przyciskami */
+}
+
+/* Ikony */
+.btn .bi {
+    font-size: 1rem;
+    margin-right: 0.25rem; /* Mniejszy odstęp jeśli ikona jest mała */
+}
+
+/* Przyciski zapisywania formularza */
+.d-flex.justify-content-between .btn {
+    min-width: 150px; /* Minimalna szerokość dla przycisków akcji */
+    padding: 0.5rem 1rem; /* Większy padding dla ważniejszych przycisków */
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Responsywność przycisków */
+@media (max-width: 575.98px) { /* Small devices (landscape phones, 576px and down) */
+    .card-header .btn {
+        width: 100%; /* Pełna szerokość na małych ekranach */
+        max-width: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .right-column .card-header .d-flex {
+        flex-direction: column; /* Przyciski jeden pod drugim */
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column; /* Przyciski jeden pod drugim */
+        gap: 0.5rem; /* Odstęp między przyciskami */
+
+
+    }
+
+    .d-flex.justify-content-between .btn {
+        width: 100%; /* Pełna szerokość na małych ekranach */
+        margin-bottom: 1rem; /* Add margin below each button */
+    }
+}
+
+/* ===== MULTISELECT SELECT2 CUSTOM===== */
+
+/* Style wspólne dla wszystkich Select2 (single i multiple) */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    border-color: #e0e0e0 !important; /* Jaśniejszy border dla lepszego wyglądu */
+    border-radius: 0.375rem; /* Standardowe zaokrąglenie Bootstrap */
+    min-height: 38px; /* Zapewnia spójną wysokość dla obu typów select */
+    display: flex;
+    align-items: center; /* Wyśrodkowanie elementów w pionie */
+}
+
+/* Wspólny styl dla selektów z customem */
+.select2-selection--custom {
+    padding: 0.25rem 0.5rem; /* Mniejszy padding */
+    font-size: 14px; /* Mniejsza czcionka */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    line-height: 1.5;
+    width: 100%; /* Pełna szerokość */
+}
+
+/* Jednolity stan focus dla wszystkich typów Select2 */
+.select2-selection--custom:focus,
+.select2-selection--multiple:focus,
+.select2-selection--single:focus,
+.select2-container--open .select2-selection--custom,
+.select2-container--open .select2-selection--single,
+.select2-container--open .select2-selection--multiple {
+    border-color: #80bdff !important; /* Kolor focus Bootstrapa */
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Cień focus Bootstrapa */
+    outline: 0; /* Usunięcie domyślnego outline */
+}
+
+/* Style dla pojedynczego selecta */
+.select2-container--default .select2-selection--single {
+    background-color: #fff;
+    height: 38px; /* Standardowa wysokość pola formularza */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #212529; /* Kolor tekstu zgodny z formularzem */
+    line-height: 38px; /* Wyrównanie w pionie */
+    padding-left: 0.75rem; /* Odstęp tekstu od lewej krawędzi */
+    font-size: 16px; /* Standardowy rozmiar czcionki Bootstrapa */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 400; /* Standardowa waga czcionki */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d; /* Kolor placeholdera Bootstrapa */
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* Strzałka w pojedynczym selekcie */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px; /* Wysokość strzałki */
+    width: 30px; /* Szerokość strzałki */
+    right: 1px; /* Pozycja od prawej */
+    top: 1px; /* Pozycja od góry */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #6c757d transparent transparent transparent; /* Kolor strzałki */
+    border-width: 5px 5px 0 5px; /* Rozmiar strzałki */
+}
+
+/* Styl dla pola wyszukiwania w dropdownie */
+.select2-dropdown .select2-search__field {
+    border-radius: 0.375rem; /* Zaokrąglone rogi */
+    border: 1px solid #80bdff; /* Kolor obramowania */
+    padding: 0.375rem 0.75rem; /* Wewnętrzny odstęp */
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 100%; /* Pełna szerokość */
+}
+
+.select2-dropdown .select2-search__field:focus {
+    border-color: #007bff; /* Kolor focus */
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Cień focus */
+    outline: 0;
+}
+
+/* Styl dla dropdowna (wspólny dla single i multiple) */
+.select2-dropdown--custom {
+    border: 1px solid rgba(0, 0, 0, 0.175); /* Standardowy border Bootstrapa */
+    border-radius: 0.5rem; /* Większe zaokrąglenie dla dropdownu */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175); /* Standardowy cień Bootstrapa */
+    z-index: 100; /* Upewnij się, że dropdown jest na wierzchu */
+}
+
+/* Style dla opcji w dropdown */
+.select2-results__option {
+    padding: 0.375rem 0.75rem; /* Standardowy padding */
+    font-size: 1rem; /* Standardowy rozmiar czcionki */
+    color: #212529; /* Standardowy kolor tekstu */
+}
+
+.select2-results__option:hover,
+.select2-results__option--highlighted {
+    background-color: #e9ecef; /* Kolor tła hover Bootstrapa */
+    color: #212529;
+    cursor: pointer;
+}
+
+/* Wybrana opcja */
+.select2-results__option[aria-selected="true"] {
+    background-color: #007bff; /* Kolor primary Bootstrapa */
+    color: #fff; /* Biały tekst na tle primary */
+}
+
+/* Style dla multiselect - zachowanie istniejących */
+.select2-selection--multiple {
+    border-color: #e0e0e0 !important; /* Jasny border */
+}
+
+.select2-selection__choice {
+    color: #212529; /* Ciemny tekst */
+    border-radius: 0.5rem; /* Zaokrąglenie */
+    padding: 0.5rem 0.5rem; /* Padding */
+    margin-right: 0.25rem;
+    margin-left: 2rem; /* Odstęp od lewej krawędzi */
+}
+
+.select2-selection__choice__remove {
+    color: #fff; /* Biały krzyżyk */
+    cursor: pointer;
+}
+
+.select2-selection__choice__remove:hover {
+    color: #fff;
+    opacity: 0.7; /* Lekkie przyciemnienie przy hover */
+}
+
+/* Poprawka dla container w input-group */
+.input-group .select2-container {
+    flex-grow: 1;
+    width: auto !important; /* Pozwala Bootstrapowi zarządzać szerokością */
+}
+
+/* Ustalenie szerokości dla wszystkich containerów Select2 */
+.select2-container {
+    width: 100% !important; /* Wymuszenie pełnej szerokości */
+}
+
+/* Styl dla placeholder w multiselect */
+.select2-selection__placeholder {
+    margin-top: 0; /* Usunięcie marginesu */
+    color: #6c757d; /* Kolor placeholdera Bootstrapa */
+    font-size: 16px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 400;
+}
+
+/* Pole wyszukiwania w multiselect */
+.select2-container--default .select2-search--inline .select2-search__field::placeholder {
+    font-size: 16px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 400;
+}
+
+/* Styl dla Select2 wewnątrz Bootstrapowego input-group */
+.input-group .select2-container {
+    flex-grow: 1; /* Pozwala Select2 zająć pozostałą przestrzeń */
+    width: auto !important;
+    /* flex-basis: 0  */
+}
+
+/* ===== ELEMENTY FIRM ===== */
+.company-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.company-row:hover {
+    background-color: #f1f8ff; /* Jaśniejszy niebieski dla hover */
+}
+
+.company-details td {
+    padding: 1rem;
+    background-color: #f8f9fa; /* Jasne tło dla szczegółów */
+}
+
+/* ===== FILTRY MOBILE ===== */
+#mobile-filter-overlay {
+  display: none;
+  position: fixed;
+  top: 10px; /* Odstęp od góry */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Półprzezroczyste tło */
+  z-index: 2000; /* Wyższy niż navbar */
+  padding: 20px;
+  overflow-y: auto; /* Scroll jeśli zawartość jest za długa */
+}
+
+.mobile-filter-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-height: 90vh; /* Maksymalna wysokość */
+    overflow-y: auto; /* Scroll wewnątrz contentu */
+}
+
+.mobile-filter-header {
+    border-bottom: 1px solid #dee2e6; /* Linia oddzielająca */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* ===== IKONY ===== */
+.bi {
+    font-size: 1rem; /* Domyślny rozmiar ikon */
+    line-height: 1; /* Dla spójnego wyrównania */
+    vertical-align: middle; /* Lepsze wyrównanie z tekstem */
+}
+
+/* ===== STYLE FORMULARZA DODAWANIA FIRMY ===== */
+.company-form-content {
+    margin-bottom: 2rem; /* Odstęp na dole formularza */
+}
+/* Sekcje formularza */
+.company-form-content .card-header {
+    padding: 0.75rem 1rem; /* Padding w nagłówku karty */
+}
+.company-form-content .card-header h5 {
+    margin: 0;
+    font-size: 1.1rem; /* Rozmiar czcionki nagłówka sekcji */
+    font-weight: 600; /* Pogrubienie */
+}
+/* Style pól formularza */
+.form-label {
+    font-weight: 500; /* Średnia grubość czcionki dla etykiet */
+    font-size: 0.9rem; /* Nieco mniejsza czcionka etykiet */
+    margin-bottom: 0.25rem; /* Mniejszy odstęp pod etykietą */
+}
+/* Pola formularza - adresy, telefony, emaile, osoby */
+.adres-form, .telefon-form, .email-form, .osoba-form, .ocena-form {
+    background-color: #f9f9f9; /* Jasne tło dla grup pól */
+    border-radius: 8px; /* Zaokrąglenie */
+    transition: all 0.2s ease; /* Płynne przejścia */
+}
+.adres-form:hover, .telefon-form:hover, .email-form:hover, .osoba-form:hover, .ocena-form:hover {
+    background-color: #f5f5f5; /* Lekka zmiana tła przy hover */
+}
+/* Nagłówki sekcji */
+h6 { /* Globalny styl dla h6, który powodował problem */
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333; /* Ten kolor był problemem w dark mode wewnątrz kart */
+}
+/* Przyciski dodawania elementów */
+#dodaj-adres, #dodaj-telefon, #dodaj-email, #dodaj-osobe, #dodaj-ocene {
+    margin-bottom: 1rem; /* Odstęp pod przyciskami dodawania */
+}
+
+/* ===== STYLE RESPONSYWNYCH TABEL ===== */
+/* Kontener tabeli - używamy już istniejącej klasy table-responsive */
+.responsive-table-container {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Style dla standardowych tabel (widok desktopowy) */
+.responsive-table th, 
+.responsive-table td {
+    white-space: nowrap; /* Zapobiega łamaniu tekstu w komórkach */
+    padding: 0.5rem 0.75rem; /* Mniejszy padding dla tabel */
+}
+
+/* Style dla kart mobilnych - zgodne z istniejącym wyglądem formularza */
+.mobile-cards-container {
+    margin: 1rem 0 1.5rem;
+}
+
+.mobile-card {
+    border: 1px solid #dee2e6; /* Ramka dla karty mobilnej */
+    border-radius: 8px; /* Zaokrąglenie */
+    background-color: #f9f9f9; /* Jasne tło */
+    transition: all 0.2s ease;
+}
+
+.mobile-card:hover {
+    background-color: #f5f5f5; /* Lekka zmiana tła przy hover */
+}
+
+.mobile-card .card-body {
+    padding: 0.75rem 1rem; /* Padding w ciele karty mobilnej */
+}
+
+.mobile-card strong {
+    display: inline-block;
+    min-width: 110px; /* Minimalna szerokość dla etykiet */
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Przyciski akcji */
+.action-btn {
+    padding: 0.25rem 0.5rem; /* Mniejszy padding dla przycisków akcji */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem; /* Mniejszy odstęp */
+    transition: all 0.2s;
+}
+
+.action-btn i {
+    font-size: 0.9rem; /* Mniejsza ikona */
+}
+
+/* Responsywność formularza i tabel */
+@media (max-width: 992px) { /* Medium devices (tablets, 992px and down) */
+    /* Ukrywamy tekst w przyciskach akcji, pokazujemy tylko ikony */
+    .action-btn .btn-text {
+        display: none;
+    }
+
+    .action-btn {
+        padding: 0.25rem 0.5rem; /* Dostosowanie paddingu dla samych ikon */
+    }
+
+    .radio-group-container { /* Poprawka dla grupy radio na tabletach */
+        flex-wrap: nowrap !important; /* Zapobiega zawijaniu */
+    }
+}
+
+@media (max-width: 767.98px) { /* Small devices (landscape phones, less than 768px) */
+    .company-form-content .card-body {
+        padding: 1rem; /* Większy padding dla małych ekranów */
+    }
+    .form-label {
+        margin-top: 0.5rem; /* Dodatkowy margines dla etykiet */
+    }
+
+    /* Alternatywne style dla tabeli w widoku mobilnym (jeśli nie używamy przełączania na karty) */
+    .responsive-table td::before {
+        content: attr(data-label); /* Wyświetlanie etykiety z atrybutu data-label */
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: inline-block;
+        min-width: 110px; /* Minimalna szerokość etykiety */
+    }
+
+    .responsive-table td {
+        display: flex; /* Użycie flexbox dla lepszego wyrównania */
+        align-items: center; /* Wyrównanie w pionie */
+        border: none; /* Usunięcie ramek komórek */
+        padding: 0.4rem 0.5rem; /* Mniejszy padding */
+    }
+
+    .responsive-table th {
+        display: none; /* Ukrycie nagłówków tabeli */
+    }
+
+    .responsive-table tr {
+        display: block; /* Wiersze jako bloki */
+        border-bottom: 1px solid #dee2e6; /* Linia oddzielająca wiersze */
+        margin-bottom: 0.5rem; /* Odstęp między wierszami */
+        background-color: #f9f9f9; /* Jasne tło dla wiersza */
+        border-radius: 8px; /* Zaokrąglenie */
+        padding: 0.5rem 0; /* Wewnętrzny padding */
+    }
+
+    .responsive-table tbody {
+        display: block; /* Ciało tabeli jako blok */
+    }
+}
+
+/* Radio button */
+
+.form-check-input {
+    margin-top: 0.3rem; /* Lepsze wyrównanie z tekstem */
+}
+.form-check {
+    min-width: 150px; /* Minimalna szerokość opcji */
+    transition: all 0.2s ease;
+}
+.form-check:hover {
+    background-color: #f8f9fa; /* Lekkie tło przy hover */
+}
+
+/* ===== STYLE RESPONSYWNYCH TABEL (STACKING) ===== */
+
+/* Domyślnie pokazuj wszystko */
+.table-responsive-stacking th,
+.table-responsive-stacking td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.table-responsive-stacking th {
+    background-color: #aaaaaa; /* Jaśniejszy szary dla nagłówków */
+    font-weight: bold;
+    text-align: center; /* Nagłówki wyśrodkowane */
+}
+
+.table-responsive-stacking .action-btn .btn-text {
+    display: inline;
+}
+
+/* Style dla widoku mobilnego (np. poniżej 768px) */
+@media (max-width: 767.98px) {
+    .table-responsive-stacking thead {
+        display: none;
+    }
+
+    .table-responsive-stacking tbody,
+    .table-responsive-stacking tr,
+    .table-responsive-stacking td {
+        display: block;
+        width: 100%;
+    }
+
+    .table-responsive-stacking tr {
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0;
+        background-color: #fff; /* Tło dla wiersza-karty */
+    }
+
+    .table-responsive-stacking.table-striped tbody tr:nth-of-type(odd) {
+        background-color: #fff; /* Usunięcie pasów w trybie mobilnym */
+    }
+    .table-responsive-stacking.table-striped > tbody > tr:nth-of-type(2n+1) > * {
+        --bs-table-accent-bg: transparent;
+    }
+
+
+    .table-responsive-stacking td {
+        position: relative;
+        padding-left: 45%; /* Miejsce na etykietę */
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        text-align: left;
+        border: none;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+    }
+
+    .table-responsive-stacking td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0.75rem;
+        width: 40%;
+        padding-right: 0.5rem;
+        font-weight: bold;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .table-responsive-stacking td[data-label="Akcje"] {
+        padding-left: 0.75rem;
+        padding-top: 0.75rem;
+        display: block;
+        text-align: right; /* Wyrównanie przycisków do prawej */
+    }
+
+     .table-responsive-stacking td[data-label="Akcje"]::before {
+       display: none;
+     }
+
+    .table-responsive-stacking td[data-label="Akcje"] form {
+        display: inline-block;
+        margin-left: 5px;
+    }
+     .table-responsive-stacking td[data-label="Akcje"] .action-btn {
+        margin-bottom: 5px;
+     }
+
+    .table-responsive-stacking .action-btn .btn-text {
+        display: none;
+    }
+     .table-responsive-stacking .action-btn {
+        padding: 0.375rem 0.5rem;
+    }
+
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+     .table-responsive-stacking .action-btn .btn-text {
+        /* display: none; */ /* Odkomentuj, jeśli chcesz ukryć tekst też na tabletach */
+     }
+}
+
+
+.action-btn {
+    padding: 0.15rem 0.5rem;
+    margin: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+
+.action-btn i {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+td[data-label="Akcje"] form {
+    margin: 0 0 0 0.25rem;
+}
+td[data-label="Akcje"] form:first-of-type {
+    margin-left: 0;
+}
+
+/* Overlay form (Add new type) - tło */
+#overlay-form-container {
+    background-color: rgba(0,0,0,0.5); /* Domyślne tło dla trybu jasnego */
+}

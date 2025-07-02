@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <div class="card-header-content d-flex justify-content-between w-100">
+                    <h5 class="card-title">{{ title }}</h5>
+                     <div class="card-actions">
+                        <a href="{{ back_url }}" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.osoba_oceniajaca.label(class="form-label") }}
+                        {{ form.osoba_oceniajaca(class="form-control") }}
+                        {% for error in form.osoba_oceniajaca.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.budowa_dzial.label(class="form-label") }}
+                        {{ form.budowa_dzial(class="form-control") }}
+                        {% for error in form.budowa_dzial.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.rok_wspolpracy.label(class="form-label") }}
+                        {{ form.rok_wspolpracy(class="form-control", type="number") }}
+                        {% for error in form.rok_wspolpracy.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.ocena.label(class="form-label") }}
+                        {{ form.ocena(class="form-control", type="number") }}
+                        {% for error in form.ocena.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.komentarz.label(class="form-label") }}
+                        {{ form.komentarz(class="form-control") }}
+                        {% for error in form.komentarz.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                         {{ form.id_firmy.label(class="form-label") }}
+                         {{ form.id_firmy(class="form-select", id="firmy_select") }}
+                         {% for error in form.id_firmy.errors %}
+                             <span class="text-danger">{{ error }}</span>
+                         {% endfor %}
+                     </div>
+                    {{ form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

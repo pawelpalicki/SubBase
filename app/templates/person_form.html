@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <div class="card-header-content d-flex justify-content-between w-100">
+                    <h5 class="card-title">{{ title }}</h5>
+                    <div class="card-actions">
+                        <a href="{{ back_url }}" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.imie.label(class="form-label") }} 
+                        {{ form.imie(class="form-control") }} 
+                        {% for error in form.imie.errors %} 
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.nazwisko.label(class="form-label") }}
+                        {{ form.nazwisko(class="form-control") }}
+                        {% for error in form.nazwisko.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.stanowisko.label(class="form-label") }}
+                        {{ form.stanowisko(class="form-control") }}
+                        {% for error in form.stanowisko.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.e_mail.label(class="form-label") }}
+                        {{ form.e_mail(class="form-control") }}
+                        {% for error in form.e_mail.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                     <div class="mb-3">
+                        {{ form.telefon.label(class="form-label") }}
+                        {{ form.telefon(class="form-control") }}
+                        {% for error in form.telefon.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                         {{ form.id_firmy.label(class="form-label") }}
+                         {{ form.id_firmy(class="form-select", id="firmy_select") }}
+                         {% for error in form.id_firmy.errors %}
+                             <span class="text-danger">{{ error }}</span>
+                         {% endfor %}
+                     </div>
+                    {{ form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
