@@ -1,8 +1,7 @@
-from dotenv import load_dotenv # Dodaj tę linię
+from dotenv import load_dotenv
+load_dotenv() # Wywołanie load_dotenv() musi nastąpić przed importem modułów aplikacji (np. `app`), które zależą od zmiennych środowiskowych.
 
-import app
-from app import create_app, db
-load_dotenv() # Dodaj tę linię
+from app import create_app
 
 flask_app = create_app()
 
