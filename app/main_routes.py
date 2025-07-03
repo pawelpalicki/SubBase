@@ -1,8 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
 from flask_login import current_user # Importujemy tylko 'current_user' (do użycia w szablonach/logice)
-
-# WAŻNA UWAGA: Pozostałe Twoje importy są tutaj prawidłowe i powinny pozostać!
-# Nie przenoś ich do __init__.py ani nie usuwaj.
 from sqlalchemy import or_, and_, func
 from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny
 from app import db # Importujesz 'db' z zainicjalizowanej aplikacji
