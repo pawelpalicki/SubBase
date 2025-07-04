@@ -57,7 +57,7 @@ Zanim napiszemy jakikolwiek kod aplikacji, musimy przygotować narzędzia.
     *   **Cel:** Umożliwienie wglądu w szczegóły pojedynczej oferty.
     *   **Weryfikacja:** Kliknięcie na ofertę na liście musi przenieść do strony szczegółów. Wyświetlone dane muszą być poprawne, a link do pobrania pliku musi działać.
 
-* Krok 10: Implementacja Modułu Projektów (CRUD)
+*  ** Krok 10: Implementacja Modułu Projektów (CRUD)**
        * Akcja 1.1 (Model): W app/models.py stworzę nowy model Project (id, nazwa_projektu). Zaktualizuję model Tender, dodając do niego klucz
          obcy id_projektu.
        * Akcja 1.2 (Migracja): Wygeneruję i zastosuję nową migrację Alembic, aby fizycznie stworzyć tabelę projects w bazie danych i dodać nową
@@ -95,3 +95,7 @@ Faza 2: Moduł Ofert - Pełna Integracja z Interfejsem Użytkownika
        * Cel: Umożliwienie użytkownikom łatwego odnajdywania interesujących ich ofert.
        * Weryfikacja: Wybranie firmy lub projektu z listy rozwijanej i kliknięcie "Filtruj" spowoduje przeładowanie strony i wyświetlenie tylko
          tych ofert, które spełniają wybrane kryteria.
+
+
+Implementacji modułu Cen Jednostkowych
+Ekstrakcją danych z plików PDF/obrazów?
