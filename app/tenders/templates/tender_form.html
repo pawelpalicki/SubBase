@@ -8,23 +8,50 @@
 
         <div class="mb-3">
             {{ form.nazwa_oferty.label(class="form-label") }}
-            {{ form.nazwa_oferty(class="form-control") }}
+            {{ form.nazwa_oferty(class="form-control" + (' is-invalid' if form.nazwa_oferty.errors else '')) }}
+            {% for error in form.nazwa_oferty.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
         <div class="mb-3">
             {{ form.data_otrzymania.label(class="form-label") }}
-            {{ form.data_otrzymania(class="form-control") }}
+            {{ form.data_otrzymania(class="form-control" + (' is-invalid' if form.data_otrzymania.errors else '')) }}
+            {% for error in form.data_otrzymania.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
         <div class="mb-3">
             {{ form.status.label(class="form-label") }}
-            {{ form.status(class="form-select") }}
+            {{ form.status(class="form-select" + (' is-invalid' if form.status.errors else '')) }}
+            {% for error in form.status.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
         <div class="mb-3">
             {{ form.id_firmy.label(class="form-label") }}
-            {{ form.id_firmy(class="form-select") }}
+            {{ form.id_firmy(class="form-select select2-enable" + (' is-invalid' if form.id_firmy.errors else '')) }}
+            {% for error in form.id_firmy.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="mb-3">
+            {{ form.id_projektu.label(class="form-label") }}
+            <div class="input-group">
+                {{ form.id_projektu(class="form-select select2-enable" + (' is-invalid' if form.id_projektu.errors else '')) }}
+                <a href="{{ url_for('main.new_project') }}" target="_blank" class="btn btn-outline-secondary" title="Dodaj nowy projekt">
+                    <i class="bi bi-plus-lg me-1"></i>Dodaj
+                </a>
+                {% for error in form.id_projektu.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
         </div>
         <div class="mb-3">
             {{ form.plik_oferty.label(class="form-label") }}
-            {{ form.plik_oferty(class="form-control") }}
+            {{ form.plik_oferty(class="form-control" + (' is-invalid' if form.plik_oferty.errors else '')) }}
+            {% for error in form.plik_oferty.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
         
         {{ form.submit(class="btn btn-primary") }}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.nazwa_projektu.label(class="form-label") }}
+                        {{ form.nazwa_projektu(class="form-control" + (' is-invalid' if form.nazwa_projektu.errors else '')) }}
+                        {% for error in form.nazwa_projektu.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.skrot.label(class="form-label") }}
+                        {{ form.skrot(class="form-control" + (' is-invalid' if form.skrot.errors else '')) }}
+                        {% for error in form.skrot.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.rodzaj.label(class="form-label") }}
+                        {{ form.rodzaj(class="form-select" + (' is-invalid' if form.rodzaj.errors else '')) }}
+                        {% for error in form.rodzaj.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.uwagi.label(class="form-label") }}
+                        {{ form.uwagi(class="form-control", rows="3" + (' is-invalid' if form.uwagi.errors else '')) }}
+                        {% for error in form.uwagi.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+                    <a href="{{ back_url }}" class="btn btn-secondary">Anuluj</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

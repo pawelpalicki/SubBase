@@ -26,10 +26,11 @@ const Select2Config = {
     },
 
     // Inicjalizacja dla pola z placeholder
-    initWithPlaceholder: function(selector, placeholder, parent = null) {
+    initWithPlaceholder: function(selector, placeholder, parent = null, allowClear = true) {
         const config = { 
             ...this.defaultConfig,
-            placeholder: placeholder
+            placeholder: placeholder,
+            allowClear: allowClear
         };
 
         if (parent) {
@@ -123,6 +124,22 @@ const Select2Config = {
                 ...this.defaultConfig,
                 allowClear: false // Wyłączenie clear button
             });
+        }
+
+        // Inicjalizacja dla pól w formularzu ofert
+        if ($('#id_firmy').length) {
+            this.initWithPlaceholder('#id_firmy', "Wybierz firmę...", null, false);
+        }
+        if ($('#id_projektu').length) {
+            this.initWithPlaceholder('#id_projektu', "Wybierz projekt...", null, false);
+        }
+
+        // Inicjalizacja dla pól filtrowania listy ofert
+        if ($('#filter_id_firmy').length) {
+            this.initWithPlaceholder('#filter_id_firmy', "Wszystkie firmy..."); // allowClear domyślnie true
+        }
+        if ($('#filter_id_projektu').length) {
+            this.initWithPlaceholder('#filter_id_projektu', "Wszystkie projekty..."); // allowClear domyślnie true
         }
 
         // // Inicjalizacja dla typowych selectów formularza

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory
 from flask_login import login_required
 from app import db
-from app.models import Tender
+from app.models import Tender, Project
 from app.forms import TenderForm
 import os
 from werkzeug.utils import secure_filename
@@ -11,8 +11,22 @@ tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_pre
 @tenders_bp.route('/')
 @login_required
 def list_tenders():
-    tenders = Tender.query.order_by(Tender.data_otrzymania.desc()).all()
-    return render_template('tenders_list.html', tenders=tenders, title='Oferty')
+    query = Tender.query
+    form = TenderForm()
+
+    # Filtrowanie
+    id_firmy = request.args.get('id_firmy', type=int)
+    id_projektu = request.args.get('id_projektu', type=int)
+
+    if id_firmy:
+        query = query.filter(Tender.id_firmy == id_firmy)
+    if id_projektu:
+        query = query.filter(Tender.id_projektu == id_projektu)
+
+    tenders = query.order_by(Tender.data_otrzymania.desc()).all()
+    projects = Project.query.order_by(Project.nazwa_projektu).all()
+    
+    return render_template('tenders_list.html', tenders=tenders, projects=projects, form=form, title='Oferty')
 
 @tenders_bp.route('/<int:tender_id>')
 @login_required
@@ -39,6 +53,7 @@ def edit_tender(tender_id):
         tender.data_otrzymania = form.data_otrzymania.data
         tender.status = form.status.data
         tender.id_firmy = form.id_firmy.data
+        tender.id_projektu = form.id_projektu.data if form.id_projektu.data else None
         
         # Sprawdź, czy użytkownik wgrał nowy plik
         if form.plik_oferty.data:
@@ -61,7 +76,10 @@ def edit_tender(tender_id):
         db.session.commit()
         flash('Oferta została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=tender.id))
-
+    else:
+        # Jeśli walidacja się nie powiodła, wyświetl błędy
+        pass # Błędy będą wyświetlane inline w szablonie
+        
     return render_template('tender_form.html', form=form, title=f"Edycja oferty: {tender.nazwa_oferty}")
 
 @tenders_bp.route('/<int:tender_id>/delete', methods=['POST'])
@@ -83,28 +101,37 @@ def delete_tender(tender_id):
 def new_tender():
     form = TenderForm()
     if form.validate_on_submit():
-        plik = form.plik_oferty.data
-        filename = secure_filename(plik.filename)
-        
-        # Zapisz plik w skonfigurowanym folderze
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        plik.save(upload_path)
+        # Sprawdź, czy plik został załączony
+        if form.plik_oferty.data:
+            plik = form.plik_oferty.data
+            filename = secure_filename(plik.filename)
+            
+            # Zapisz plik w skonfigurowanym folderze
+            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            plik.save(upload_path)
 
-        # Utwórz nowy obiekt Tender
-        nowa_oferta = Tender(
-            nazwa_oferty=form.nazwa_oferty.data,
-            data_otrzymania=form.data_otrzymania.data,
-            status=form.status.data,
-            id_firmy=form.id_firmy.data,
-            original_filename=filename,
-            storage_path=upload_path, # Na razie przechowujemy lokalną ścieżkę
-            file_type=plik.mimetype
-        )
-        
-        db.session.add(nowa_oferta)
-        db.session.commit()
-        
-        flash('Nowa oferta została dodana pomyślnie!', 'success')
-        return redirect(url_for('tenders.list_tenders'))
+            # Utwórz nowy obiekt Tender
+            nowa_oferta = Tender(
+                nazwa_oferty=form.nazwa_oferty.data,
+                data_otrzymania=form.data_otrzymania.data,
+                status=form.status.data,
+                id_firmy=form.id_firmy.data,
+                id_projektu=form.id_projektu.data if form.id_projektu.data else None,
+                original_filename=filename,
+                storage_path=upload_path, # Na razie przechowujemy lokalną ścieżkę
+                file_type=plik.mimetype
+            )
+            
+            db.session.add(nowa_oferta)
+            db.session.commit()
+            
+            flash('Nowa oferta została dodana pomyślnie!', 'success')
+            return redirect(url_for('tenders.list_tenders'))
+        else:
+            flash('Proszę załączyć plik oferty.', 'danger')
+            
+    else:
+        # Jeśli walidacja się nie powiodła, wyświetl błędy
+        pass # Błędy będą wyświetlane inline w szablonie
         
     return render_template('tender_form.html', form=form, title='Nowa Oferta')

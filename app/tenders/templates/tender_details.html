@@ -17,6 +17,9 @@
                 <dt class="col-sm-3">Data otrzymania</dt>
                 <dd class="col-sm-9">{{ tender.data_otrzymania.strftime('%Y-%m-%d') }}</dd>
 
+                <dt class="col-sm-3">Projekt</dt>
+                <dd class="col-sm-9">{{ tender.project.nazwa_projektu if tender.project else 'Brak przypisanego projektu' }}</dd>
+
                 <dt class="col-sm-3">Status</dt>
                 <dd class="col-sm-9">{{ tender.status }}</dd>
 

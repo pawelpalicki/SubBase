@@ -135,6 +135,9 @@ class Project(db.Model):
     __tablename__ = 'projects'
     id = db.Column(db.Integer, primary_key=True)
     nazwa_projektu = db.Column(db.String(255), nullable=False, unique=True)
+    skrot = db.Column(db.String(50), nullable=True)
+    rodzaj = db.Column(db.String(50), nullable=True)
+    uwagi = db.Column(db.Text, nullable=True)
     tenders = db.relationship('Tender', backref='project', lazy='dynamic')
 
 class Tender(db.Model):
@@ -145,6 +148,6 @@ class Tender(db.Model):
     status = db.Column(db.String(50), nullable=False, default='Nowa')
     original_filename = db.Column(db.String(255))
     storage_path = db.Column(db.String(1024))
-    file_type = db.Column(db.String(50))
+    file_type = db.Column(db.String(100))
     id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), nullable=False)
     id_projektu = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True)

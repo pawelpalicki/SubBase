@@ -175,19 +175,28 @@ class CompanyTypeForm(FlaskForm):
     submit = SubmitField('Zapisz')
 
 class ProjectForm(FlaskForm):
-    nazwa_projektu = StringField('Nazwa projektu', validators=[DataRequired()])
+    nazwa_projektu = StringField('Nazwa projektu', validators=[DataRequired('To pole jest wymagane.')])
+    skrot = StringField('Skrót', validators=[Optional()])
+    rodzaj = SelectField('Rodzaj', choices=[
+        ('', '-- Wybierz --'),
+        ('Przetarg', 'Przetarg'),
+        ('Realizacja', 'Realizacja'),
+        ('Inne', 'Inne')
+    ], validators=[Optional()])
+    uwagi = TextAreaField('Uwagi', validators=[Optional()])
     submit = SubmitField('Zapisz')
 
 class TenderForm(FlaskForm):
-    nazwa_oferty = StringField('Nazwa oferty', validators=[DataRequired()])
-    data_otrzymania = DateField('Data otrzymania', format='%Y-%m-%d', validators=[DataRequired()])
+    nazwa_oferty = StringField('Nazwa oferty', validators=[DataRequired('To pole jest wymagane.')])
+    data_otrzymania = DateField('Data otrzymania', format='%Y-%m-%d', validators=[DataRequired('To pole jest wymagane.')])
     status = SelectField('Status', choices=[
         ('Nowa', 'Nowa'),
         ('W analizie', 'W analizie'),
         ('Zaakceptowana', 'Zaakceptowana'),
         ('Odrzucona', 'Odrzucona')
-    ], validators=[DataRequired()])
-    id_firmy = SelectField('Firma', coerce=int, validators=[DataRequired()])
+    ], validators=[DataRequired('To pole jest wymagane.')])
+    id_firmy = SelectField('Firma', coerce=int, validators=[DataRequired('To pole jest wymagane.')])
+    id_projektu = SelectField('Projekt (opcjonalnie)', coerce=int, validators=[Optional()])
     plik_oferty = FileField('Nowy plik z ofertą (opcjonalnie)', validators=[
         Optional(),
         FileAllowed(['pdf', 'jpg', 'jpeg', 'png', 'xls', 'xlsx'], 'Dozwolone są tylko pliki PDF, obrazów i Excel!')
@@ -196,6 +205,11 @@ class TenderForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(TenderForm, self).__init__(*args, **kwargs)
-        from app.models import Firmy
+        from app.models import Firmy, Project
         self.id_firmy.choices = [(f.id_firmy, f.nazwa_firmy) for f in Firmy.query.order_by(Firmy.nazwa_firmy).all()]
         self.id_firmy.choices.insert(0, (0, '--- Wybierz firmę ---'))
+        # Ustawienie walidatora DataRequired z polskim komunikatem
+        self.id_firmy.validators = [DataRequired('To pole jest wymagane.')]
+        
+        self.id_projektu.choices = [(p.id, p.nazwa_projektu) for p in Project.query.order_by(Project.nazwa_projektu).all()]
+        self.id_projektu.choices.insert(0, (0, '--- Brak projektu ---'))

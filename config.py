@@ -15,7 +15,7 @@ class Config:
     # --- DEBUGOWANIE ---
     # Poniższa linia wyświetli w konsoli, z którą bazą danych łączy się aplikacja.
     # Jest to przydatne do szybkiego sprawdzenia konfiguracji.
-    print(f"✅ KONFIGURACJA: Aplikacja łączy się z bazą -> {SQLALCHEMY_DATABASE_URI}")
+    print(f"KONFIGURACJA: Aplikacja łączy się z bazą -> {SQLALCHEMY_DATABASE_URI}")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
@@ -33,4 +33,4 @@ class Config:
     # Upewnij się, że folder do uploadu istnieje
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
-        print(f"✅ KONFIGURACJA: Utworzono katalog na pliki: {UPLOAD_FOLDER}")
+        print(f"KONFIGURACJA: Utworzono katalog na pliki: {UPLOAD_FOLDER}")

@@ -67,6 +67,7 @@
                             <i class="bi bi-list-ul me-1"></i>Inne formularze
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_projects') }}"><i class="bi bi-folder me-2"></i>Projekty</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_specialties') }}"><i class="bi bi-wrench-adjustable-circle me-2"></i>Specjalności</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_company_types') }}"><i class="bi bi-building me-2"></i>Typy firm</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_address_types') }}"><i class="bi bi-geo-alt me-2"></i>Typy adresów</a></li>
@@ -119,5 +120,20 @@
     <script src="{{ url_for('static', filename='js/select2_config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
+
+    <!-- Modal dla formularzy dynamicznych (np. dodawanie projektu) -->
+    <div class="modal fade" id="dynamicFormModal" tabindex="-1" aria-labelledby="dynamicFormModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dynamicFormModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Treść formularza ładowana dynamicznie -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

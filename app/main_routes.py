@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
 from flask_login import current_user # Importujemy tylko 'current_user' (do użycia w szablonach/logice)
 from sqlalchemy import or_, and_, func
-from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny
+from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny, Project
 from app import db # Importujesz 'db' z zainicjalizowanej aplikacji
 from unidecode import unidecode
-from app.forms import CompanyForm, SimplePersonForm, SimpleRatingForm, SpecialtyForm, AddressTypeForm, EmailTypeForm, PhoneTypeForm, CompanyTypeForm
+from app.forms import CompanyForm, SimplePersonForm, SimpleRatingForm, SpecialtyForm, AddressTypeForm, EmailTypeForm, PhoneTypeForm, CompanyTypeForm, ProjectForm
 from sqlalchemy.exc import SQLAlchemyError
 
 main = Blueprint('main', __name__)
@@ -1148,6 +1148,67 @@ def delete_company_type(id):
         db.session.rollback()
         flash(f'Wystąpił błąd podczas usuwania typu firmy: {e}', 'danger')
     return redirect(url_for('main.list_company_types'))
+
+# Routes for Projects
+@main.route('/projects')
+def list_projects():
+    projects = Project.query.all()
+    return render_template('projects.html', items=projects, title='Projekty')
+
+@main.route('/projects/new', methods=['GET', 'POST'])
+def new_project():
+    form = ProjectForm()
+    if form.validate_on_submit():
+        try:
+            new_project = Project(
+                nazwa_projektu=form.nazwa_projektu.data,
+                skrot=form.skrot.data,
+                rodzaj=form.rodzaj.data,
+                uwagi=form.uwagi.data
+            )
+            db.session.add(new_project)
+            db.session.commit()
+            flash('Projekt został dodany pomyślnie!', 'success')
+            return redirect(url_for('main.list_projects'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas dodawania projektu: {e}', 'danger')
+    return render_template('project_form.html', form=form, title='Dodaj Projekt', back_url=url_for('main.list_projects'))
+
+@main.route('/projects/<int:id>/edit', methods=['GET', 'POST'])
+def edit_project(id):
+    project = Project.query.get_or_404(id)
+    form = ProjectForm(obj=project)
+    if form.validate_on_submit():
+        try:
+            project.nazwa_projektu = form.nazwa_projektu.data
+            project.skrot = form.skrot.data
+            project.rodzaj = form.rodzaj.data
+            project.uwagi = form.uwagi.data
+            db.session.commit()
+            flash('Projekt został zaktualizowany pomyślnie!', 'success')
+            return redirect(url_for('main.list_projects'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas aktualizacji projektu: {e}', 'danger')
+    if request.method == 'GET':
+        form.nazwa_projektu.data = project.nazwa_projektu
+        form.skrot.data = project.skrot
+        form.rodzaj.data = project.rodzaj
+        form.uwagi.data = project.uwagi
+    return render_template('project_form.html', form=form, title='Edytuj Projekt', back_url=url_for('main.list_projects'))
+
+@main.route('/projects/<int:id>/delete', methods=['POST'])
+def delete_project(id):
+    project = Project.query.get_or_404(id)
+    try:
+        db.session.delete(project)
+        db.session.commit()
+        flash('Projekt został usunięty pomyślnie!', 'success')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'Wystąpił błąd podczas usuwania projektu: {e}', 'danger')
+    return redirect(url_for('main.list_projects'))
 
 # Routes for Persons
 @main.route('/persons')
