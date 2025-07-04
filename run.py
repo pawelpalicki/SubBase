@@ -1,5 +1,9 @@
+import os
 from dotenv import load_dotenv
-load_dotenv() # Wywołanie load_dotenv() musi nastąpić przed importem modułów aplikacji (np. `app`), które zależą od zmiennych środowiskowych.
+
+# Set the project base directory
+project_folder = os.path.expanduser('~/projects/SubBase')
+load_dotenv(os.path.join(project_folder, '.env'))
 
 from app import create_app
 

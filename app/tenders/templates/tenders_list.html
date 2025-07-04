@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    <a href="{{ url_for('tenders.new_tender') }}" class="btn btn-primary mb-3">Dodaj nową ofertę</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nazwa Oferty</th>
+                <th>Firma</th>
+                <th>Data Otrzymania</th>
+                <th>Status</th>
+                <th>Plik</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tender in tenders %}
+            <tr>
+                <td><a href="{{ url_for('tenders.tender_details', tender_id=tender.id) }}">{{ tender.nazwa_oferty }}</a></td>
+                <td><a href="{{ url_for('main.company_details', company_id=tender.id_firmy) }}">{{ tender.firma.nazwa_firmy }}</a></td>
+                <td>{{ tender.data_otrzymania.strftime('%Y-%m-%d') }}</td>
+                <td>{{ tender.status }}</td>
+                <td><a href="{{ url_for('tenders.download_file', tender_id=tender.id) }}">{{ tender.original_filename }}</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">Brak ofert w bazie.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

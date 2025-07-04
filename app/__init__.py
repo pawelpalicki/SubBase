@@ -77,4 +77,8 @@ def create_app(config_class=Config):
     from app.routes import auth
     app.register_blueprint(auth)
 
+    # Rejestracja blueprintu dla ofert
+    from app.tenders.routes import tenders_bp
+    app.register_blueprint(tenders_bp)
+
     return app

@@ -1,4 +1,3 @@
-
 from app import db
 
 class Firmy(db.Model):
@@ -17,6 +16,7 @@ class Firmy(db.Model):
     
     firmy_specjalnosci = db.relationship('FirmySpecjalnosci', backref='firma', lazy='dynamic')
     firmy_obszar_dzialania = db.relationship('FirmyObszarDzialania', backref='firma', lazy='dynamic')
+    tenders = db.relationship('Tender', backref='firma', lazy='dynamic')
 
 class FirmyTyp(db.Model):
     __tablename__ = 'firmy_typ'
@@ -130,3 +130,21 @@ class Oceny(db.Model):
     ocena = db.Column(db.Integer)
     komentarz = db.Column(db.Text)
     id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+
+class Project(db.Model):
+    __tablename__ = 'projects'
+    id = db.Column(db.Integer, primary_key=True)
+    nazwa_projektu = db.Column(db.String(255), nullable=False, unique=True)
+    tenders = db.relationship('Tender', backref='project', lazy='dynamic')
+
+class Tender(db.Model):
+    __tablename__ = 'tenders'
+    id = db.Column(db.Integer, primary_key=True)
+    nazwa_oferty = db.Column(db.String(255), nullable=False)
+    data_otrzymania = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String(50), nullable=False, default='Nowa')
+    original_filename = db.Column(db.String(255))
+    storage_path = db.Column(db.String(1024))
+    file_type = db.Column(db.String(50))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), nullable=False)
+    id_projektu = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True)

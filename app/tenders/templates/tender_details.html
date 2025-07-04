@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Nazwa oferty</dt>
+                <dd class="col-sm-9">{{ tender.nazwa_oferty }}</dd>
+
+                <dt class="col-sm-3">Firma</dt>
+                <dd class="col-sm-9"><a href="{{ url_for('main.company_details', company_id=tender.id_firmy) }}">{{ tender.firma.nazwa_firmy }}</a></dd>
+
+                <dt class="col-sm-3">Data otrzymania</dt>
+                <dd class="col-sm-9">{{ tender.data_otrzymania.strftime('%Y-%m-%d') }}</dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">{{ tender.status }}</dd>
+
+                <dt class="col-sm-3">Załącznik</dt>
+                <dd class="col-sm-9">
+                    <a href="{{ url_for('tenders.download_file', tender_id=tender.id) }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-download me-1"></i> Pobierz ({{ tender.original_filename }})
+                    </a>
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('tenders.list_tenders') }}" class="btn btn-secondary">Powrót do listy</a>
+            <a href="{{ url_for('tenders.edit_tender', tender_id=tender.id) }}" class="btn btn-primary">Edytuj</a>
+            <form action="{{ url_for('tenders.delete_tender', tender_id=tender.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz usunąć tę ofertę?');">
+                <button type="submit" class="btn btn-danger">Usuń</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

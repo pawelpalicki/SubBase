@@ -26,3 +26,11 @@ class Config:
         'pool_timeout': 30,
         'max_overflow': 20
     }
+
+    # --- Konfiguracja przechowywania plików ---
+    UPLOAD_FOLDER = os.path.join(basedir, 'instance', 'uploads')
+    
+    # Upewnij się, że folder do uploadu istnieje
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+        print(f"✅ KONFIGURACJA: Utworzono katalog na pliki: {UPLOAD_FOLDER}")

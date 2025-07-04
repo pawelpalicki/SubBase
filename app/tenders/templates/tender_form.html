@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.nazwa_oferty.label(class="form-label") }}
+            {{ form.nazwa_oferty(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.data_otrzymania.label(class="form-label") }}
+            {{ form.data_otrzymania(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.status.label(class="form-label") }}
+            {{ form.status(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.id_firmy.label(class="form-label") }}
+            {{ form.id_firmy(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.plik_oferty.label(class="form-label") }}
+            {{ form.plik_oferty(class="form-control") }}
+        </div>
+        
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+{% endblock %}

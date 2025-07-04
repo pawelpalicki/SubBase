@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField
+from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField
 from wtforms.validators import DataRequired, Email, Optional, NumberRange
 from wtforms.widgets import ListWidget, CheckboxInput, Select
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 
 # Zamiast tworzenia własnych widgetów, użyjmy atrybutów HTML i klas CSS
@@ -173,3 +173,29 @@ class PhoneTypeForm(FlaskForm):
 class CompanyTypeForm(FlaskForm):
     name = StringField('Nazwa Typu Firmy', validators=[DataRequired()])
     submit = SubmitField('Zapisz')
+
+class ProjectForm(FlaskForm):
+    nazwa_projektu = StringField('Nazwa projektu', validators=[DataRequired()])
+    submit = SubmitField('Zapisz')
+
+class TenderForm(FlaskForm):
+    nazwa_oferty = StringField('Nazwa oferty', validators=[DataRequired()])
+    data_otrzymania = DateField('Data otrzymania', format='%Y-%m-%d', validators=[DataRequired()])
+    status = SelectField('Status', choices=[
+        ('Nowa', 'Nowa'),
+        ('W analizie', 'W analizie'),
+        ('Zaakceptowana', 'Zaakceptowana'),
+        ('Odrzucona', 'Odrzucona')
+    ], validators=[DataRequired()])
+    id_firmy = SelectField('Firma', coerce=int, validators=[DataRequired()])
+    plik_oferty = FileField('Nowy plik z ofertą (opcjonalnie)', validators=[
+        Optional(),
+        FileAllowed(['pdf', 'jpg', 'jpeg', 'png', 'xls', 'xlsx'], 'Dozwolone są tylko pliki PDF, obrazów i Excel!')
+    ])
+    submit = SubmitField('Zapisz Ofertę')
+
+    def __init__(self, *args, **kwargs):
+        super(TenderForm, self).__init__(*args, **kwargs)
+        from app.models import Firmy
+        self.id_firmy.choices = [(f.id_firmy, f.nazwa_firmy) for f in Firmy.query.order_by(Firmy.nazwa_firmy).all()]
+        self.id_firmy.choices.insert(0, (0, '--- Wybierz firmę ---'))
