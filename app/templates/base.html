@@ -76,6 +76,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('main.list_email_types') }}"><i class="bi bi-envelope me-2"></i>Typy e-maili</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_categories') }}"><i class="bi bi-tags me-2"></i>Kategorie cen</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_work_types') }}"><i class="bi bi-tools me-2"></i>Rodzaje robót</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('tenders.list_all_unit_prices') }}"><i class="bi bi-currency-dollar me-2"></i>Wszystkie ceny jedn.</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('tenders.unit_prices_analysis') }}"><i class="bi bi-graph-up me-2"></i>Analiza cen jedn.</a></li>
                         </ul>
@@ -125,21 +126,150 @@
     <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
     <script src="{{ url_for('static', filename='js/select2_config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+    $(document).ready(function() {
+        // Usunięto ręczne tworzenie instancji modali
+        // var mainModal = new bootstrap.Modal(document.getElementById('mainModal'));
+        // var secondaryModal = new bootstrap.Modal(document.getElementById('secondaryModal'));
+        var formState = {}; // Przechowuje stan formularza z pierwszego modala
+
+        // --- GŁÓWNY MODAL ---
+        // Otwieranie z przycisku
+        $(document).on('click', '[data-bs-target="#mainModal"]', function() {
+            var button = $(this);
+            var url = button.data('url');
+            $('#mainModal .modal-title').text(button.data('title'));
+            $('#mainModal .modal-body').load(url, function() {
+                initializeSelect2($('#mainModal .select2-enable'));
+            });
+        });
+
+        // --- MODAL POMOCNICZY (np. do dodawania kategorii) ---
+        // Otwieranie z przycisku wewnątrz modala głównego
+        $(document).on('click', '.js-open-secondary-modal', function() {
+            var button = $(this);
+            
+            // Zapisz stan z głównego modala
+            formState.name = $('#mainModal input[name="name"]').val();
+            
+            // Załaduj treść do modala pomocniczego i go pokaż
+            var url = button.data('url');
+            $('#secondaryModal .modal-title').text(button.data('title'));
+            $('#secondaryModal .modal-body').load(url, function() {
+                $('#mainModal').modal('hide');
+                $('#secondaryModal').modal('show');
+            });
+        });
+
+        // Przesłanie formularza w modalu pomocniczym
+        $(document).on('submit', '#secondaryModal form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            
+            $.ajax({
+                type: 'POST',
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function(response) {
+                    console.log('Odpowiedź z serwera po dodaniu kategorii:', response);
+                    if (response.success) {
+                        // Przygotuj URL do ponownego załadowania głównego modala
+                        var mainUrl = new URL("{{ url_for('main.add_work_type', _external=True) }}");
+                        if (formState.name) {
+                            mainUrl.searchParams.set('work_type_name', formState.name);
+                        }
+                        mainUrl.searchParams.set('category_id', response.id);
+
+                        // Załaduj główny modal z nowymi danymi i go pokaż
+                        $('#mainModal .modal-title').text('Dodaj nową nazwę roboty');
+                        console.log('Ładowanie do mainModal URL:', mainUrl.href); // Dodany log
+                        $('#mainModal .modal-body').load(mainUrl.href, function(response, status, xhr) {
+                            if (status == "error") {
+                                console.error("Błąd ładowania mainModal:", xhr.status, xhr.statusText, response);
+                            } else {
+                                console.log('mainModal załadowany pomyślnie.');
+                            }
+                            window.Select2Config.initWithPlaceholder($('#mainModal .select2-enable'), "Wybierz...");
+                            $('#secondaryModal').modal('hide');
+                            $('#mainModal').modal('show');
+                        });
+                    } else {
+                        $('#secondaryModal .modal-body').html(response);
+                    }
+                }
+            });
+        });
+
+        // NOWY KOD: Przesłanie formularza w modalu głównym (dla WorkTypeForm)
+        $(document).on('submit', '#mainModal form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            
+            $.ajax({
+                type: 'POST',
+                url: form.attr('action'), // Powinno być /api/work_types
+                data: form.serialize(),
+                beforeSend: function() {
+                    console.log('Wysyłam POST z mainModal na URL:', form.attr('action'));
+                },
+                success: function(response) {
+                    console.log('Odpowiedź z serwera po dodaniu nazwy roboty:', response);
+                    if (response.success) {
+                        console.log('Sukces dodawania nazwy roboty. Aktualizuję Select2 i zamykam modal.');
+                        // Zaktualizuj Select2 na głównej stronie (extract_helper.html)
+                        var workTypeSelectOnMainPage = $('#id_work_type_select'); // To jest Select2 na głównej stronie
+                        var newOption = new Option(response.name, response.id, true, true);
+                        workTypeSelectOnMainPage.append(newOption).trigger('change');
+
+                        $('#mainModal').modal('hide'); // Zamknij główny modal
+                        console.log('mainModal powinien być ukryty.');
+                        // Nie trzeba niczego ponownie ładować, wystarczy zaktualizować select na głównej stronie
+                    } else {
+                        console.log('Błąd walidacji lub inny błąd podczas dodawania nazwy roboty. Wyświetlam błędy w modalu.');
+                        // Wyświetl błędy walidacji w głównym modalu
+                        $('#mainModal .modal-body').html(response); // Zakładamy, że odpowiedź zawiera HTML z błędami
+                        // Ponownie zainicjuj Select2 dla formularza z błędami, jeśli to konieczne
+                        if (typeof window.Select2Config !== 'undefined') {
+                            window.Select2Config.initWithPlaceholder($('#mainModal .select2-enable'), "Wybierz...");
+                        }
+                    }
+                },
+                error: function(jqXHR) {
+                    // Obsłuż błąd AJAX
+                    console.error("Błąd AJAX podczas przesyłania formularza WorkType:", jqXHR);
+                    $('#mainModal .modal-body').html('<p class="text-danger">Wystąpił błąd podczas dodawania nazwy roboty.</p>');
+                }
+            });
+        });
+    });
+    </script>
     {% block scripts %}{% endblock %}
 
-    <!-- Modal dla formularzy dynamicznych (np. dodawanie projektu) -->
-    <div class="modal fade" id="dynamicFormModal" tabindex="-1" aria-labelledby="dynamicFormModalLabel" aria-hidden="true">
+    <!-- Modal Główny -->
+    <div class="modal fade" id="mainModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dynamicFormModalLabel"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Treść formularza ładowana dynamicznie -->
+                <div class="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pomocniczy -->
+    <div class="modal fade" id="secondaryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+                <div class="modal-body"></div>
             </div>
         </div>
     </div>
 </body>
+</html>
 </html>

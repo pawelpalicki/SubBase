@@ -63,9 +63,8 @@ def extract_data(tender_id):
         try:
             # Logika do obsługi kategorii
             work_type_id = unit_price_form.id_work_type.data
-            category_id = unit_price_form.id_kategorii.data if unit_price_form.id_kategorii.data != 0 else None
-
             work_type = WorkType.query.get(work_type_id)
+            category_id = work_type.id_kategorii if work_type else None
             new_unit_price = UnitPrice(
                 id_work_type=work_type_id,
                 nazwa_roboty=work_type.name if work_type else None, # Ustawiamy nazwę roboty
@@ -345,10 +344,8 @@ def new_global_unit_price():
     if form.validate_on_submit():
         try:
             work_type_id = form.id_work_type.data
-            category_id = form.id_kategorii.data if form.id_kategorii.data != 0 else None
-            tender_id = form.id_oferty.data
-
             work_type = WorkType.query.get(work_type_id)
+            category_id = work_type.id_kategorii if work_type else None
             new_unit_price = UnitPrice(
                 id_work_type=work_type_id,
                 nazwa_roboty=work_type.name if work_type else None,
@@ -366,7 +363,7 @@ def new_global_unit_price():
             db.session.rollback()
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
 
-    return render_template('unit_price_form.html', form=form, title='Dodaj nową pozycję cenową', show_tender_select=True)
+    return render_template('unit_price_form.html', form=form, title='Dodaj nową pozycję cenową', show_tender_select=True, category_field_always_disabled_unless_auto_filled=True)
 
 @tenders_bp.route('/unit_price/<int:price_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -379,7 +376,7 @@ def edit_unit_price(price_id):
         price.nazwa_roboty = work_type.name if work_type else None
         price.jednostka_miary = form.jednostka_miary.data
         price.cena_jednostkowa = form.cena_jednostkowa.data
-        price.id_kategorii = form.id_kategorii.data if form.id_kategorii.data != 0 else None
+        price.id_kategorii = work_type.id_kategorii if work_type else None
         price.uwagi = form.uwagi.data
         db.session.commit()
         flash('Pozycja cenowa została zaktualizowana.', 'success')
@@ -388,7 +385,7 @@ def edit_unit_price(price_id):
 
 
     # Przekazujemy tender_id do szablonu, aby link "Anuluj" działał poprawnie
-    return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty)
+    return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty, category_field_always_disabled_unless_auto_filled=True)
 
 @tenders_bp.route('/unit_price/<int:price_id>/delete', methods=['POST'])
 @login_required

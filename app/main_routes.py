@@ -4,7 +4,7 @@ from sqlalchemy import or_, and_, func
 from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny, Project, WorkType, Category
 from app import db # Importujesz 'db' z zainicjalizowanej aplikacji
 from unidecode import unidecode
-from app.forms import CompanyForm, SimplePersonForm, SimpleRatingForm, SpecialtyForm, AddressTypeForm, EmailTypeForm, PhoneTypeForm, CompanyTypeForm, ProjectForm
+from app.forms import CompanyForm, SimplePersonForm, SimpleRatingForm, SpecialtyForm, AddressTypeForm, EmailTypeForm, PhoneTypeForm, CompanyTypeForm, ProjectForm, CategoryForm, WorkTypeForm
 from sqlalchemy.exc import SQLAlchemyError
 
 main = Blueprint('main', __name__)
@@ -111,7 +111,6 @@ def index():
                 for fs in firmy_spec:
                     matching_company_ids.add(fs.id_firmy)
 
-        # Wyszukiwanie po typie firmy
         firmy_typ_results = FirmyTyp.query.all()
         for typ in firmy_typ_results:
             if normalized_search in normalize_text(typ.typ_firmy).lower():
@@ -141,7 +140,6 @@ def index():
                 for fk in firmy_kraj:
                     matching_company_ids.add(fk.id_firmy)
 
-        # Filtrowanie głównego zapytania, aby zawierało tylko firmy pasujące do wyszukiwania
         if matching_company_ids:
             query = query.filter(Firmy.id_firmy.in_(matching_company_ids))
         else:
@@ -203,23 +201,19 @@ def index():
                                 .join(FirmyObszarDzialania)\
                                 .filter(FirmyObszarDzialania.id_kraj == 'POL')
 
-        # Firmy działające tylko na poziomie województwa (bez przypisanych powiatów)
         wojewodztwo_companies = db.session.query(Firmy.id_firmy)\
-                                .join(FirmyObszarDzialania)\
-                                .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                .filter(FirmyObszarDzialania.id_powiaty == 0)\
-                                .except_(
-                                    # Wykluczenie firm, które mają jakikolwiek wpis z przypisanym powiatem
-                                    db.session.query(Firmy.id_firmy)\
-                                    .join(FirmyObszarDzialania)\
-                                    .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                    .filter(FirmyObszarDzialania.id_powiaty != 0))
+                                 .join(FirmyObszarDzialania)\
+                                 .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
+                                 .filter(FirmyObszarDzialania.id_powiaty == 0)\
+                                 .except_(
+                                     db.session.query(Firmy.id_firmy)\
+                                     .join(FirmyObszarDzialania)\
+                                     .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
+                                     .filter(FirmyObszarDzialania.id_powiaty != 0)
+                                 )
 
-        # Połączenie zbiorów
-        combined_companies = nationwide_companies.union(wojewodztwo_companies).subquery()
-
-        # Filtrowanie głównego zapytania
-        query = query.filter(Firmy.id_firmy.in_(combined_companies))
+        combined_companies_ids_subquery = nationwide_companies.union(wojewodztwo_companies).subquery()
+        query = query.filter(Firmy.id_firmy.in_(combined_companies_ids_subquery))
 
 
     # Handle company type filter
@@ -259,13 +253,13 @@ def company_details(company_id):
 
     # Get area of operation
     nationwide = db.session.query(FirmyObszarDzialania)\
-                            .filter(FirmyObszarDzialania.id_firmy == company_id,
+                            .filter(FirmyObszarDzialania.id_firmy == company_id,\
                                     FirmyObszarDzialania.id_kraj == 'POL')\
                             .first() is not None
 
     wojewodztwa = db.session.query(Wojewodztwa)\
                            .join(FirmyObszarDzialania)\
-                           .filter(FirmyObszarDzialania.id_firmy == company_id,
+                           .filter(FirmyObszarDzialania.id_firmy == company_id,\
                                    Wojewodztwa.wojewodztwo != 'Nie dotyczy / Brak danych')\
                            .all()
 
@@ -521,7 +515,7 @@ def new_company():
                 #         id_firmy=company.id_firmy,
                 #         id_kraj='',
                 #         id_wojewodztwa=woj_id,
-                #         id_powiaty=''
+                #         id_powiaty=0
                 #     )
                 #     db.session.add(obszar)
 
@@ -780,7 +774,7 @@ def edit_company(company_id):
                     )
                     db.session.add(obszar)
 
-            # Dodaj specjalności
+            # Add specialties
             for spec_id in form.specjalnosci.data:
                 spec = FirmySpecjalnosci(
                     id_firmy=company_id,
@@ -1511,7 +1505,6 @@ def export_companies_html():
     # Handle company type filter
     company_types = [ct for ct in request.args.getlist('company_types') if ct.strip()]
     if company_types:
-        # Apply the filter to the current query state
         query = query.filter(Firmy.id_firmy_typ.in_(company_types))
 
 
@@ -1600,7 +1593,7 @@ def new_category():
         db.session.commit()
         flash('Nowa kategoria została dodana.', 'success')
         return redirect(url_for('main.list_categories'))
-    return render_template('simple_form.html', form=form, title='Nowa Kategoria')
+    return render_template('simple_form.html', form=form, title='Nowa Kategoria', back_url=url_for('main.list_categories'))
 
 @main.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -1617,14 +1610,14 @@ def edit_category(category_id):
     # Trzeba ręcznie ustawić pole 'name' dla metody GET, bo nazwy w modelu i formularzu się różnią
     if request.method == 'GET':
         form.name.data = category.nazwa_kategorii
-    return render_template('simple_form.html', form=form, title='Edycja Kategorii')
+    return render_template('simple_form.html', form=form, title='Edycja Kategorii', back_url=url_for('main.list_categories'))
 
 @main.route('/categories/<int:category_id>/delete', methods=['POST'])
 @login_required
 def delete_category(category_id):
     from app.models import Category
     category = Category.query.get_or_404(category_id)
-    if category.unit_prices.first():
+    if category.unit_prices:
         flash('Nie można usunąć kategorii, która jest przypisana do pozycji cenowych.', 'danger')
         return redirect(url_for('main.list_categories'))
     db.session.delete(category)
@@ -1636,56 +1629,89 @@ def delete_category(category_id):
 @main.route('/api/work_types', methods=['GET', 'POST'])
 @login_required
 def add_work_type():
-    if request.method == 'GET':
-        return render_template('simple_work_type_form.html')
+    from app.forms import WorkTypeForm
+    form = WorkTypeForm()
+
+    if request.method == 'POST': # Only process POST for form submission
+        if form.validate_on_submit():
+            try:
+                existing = WorkType.query.filter(func.lower(WorkType.name) == func.lower(form.name.data)).first()
+                if existing:
+                    # Return JSON with error if work type already exists
+                    return jsonify({'success': False, 'errors': {'name': ['Ta nazwa roboty już istnieje.']}}), 400
+                
+                new_work_type = WorkType(
+                    name=form.name.data,
+                    id_kategorii=form.id_kategorii.data
+                )
+                db.session.add(new_work_type)
+                db.session.commit()
+                return jsonify({'success': True, 'id': new_work_type.id, 'name': new_work_type.name}), 201
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                # Return JSON with database error
+                return jsonify({'success': False, 'errors': {'_form': [f'Błąd bazy danych: {str(e)}']}}), 500
+        else:
+            # Return JSON with validation errors
+            return jsonify({'success': False, 'errors': form.errors}), 400
     
-    # Zmieniono z request.json na request.form
-    name = request.form.get('name')
-    if not name:
-        return jsonify({'error': 'Brak wymaganych danych'}), 400
-
-    try:
-        existing = WorkType.query.filter(func.lower(WorkType.name) == func.lower(name)).first()
-        if existing:
-            return jsonify({'error': 'Ta nazwa roboty już istnieje', 'id': existing.id}), 400
-
-        new_work_type = WorkType(name=name)
-        db.session.add(new_work_type)
-        db.session.commit()
-
-        return jsonify({'id': new_work_type.id, 'name': new_work_type.name}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    # For GET request, render the form fragment
+    # Wstępne wypełnienie z parametrów GET
+    if request.method == 'GET':
+        work_type_name = request.args.get('work_type_name')
+        category_id = request.args.get('category_id')
+        if work_type_name:
+            form.name.data = work_type_name
+        if category_id:
+            form.id_kategorii.data = int(category_id)
+    
+    return render_template('work_type_form_modal.html', form=form)
 
 @main.route('/api/categories', methods=['GET', 'POST'])
 @login_required
 def add_category():
-    if request.method == 'GET':
-        return render_template('simple_category_form.html')
+    from app.forms import CategoryForm # Import CategoryForm here
+    form = CategoryForm() # Instantiate the form
+    if form.validate_on_submit():
+        try:
+            existing = Category.query.filter(func.lower(Category.nazwa_kategorii) == func.lower(form.name.data)).first()
+            if existing:
+                form.name.errors.append('Ta kategoria już istnieje.')
+                return render_template('category_form_modal.html', form=form), 400
+            new_category = Category(nazwa_kategorii=form.name.data)
+            db.session.add(new_category)
+            db.session.commit()
+            return jsonify({'success': True, 'id': new_category.id, 'name': new_category.nazwa_kategorii}), 201
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            form.name.errors.append(f'Błąd bazy danych: {str(e)}')
+            return render_template('category_form_modal.html', form=form), 500
     
-    # Zmieniono z request.json na request.form
-    name = request.form.get('name')
-    if not name:
-        return jsonify({'error': 'Brak wymaganych danych'}), 400
+    # For GET request or validation errors, render the form fragment
+    return render_template('category_form_modal.html', form=form)
 
-    try:
-        # UWAGA: Tutaj używasz Category.name, ale Twój model ma pole nazwa_kategorii!
-        # Zmień to na właściwe pole:
-        existing = Category.query.filter(func.lower(Category.nazwa_kategorii) == func.lower(name)).first()
-        if existing:
-            return jsonify({'error': 'Ta kategoria już istnieje', 'id': existing.id}), 400
-
-        # Tutaj też zmień na właściwe pole:
-        new_category = Category(nazwa_kategorii=name)
-        db.session.add(new_category)
-        db.session.commit()
-
-        # W odpowiedzi zwróć właściwe pole:
-        return jsonify({'id': new_category.id, 'name': new_category.nazwa_kategorii}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+@main.route('/api/categories/form', methods=['GET', 'POST'])
+@login_required
+def get_category_form():
+    from app.forms import CategoryForm
+    form = CategoryForm()
+    if form.validate_on_submit():
+        try:
+            existing = Category.query.filter(func.lower(Category.nazwa_kategorii) == func.lower(form.name.data)).first()
+            if existing:
+                form.name.errors.append('Ta kategoria już istnieje.')
+                return render_template('category_form_modal.html', form=form), 400
+            new_category = Category(nazwa_kategorii=form.name.data)
+            db.session.add(new_category)
+            db.session.commit()
+            return jsonify({'success': True, 'id': new_category.id, 'name': new_category.nazwa_kategorii}), 201
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            form.name.errors.append(f'Błąd bazy danych: {str(e)}')
+            return render_template('category_form_modal.html', form=form), 500
+    
+    # For GET request or validation errors, render the form fragment
+    return render_template('category_form_modal.html', form=form)
 
 @main.route('/api/work_types_list')
 @login_required
@@ -1702,3 +1728,72 @@ def api_categories_list():
     categories = Category.query.filter(Category.name.ilike(f'%{query}%')).order_by(Category.name).limit(20).all()
     results = [{'id': cat.id, 'text': cat.name} for cat in categories]
     return jsonify(results)
+
+@main.route('/api/work_type_category/<int:work_type_id>')
+@login_required
+def get_work_type_category(work_type_id):
+    work_type = WorkType.query.get(work_type_id)
+    if work_type and work_type.category:
+        return jsonify({'id': work_type.category.id, 'name': work_type.category.nazwa_kategorii})
+    return jsonify({'id': 0, 'name': 'Brak kategorii'})
+
+# Routes for Work Types
+@main.route('/work_types')
+@login_required
+def list_work_types():
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    return render_template('work_types.html', items=work_types, title='Rodzaje Robót')
+
+@main.route('/work_types/new', methods=['GET', 'POST'])
+@login_required
+def new_work_type():
+    from app.forms import WorkTypeForm
+    form = WorkTypeForm()
+    if form.validate_on_submit():
+        try:
+            new_work_type = WorkType(
+                name=form.name.data,
+                id_kategorii=form.id_kategorii.data
+            )
+            db.session.add(new_work_type)
+            db.session.commit()
+            flash('Rodzaj roboty został dodany pomyślnie!', 'success')
+            return redirect(url_for('main.list_work_types'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas dodawania rodzaju roboty: {e}', 'danger')
+    return render_template('work_type_form.html', form=form, title='Nowy Rodzaj Roboty', back_url=url_for('main.list_work_types'))
+
+@main.route('/work_types/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_work_type(id):
+    from app.forms import WorkTypeForm
+    work_type = WorkType.query.get_or_404(id)
+    form = WorkTypeForm(obj=work_type)
+    if form.validate_on_submit():
+        try:
+            work_type.name = form.name.data
+            work_type.id_kategorii = form.id_kategorii.data
+            db.session.commit()
+            flash('Rodzaj roboty został zaktualizowany pomyślnie!', 'success')
+            return redirect(url_for('main.list_work_types'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas aktualizacji rodzaju roboty: {e}', 'danger')
+    return render_template('work_type_form.html', form=form, title='Edytuj Rodzaj Roboty', back_url=url_for('main.list_work_types'))
+
+@main.route('/work_types/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_work_type(id):
+    work_type = WorkType.query.get_or_404(id)
+    if work_type.unit_prices.first():
+        flash('Nie można usunąć rodzaju roboty, który jest przypisany do pozycji cenowych.', 'danger')
+        return redirect(url_for('main.list_work_types'))
+    try:
+        db.session.delete(work_type)
+        db.session.commit()
+        flash('Rodzaj roboty został usunięty pomyślnie!', 'success')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'Wystąpił błąd podczas usuwania rodzaju roboty: {e}', 'danger')
+    return redirect (url_for('main.list_work_types'))

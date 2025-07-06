@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField
+from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField, HiddenField
 from wtforms.validators import DataRequired, Email, Optional, NumberRange
 from wtforms.widgets import ListWidget, CheckboxInput, Select
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -223,18 +223,26 @@ class UnitPriceForm(FlaskForm):
     id_work_type = SelectField('Nazwa roboty', coerce=int, validators=[DataRequired('To pole jest wymagane.')])
     jednostka_miary = StringField('J.m.', validators=[DataRequired('To pole jest wymagane.')])
     cena_jednostkowa = StringField('Cena jednostatkowa', validators=[DataRequired('To pole jest wymagane.')])
-    id_kategorii = SelectField('Kategoria (opcjonalnie)', coerce=int, validators=[Optional()])
+    id_kategorii = HiddenField('Kategoria')
     uwagi = TextAreaField('Uwagi (opcjonalnie)', validators=[Optional()])
     submit = SubmitField('Dodaj pozycję')
 
     def __init__(self, *args, **kwargs):
         super(UnitPriceForm, self).__init__(*args, **kwargs)
         from app.models import WorkType, Category, Tender # Dodano Tender
-        self.id_oferty.choices = [(t.id, f"{t.nazwa_oferty} ({t.project.nazwa_projektu if t.project else 'Brak projektu'})") for t in Tender.query.order_by(Tender.nazwa_oferty).all()] # Wypełnienie ofert
+        self.id_oferty.choices = [(t.id, f"{t.nazwa_oferty} ({t.project.nazwa_projektu if t.project else 'Brak projektu'})" ) for t in Tender.query.order_by(Tender.nazwa_oferty).all()] # Wypełnienie ofert
         self.id_oferty.choices.insert(0, (0, '--- Wybierz ofertę ---'))
 
         self.id_work_type.choices = [(wt.id, wt.name) for wt in WorkType.query.order_by(WorkType.name).all()]
         self.id_work_type.choices.insert(0, (0, '--- Wybierz nazwę roboty ---'))
 
+class WorkTypeForm(FlaskForm):
+    name = StringField('Nazwa roboty', validators=[DataRequired('To pole jest wymagane.')])
+    id_kategorii = SelectField('Kategoria', coerce=int, validators=[DataRequired('Proszę wybrać kategorię.')])
+    submit = SubmitField('Zapisz')
+
+    def __init__(self, *args, **kwargs):
+        super(WorkTypeForm, self).__init__(*args, **kwargs)
+        from app.models import Category
         self.id_kategorii.choices = [(c.id, c.nazwa_kategorii) for c in Category.query.order_by(Category.nazwa_kategorii).all()]
-        self.id_kategorii.choices.insert(0, (0, '--- Brak kategorii ---'))
+        self.id_kategorii.choices.insert(0, (0, '--- Wybierz kategorię ---'))

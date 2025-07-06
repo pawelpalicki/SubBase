@@ -64,7 +64,7 @@
                             {{ unit_price_form.id_work_type.label(class="form-label") }}
                             <div class="input-group">
                                 {{ unit_price_form.id_work_type(class="form-control select2-enable" + (' is-invalid' if unit_price_form.id_work_type.errors else ''), id="id_work_type_select") }}
-                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.add_work_type') }}" data-target-select="#id_work_type_select" data-title="Dodaj nową nazwę roboty">+</button>
+                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" data-bs-toggle="modal" data-bs-target="#mainModal" data-url="{{ url_for('main.add_work_type') }}" data-title="Dodaj nową nazwę roboty">+</button>
                                 {% for error in unit_price_form.id_work_type.errors %}
                                     <div class="invalid-feedback">{{ error }}</div>
                                 {% endfor %}
@@ -88,7 +88,6 @@
                             {{ unit_price_form.id_kategorii.label(class="form-label") }}
                             <div class="input-group">
                                 {{ unit_price_form.id_kategorii(class="form-control select2-enable" + (' is-invalid' if unit_price_form.id_kategorii.errors else ''), id="id_kategorii_select") }}
-                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.add_category') }}" data-target-select="#id_kategorii_select" data-title="Dodaj nową kategorię">+</button>
                                 {% for error in unit_price_form.id_kategorii.errors %}
                                     <div class="invalid-feedback">{{ error }}</div>
                                 {% endfor %}
@@ -161,6 +160,47 @@
         gutterSize: 10,
         cursor: 'col-resize',
         minSize: 100,
+    });
+
+    $(document).ready(function() {
+        const workTypeSelect = $('#id_work_type_select');
+        const categorySelect = $('#id_kategorii_select');
+
+        function updateCategoryField(workTypeId) {
+            if (workTypeId && workTypeId !== 0) {
+                $.getJSON(`/api/work_type_category/${workTypeId}`, function(data) {
+                    if (data.id) {
+                        // Ustawienie wartości i tekstu dla Select2
+                        const newOption = new Option(data.name, data.id, true, true);
+                        categorySelect.empty().append(newOption).trigger('change');
+                        categorySelect.prop('disabled', true); // Zablokuj pole
+                    } else {
+                        categorySelect.empty().append(new Option('Brak kategorii', 0, true, true)).trigger('change');
+                        categorySelect.prop('disabled', true); // Zablokuj pole
+                    }
+                }).fail(function() {
+                    categorySelect.empty().append(new Option('Błąd ładowania kategorii', 0, true, true)).trigger('change');
+                    categorySelect.prop('disabled', true); // Zablokuj pole
+                });
+            } else {
+                // Jeśli nie wybrano rodzaju roboty, odblokuj i wyczyść kategorię
+                categorySelect.empty().append(new Option('--- Brak kategorii ---', 0, true, true)).trigger('change');
+                categorySelect.prop('disabled', false); // Odblokuj pole
+            }
+        }
+
+        // Obsługa zmiany wyboru rodzaju roboty
+        workTypeSelect.on('change', function() {
+            updateCategoryField($(this).val());
+        });
+
+        // Inicjalizacja przy ładowaniu strony (jeśli edytujemy istniejącą pozycję)
+        if (workTypeSelect.val() && workTypeSelect.val() !== "0") {
+            updateCategoryField(workTypeSelect.val());
+        } else {
+            // Domyślnie zablokuj pole kategorii, jeśli nie wybrano rodzaju roboty
+            categorySelect.prop('disabled', true);
+        }
     });
 </script>
 {% endblock %}

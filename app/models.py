@@ -157,6 +157,8 @@ class WorkType(db.Model):
     __tablename__ = 'work_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False, unique=True)
+    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    category = db.relationship('Category', backref='work_types')
     unit_prices = db.relationship('UnitPrice', backref='work_type', lazy='dynamic')
 
 class UnitPrice(db.Model):
@@ -166,7 +168,8 @@ class UnitPrice(db.Model):
     jednostka_miary = db.Column(db.String(50), nullable=False)
     cena_jednostkowa = db.Column(db.Numeric(10, 2), nullable=False)
     id_oferty = db.Column(db.Integer, db.ForeignKey('tenders.id'), nullable=False)
-    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    category = db.relationship('Category', backref='unit_prices')
     uwagi = db.Column(db.Text, nullable=True)
     # Pole nazwa_roboty zostanie usunięte po migracji danych
     nazwa_roboty = db.Column(db.String(255), nullable=True)
@@ -175,4 +178,3 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     nazwa_kategorii = db.Column(db.String(255), nullable=False, unique=True)
-    unit_prices = db.relationship('UnitPrice', backref='category', lazy='dynamic')

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (' is-invalid' if form.name.errors else '')) }}
+                        {% for error in form.name.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+    {{ form.id_kategorii.label(class="form-label") }}
+    <div class="input-group">
+        {{ form.id_kategorii(class="form-select" + (' is-invalid' if form.id_kategorii.errors else ''), id='work_type_category_select') }}
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.get_category_form') }}" data-target-select="#work_type_category_select" data-form-title="Dodaj nową kategorię">
+            <i class="bi bi-plus-lg"></i> Dodaj
+        </button>
+        {% for error in form.id_kategorii.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+</div>
+                    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+                    <a href="{{ back_url }}" class="btn btn-secondary">Anuluj</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
