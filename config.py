@@ -29,6 +29,7 @@ class Config:
 
     # --- Konfiguracja przechowywania plików ---
     UPLOAD_FOLDER = os.path.join(basedir, 'instance', 'uploads')
+    GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME')
     
     # Upewnij się, że folder do uploadu istnieje
     if not os.path.exists(UPLOAD_FOLDER):

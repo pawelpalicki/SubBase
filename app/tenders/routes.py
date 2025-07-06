@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify, send_file
 from flask_login import login_required
 from app import db
 from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
@@ -9,10 +9,38 @@ from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 from PIL import Image
 import pytesseract
-
+from google.cloud import storage
 import openpyxl
+import io
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
+
+# Inicjalizacja klienta Google Cloud Storage
+def get_gcs_client():
+    return storage.Client()
+
+def upload_to_gcs(file_stream, filename, content_type):
+    client = get_gcs_client()
+    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
+    blob = bucket.blob(filename)
+    blob.upload_from_file(file_stream, content_type=content_type)
+    return blob.public_url # Lub inna ścieżka, którą będziesz przechowywać
+
+def download_from_gcs(filename):
+    client = get_gcs_client()
+    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
+    blob = bucket.blob(filename)
+    # Zwracamy strumień bajtów, aby Flask mógł go wysłać jako plik
+    return io.BytesIO(blob.download_as_bytes())
+
+def delete_from_gcs(filename):
+    client = get_gcs_client()
+    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
+    blob = bucket.blob(filename)
+    if blob.exists():
+        blob.delete()
+        return True
+    return False
 
 @tenders_bp.route('/')
 @login_required
@@ -44,9 +72,18 @@ def tender_details(tender_id):
 @login_required
 def download_file(tender_id):
     tender = Tender.query.get_or_404(tender_id)
-    directory = current_app.config['UPLOAD_FOLDER']
-    filename = tender.original_filename
-    return send_from_directory(directory, filename, as_attachment=True)
+    if current_app.config.get('GCS_BUCKET_NAME'):
+        try:
+            file_stream = download_from_gcs(tender.storage_path) # storage_path będzie teraz nazwą pliku w GCS
+            return send_file(file_stream, download_name=tender.original_filename, mimetype=tender.file_type, as_attachment=True)
+        except Exception as e:
+            flash(f'Błąd pobierania pliku z GCS: {e}', 'danger')
+            return redirect(url_for('tenders.tender_details', tender_id=tender.id))
+    else:
+        # Fallback do lokalnego przechowywania, jeśli GCS nie jest skonfigurowane
+        directory = current_app.config['UPLOAD_FOLDER']
+        filename = tender.original_filename
+        return send_from_directory(directory, filename, as_attachment=True)
 
 @tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST'])
 @login_required
@@ -94,14 +131,38 @@ def extract_data(tender_id):
 
     if request.method == 'GET' and not request.args.get('from_submit'):
         try:
+            file_content = None
+            if current_app.config.get('GCS_BUCKET_NAME'):
+                # Pobierz plik z GCS
+                file_stream = download_from_gcs(tender.storage_path)
+                file_stream.seek(0) # Przewiń strumień na początek
+                file_content = file_stream.read()
+            else:
+                # Pobierz plik lokalnie
+                with open(tender.storage_path, 'rb') as f:
+                    file_content = f.read()
+
             if tender.file_type == 'application/pdf':
-                with fitz.open(tender.storage_path) as doc:
-                    for page in doc:
-                        extracted_text += page.get_text("text", sort=True)
+                # PyMuPDF potrzebuje ścieżki do pliku lub obiektu BytesIO
+                if current_app.config.get('GCS_BUCKET_NAME'):
+                    with fitz.open(stream=file_content, filetype="pdf") as doc:
+                        for page in doc:
+                            extracted_text += page.get_text("text", sort=True)
+                else:
+                    with fitz.open(tender.storage_path) as doc:
+                        for page in doc:
+                            extracted_text += page.get_text("text", sort=True)
             elif tender.file_type.startswith('image/'):
-                extracted_text = pytesseract.image_to_string(Image.open(tender.storage_path), lang='pol')
+                if current_app.config.get('GCS_BUCKET_NAME'):
+                    image = Image.open(io.BytesIO(file_content))
+                else:
+                    image = Image.open(tender.storage_path)
+                extracted_text = pytesseract.image_to_string(image, lang='pol')
             elif tender.file_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                workbook = openpyxl.load_workbook(tender.storage_path, data_only=True)
+                if current_app.config.get('GCS_BUCKET_NAME'):
+                    workbook = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                else:
+                    workbook = openpyxl.load_workbook(tender.storage_path, data_only=True)
                 for sheetname in workbook.sheetnames:
                     sheet = workbook[sheetname]
                     for row in sheet.iter_rows():
@@ -132,17 +193,28 @@ def edit_tender(tender_id):
             filename = secure_filename(plik.filename)
             
             # Opcjonalnie: usuń stary plik, jeśli istnieje
-            if tender.storage_path and os.path.exists(tender.storage_path):
-                os.remove(tender.storage_path)
+            if tender.storage_path:
+                if current_app.config.get('GCS_BUCKET_NAME'):
+                    delete_from_gcs(tender.storage_path)
+                elif os.path.exists(tender.storage_path):
+                    os.remove(tender.storage_path)
 
             # Zapisz nowy plik
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            plik.save(upload_path)
-            
-            # Zaktualizuj dane pliku w modelu
-            tender.original_filename = filename
-            tender.storage_path = upload_path
-            tender.file_type = plik.mimetype
+            if current_app.config.get('GCS_BUCKET_NAME'):
+                # Przesyłanie do GCS
+                tender.storage_path = filename # W GCS przechowujemy tylko nazwę pliku
+                tender.original_filename = plik.filename
+                tender.file_type = plik.mimetype
+                upload_to_gcs(plik.stream, filename, plik.mimetype)
+            else:
+                # Zapisz nowy plik lokalnie
+                upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                plik.save(upload_path)
+                
+                # Zaktualizuj dane pliku w modelu
+                tender.original_filename = filename
+                tender.storage_path = upload_path
+                tender.file_type = plik.mimetype
 
         db.session.commit()
         flash('Oferta została zaktualizowana.', 'success')
@@ -159,8 +231,11 @@ def delete_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     
     # Usuń plik z serwera, jeśli istnieje
-    if tender.storage_path and os.path.exists(tender.storage_path):
-        os.remove(tender.storage_path)
+    if tender.storage_path:
+        if current_app.config.get('GCS_BUCKET_NAME'):
+            delete_from_gcs(tender.storage_path)
+        elif os.path.exists(tender.storage_path):
+            os.remove(tender.storage_path)
         
     db.session.delete(tender)
     db.session.commit()
@@ -177,9 +252,15 @@ def new_tender():
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
             
-            # Zapisz plik w skonfigurowanym folderze
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            plik.save(upload_path)
+            if current_app.config.get('GCS_BUCKET_NAME'):
+                # Przesyłanie do GCS
+                storage_path = filename # W GCS przechowujemy tylko nazwę pliku
+                upload_to_gcs(plik.stream, filename, plik.mimetype)
+            else:
+                # Zapisz plik w skonfigurowanym folderze lokalnie
+                upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                plik.save(upload_path)
+                storage_path = upload_path
 
             # Utwórz nowy obiekt Tender
             nowa_oferta = Tender(
@@ -188,8 +269,8 @@ def new_tender():
                 status=form.status.data,
                 id_firmy=form.id_firmy.data,
                 id_projektu=form.id_projektu.data if form.id_projektu.data else None,
-                original_filename=filename,
-                storage_path=upload_path, # Na razie przechowujemy lokalną ścieżkę
+                original_filename=plik.filename,
+                storage_path=storage_path, 
                 file_type=plik.mimetype
             )
             
@@ -258,54 +339,51 @@ def list_all_unit_prices():
 @tenders_bp.route('/unit_prices/analysis')
 @login_required
 def unit_prices_analysis():
-    query = db.session.query(
-        WorkType.name,
-        func.min(UnitPrice.cena_jednostkowa),
-        func.max(UnitPrice.cena_jednostkowa),
-        func.avg(UnitPrice.cena_jednostkowa),
-        func.count(UnitPrice.id)
-    ).join(UnitPrice)
-
     # Filtrowanie
-    work_type_filter = request.args.get('work_type', type=int)
     category_filter = request.args.get('category', type=int)
-    tender_filter = request.args.get('tender', type=int)
-    firmy_filter = request.args.get('firmy', type=int)
-    project_filter = request.args.get('project', type=int)
+    tender_ids_filter = request.args.getlist('tenders', type=int) # Zmieniono na getlist dla multiselect
 
-    if work_type_filter:
-        query = query.filter(WorkType.id == work_type_filter)
+    # Pobierz wszystkie unikalne roboty (WorkType)
+    work_types_query = WorkType.query.order_by(WorkType.name)
     if category_filter:
-        query = query.join(Category).filter(Category.id == category_filter)
-    if tender_filter:
-        query = query.join(Tender).filter(Tender.id == tender_filter)
-    if firmy_filter:
-        query = query.join(Tender).join(Firmy).filter(Firmy.id_firmy == firmy_filter)
-    if project_filter:
-        query = query.join(Tender).join(Project).filter(Project.id == project_filter)
+        work_types_query = work_types_query.filter(WorkType.id_kategorii == category_filter)
+    all_work_types = work_types_query.all()
 
-    analysis_results = query.group_by(WorkType.name).all()
+    # Pobierz wszystkie oferty (Tender) wraz z firmami i projektami
+    all_tenders_query = Tender.query.join(Firmy).outerjoin(Project).order_by(Tender.data_otrzymania.desc())
+    if tender_ids_filter:
+        all_tenders_query = all_tenders_query.filter(Tender.id.in_(tender_ids_filter))
+    all_tenders = all_tenders_query.all()
+
+    # Pobierz wszystkie ceny jednostkowe, opcjonalnie filtrując po kategorii i ofertach
+    unit_prices_query = UnitPrice.query.join(WorkType).join(Tender)
+    if category_filter:
+        unit_prices_query = unit_prices_query.filter(UnitPrice.id_kategorii == category_filter)
+    if tender_ids_filter:
+        unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_(tender_ids_filter))
+    all_unit_prices = unit_prices_query.all()
+
+    # Przygotuj dane do wyświetlenia w tabeli
+    # Klucz: id_work_type, Wartość: {id_tender: cena_jednostkowa}
+    prices_table = {}
+    for up in all_unit_prices:
+        if up.id_work_type not in prices_table:
+            prices_table[up.id_work_type] = {}
+        prices_table[up.id_work_type][up.id_oferty] = up.cena_jednostkowa
 
     # Przygotowanie danych dla dropdownów filtrowania
-    work_types = WorkType.query.order_by(WorkType.name).all()
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
-    tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
-    firmy = Firmy.query.order_by(Firmy.nazwa_firmy).all()
-    projects = Project.query.order_by(Project.nazwa_projektu).all()
+    all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all() # Wszystkie oferty do wyświetlenia w multiselect
 
     return render_template(
         'unit_prices_analysis.html',
-        analysis_results=analysis_results,
-        work_types=work_types,
+        all_work_types=all_work_types,
+        all_tenders=all_tenders,
+        prices_table=prices_table,
         categories=categories,
-        tenders=tenders,
-        firmy=firmy,
-        projects=projects,
-        selected_work_type=work_type_filter,
+        all_available_tenders=all_available_tenders, # Przekazujemy wszystkie oferty
         selected_category=category_filter,
-        selected_tender=tender_filter,
-        selected_firmy=firmy_filter,
-        selected_project=project_filter,
+        selected_tenders=tender_ids_filter, # Przekazujemy wybrane oferty
         title='Analiza cen jednostkowych'
     )
 
@@ -381,8 +459,6 @@ def edit_unit_price(price_id):
         db.session.commit()
         flash('Pozycja cenowa została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=price.id_oferty))
-
-
 
     # Przekazujemy tender_id do szablonu, aby link "Anuluj" działał poprawnie
     return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty, category_field_always_disabled_unless_auto_filled=True)
