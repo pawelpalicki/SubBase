@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Filtrowanie
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('tenders.list_all_unit_prices') }}">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="nazwa_roboty" class="form-label">Nazwa roboty</label>
+                        <select class="form-control select2-enable" id="filter_nazwa_roboty" name="nazwa_roboty">
+                            <option value="">-- Wybierz --</option>
+                            {% for wt in work_types %}
+                            <option value="{{ wt.id }}" {% if selected_nazwa_roboty == wt.id %}selected{% endif %}>{{ wt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="kategoria" class="form-label">Kategoria</label>
+                        <select class="form-control select2-enable" id="filter_kategoria" name="kategoria">
+                            <option value="">-- Wybierz --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_kategoria == cat.id %}selected{% endif %}>{{ cat.nazwa_kategorii }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_oferty" class="form-label">Oferta</label>
+                        <select class="form-control select2-enable" id="filter_id_oferty" name="id_oferty">
+                            <option value="">-- Wybierz --</option>
+                            {% for tender_item in tenders %}
+                            <option value="{{ tender_item.id }}" {% if selected_id_oferty == tender_item.id %}selected{% endif %}>{{ tender_item.nazwa_oferty }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_firmy" class="form-label">Wykonawca</label>
+                        <select class="form-control select2-enable" id="filter_id_firmy" name="id_firmy">
+                            <option value="">-- Wybierz --</option>
+                            {% for firma in firmy %}
+                            <option value="{{ firma.id_firmy }}" {% if selected_id_firmy == firma.id_firmy %}selected{% endif %}>{{ firma.nazwa_firmy }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_projektu" class="form-label">Projekt</label>
+                        <select class="form-control select2-enable" id="filter_id_projektu" name="id_projektu">
+                            <option value="">-- Wybierz --</option>
+                            {% for project_item in projects %}
+                            <option value="{{ project_item.id }}" {% if selected_id_projektu == project_item.id %}selected{% endif %}>{{ project_item.nazwa_projektu }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filtruj</button>
+                        <a href="{{ url_for('tenders.list_all_unit_prices') }}" class="btn btn-secondary">Resetuj</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <a href="{{ url_for('tenders.new_global_unit_price') }}" class="btn btn-success mb-3">Dodaj nową pozycję cenową</a>
+
+    {% if unit_prices %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-responsive-stacking">
+            <thead>
+                <tr>
+                    <th>Nazwa roboty</th>
+                    <th>J.m.</th>
+                    <th>Cena jedn.</th>
+                    <th>Kategoria</th>
+                    <th>Oferta</th>
+                    <th>Wykonawca</th>
+                    <th>Projekt</th>
+                    <th>Uwagi</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for price in unit_prices %}
+                <tr>
+                    <td data-label="Nazwa roboty">{{ price.work_type.name if price.work_type else 'Brak' }}</td>
+                    <td data-label="J.m.">{{ price.jednostka_miary }}</td>
+                    <td data-label="Cena jedn.">{{ "%.2f"|format(price.cena_jednostkowa) }}</td>
+                    <td data-label="Kategoria">{{ price.category.nazwa_kategorii if price.category else 'Brak' }}</td>
+                    <td data-label="Oferta"><a href="{{ url_for('tenders.tender_details', tender_id=price.tender.id) }}">{{ price.tender.nazwa_oferty }}</a></td>
+                    <td data-label="Wykonawca">{{ price.tender.firma.nazwa_firmy if price.tender.firma else 'Brak' }}</td>
+                    <td data-label="Projekt">{{ price.tender.project.nazwa_projektu if price.tender.project else 'Brak' }}</td>
+                    <td data-label="Uwagi">{{ price.uwagi if price.uwagi else 'Brak' }}</td>
+                    <td data-label="Akcje">
+                        <a href="{{ url_for('tenders.edit_unit_price', price_id=price.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
+                        <form action="{{ url_for('tenders.delete_unit_price', price_id=price.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć tę pozycję cenową?');">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Brak pozycji cenowych do wyświetlenia.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $(document).ready(function() {
+        $('.select2-enable').select2({
+            placeholder: "-- Wybierz --",
+            allowClear: true // Allow clearing selection for filters
+        });
+    });
+</script>
+{% endblock %}

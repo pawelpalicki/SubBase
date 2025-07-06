@@ -213,3 +213,28 @@ class TenderForm(FlaskForm):
         
         self.id_projektu.choices = [(p.id, p.nazwa_projektu) for p in Project.query.order_by(Project.nazwa_projektu).all()]
         self.id_projektu.choices.insert(0, (0, '--- Brak projektu ---'))
+
+class CategoryForm(FlaskForm):
+    name = StringField('Nazwa kategorii', validators=[DataRequired('To pole jest wymagane.')])
+    submit = SubmitField('Zapisz')
+
+class UnitPriceForm(FlaskForm):
+    id_oferty = SelectField('Oferta', coerce=int, validators=[DataRequired('To pole jest wymagane.')]) # Nowe pole
+    id_work_type = SelectField('Nazwa roboty', coerce=int, validators=[DataRequired('To pole jest wymagane.')])
+    jednostka_miary = StringField('J.m.', validators=[DataRequired('To pole jest wymagane.')])
+    cena_jednostkowa = StringField('Cena jednostatkowa', validators=[DataRequired('To pole jest wymagane.')])
+    id_kategorii = SelectField('Kategoria (opcjonalnie)', coerce=int, validators=[Optional()])
+    uwagi = TextAreaField('Uwagi (opcjonalnie)', validators=[Optional()])
+    submit = SubmitField('Dodaj pozycję')
+
+    def __init__(self, *args, **kwargs):
+        super(UnitPriceForm, self).__init__(*args, **kwargs)
+        from app.models import WorkType, Category, Tender # Dodano Tender
+        self.id_oferty.choices = [(t.id, f"{t.nazwa_oferty} ({t.project.nazwa_projektu if t.project else 'Brak projektu'})") for t in Tender.query.order_by(Tender.nazwa_oferty).all()] # Wypełnienie ofert
+        self.id_oferty.choices.insert(0, (0, '--- Wybierz ofertę ---'))
+
+        self.id_work_type.choices = [(wt.id, wt.name) for wt in WorkType.query.order_by(WorkType.name).all()]
+        self.id_work_type.choices.insert(0, (0, '--- Wybierz nazwę roboty ---'))
+
+        self.id_kategorii.choices = [(c.id, c.nazwa_kategorii) for c in Category.query.order_by(Category.nazwa_kategorii).all()]
+        self.id_kategorii.choices.insert(0, (0, '--- Brak kategorii ---'))

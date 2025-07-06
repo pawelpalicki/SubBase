@@ -1272,7 +1272,7 @@ h6 { /* Globalny styl dla h6, który powodował problem */
 
 @media (min-width: 768px) and (max-width: 991.98px) {
      .table-responsive-stacking .action-btn .btn-text {
-        /* display: none; */ /* Odkomentuj, jeśli chcesz ukryć tekst też na tabletach */
+        display: none; /* Odkomentuj, jeśli chcesz ukryć tekst też na tabletach */
      }
 }
 
@@ -1403,7 +1403,7 @@ td[data-label="Akcje"] form:first-of-type {
 
 @media (min-width: 768px) and (max-width: 991.98px) {
      .table-responsive-stacking .action-btn .btn-text {
-        /* display: none; */ /* Odkomentuj, jeśli chcesz ukryć tekst też na tabletach */
+        display: none; /* Odkomentuj, jeśli chcesz ukryć tekst też na tabletach */
      }
 }
 

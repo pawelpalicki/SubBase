@@ -1,6 +1,68 @@
 $(document).ready(function() {
     // Inicjalizacja Select2 jest teraz obsługiwana przez select2_config.js
 
+    // Obsługa dynamicznych modali dla dodawania nowych elementów (np. WorkType, Category)
+    $('.add-new-item-btn').on('click', function() {
+        const button = $(this);
+        const url = button.data('url');
+        const title = button.data('title');
+        const targetSelectId = button.data('target-select');
+
+        const modal = $('#dynamicFormModal');
+        const modalLabel = $('#dynamicFormModalLabel');
+        const modalBody = modal.find('.modal-body');
+
+        modalLabel.text(title);
+        modalBody.html('<p>Ładowanie...</p>');
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(response) {
+                modalBody.html(response);
+                // Po załadowaniu formularza, obsłuż jego submit
+                modalBody.find('form').on('submit', function(e) {
+                    e.preventDefault();
+                    const form = $(this);
+                    const formData = form.serialize();
+
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        success: function(data) {
+                            if (data.id && data.name) {
+                                const newOption = new Option(data.name, data.id, true, true);
+                                $(targetSelectId).append(newOption).trigger('change');
+                                modal.modal('hide');
+                            } else if (data.error) {
+                                alert('Błąd: ' + data.error);
+                            } else {
+                                alert('Nieoczekiwana odpowiedź serwera.');
+                            }
+                        },
+                        error: function(jqXHR) {
+                            const errorData = jqXHR.responseJSON;
+                            if (errorData && errorData.error) {
+                                alert('Błąd: ' + errorData.error);
+                            } else {
+                                alert('Wystąpił błąd podczas dodawania elementu.');
+                            }
+                        }
+                    });
+                });
+            },
+            error: function(jqXHR) {
+                const errorData = jqXHR.responseJSON;
+                if (errorData && errorData.error) {
+                    modalBody.html('<p class="text-danger">Błąd ładowania formularza: ' + errorData.error + '</p>');
+                } else {
+                    modalBody.html('<p class="text-danger">Wystąpił błąd podczas ładowania formularza.</p>');
+                }
+            }
+        });
+    });
+
     // Obsługa nawigacji mobilnej
     const navbar = document.querySelector('.navbar');
     const navbarToggler = document.querySelector('.navbar-toggler');

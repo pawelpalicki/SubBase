@@ -1,10 +1,16 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify
 from flask_login import login_required
 from app import db
-from app.models import Tender, Project
-from app.forms import TenderForm
+from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
+from sqlalchemy import func
+from app.forms import TenderForm, UnitPriceForm
 import os
 from werkzeug.utils import secure_filename
+import fitz  # PyMuPDF
+from PIL import Image
+import pytesseract
+
+import openpyxl
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
@@ -41,6 +47,72 @@ def download_file(tender_id):
     directory = current_app.config['UPLOAD_FOLDER']
     filename = tender.original_filename
     return send_from_directory(directory, filename, as_attachment=True)
+
+@tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST'])
+@login_required
+def extract_data(tender_id):
+    tender = Tender.query.get_or_404(tender_id)
+    extracted_text = ""
+    unit_price_form = UnitPriceForm()
+    unit_price_form.id_oferty.data = tender.id # Ustawiamy id_oferty z URL
+
+    print("Wchodzę do funkcji extract_data")
+    print("Wchodzę do funkcji extract_data")
+    if unit_price_form.validate_on_submit():
+        print("Formularz przeszedł walidację.")
+        try:
+            # Logika do obsługi kategorii
+            work_type_id = unit_price_form.id_work_type.data
+            category_id = unit_price_form.id_kategorii.data if unit_price_form.id_kategorii.data != 0 else None
+
+            work_type = WorkType.query.get(work_type_id)
+            new_unit_price = UnitPrice(
+                id_work_type=work_type_id,
+                nazwa_roboty=work_type.name if work_type else None, # Ustawiamy nazwę roboty
+                jednostka_miary=unit_price_form.jednostka_miary.data,
+                cena_jednostkowa=unit_price_form.cena_jednostkowa.data,
+                id_oferty=tender.id,
+                id_kategorii=category_id,
+                uwagi=unit_price_form.uwagi.data
+            )
+            print(f"Tworzę nowy obiekt UnitPrice: {new_unit_price}")
+            db.session.add(new_unit_price)
+            print("Dodaję obiekt do sesji bazy danych.")
+            db.session.commit()
+            print("Zatwierdzam zmiany w bazie danych.")
+            flash('Pozycja cenowa została dodana pomyślnie!', 'success')
+            return redirect(url_for('tenders.extract_data', tender_id=tender.id, from_submit=True))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Wystąpił błąd podczas dodawania pozycji cenowej: {e}")
+            flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
+    else:
+        print("Formularz NIE przeszedł walidacji. Błędy:")
+        for field, errors in unit_price_form.errors.items():
+            for error in errors:
+                print(f"Błąd w polu {field}: {error}")
+                flash(f"Błąd w polu {field}: {error}", 'danger')
+
+    if request.method == 'GET' and not request.args.get('from_submit'):
+        try:
+            if tender.file_type == 'application/pdf':
+                with fitz.open(tender.storage_path) as doc:
+                    for page in doc:
+                        extracted_text += page.get_text("text", sort=True)
+            elif tender.file_type.startswith('image/'):
+                extracted_text = pytesseract.image_to_string(Image.open(tender.storage_path), lang='pol')
+            elif tender.file_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                workbook = openpyxl.load_workbook(tender.storage_path, data_only=True)
+                for sheetname in workbook.sheetnames:
+                    sheet = workbook[sheetname]
+                    for row in sheet.iter_rows():
+                        extracted_text += " | ".join([str(cell.value) if cell.value is not None else "" for cell in row]) + "\n"
+            else:
+                flash('Nieobsługiwany typ pliku do ekstrakcji danych.', 'warning')
+        except Exception as e:
+            flash(f'Wystąpił błąd podczas ekstrakcji danych: {e}', 'danger')
+
+    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty")
 
 @tenders_bp.route('/<int:tender_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -135,3 +207,195 @@ def new_tender():
         pass # Błędy będą wyświetlane inline w szablonie
         
     return render_template('tender_form.html', form=form, title='Nowa Oferta')
+
+@tenders_bp.route('/unit_prices')
+@login_required
+def list_all_unit_prices():
+    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy) # Join with necessary tables for filtering
+
+    # Get filter parameters
+    nazwa_roboty_filter = request.args.get('nazwa_roboty', type=int)
+    kategoria_filter = request.args.get('kategoria', type=int)
+    id_oferty_filter = request.args.get('id_oferty', type=int)
+    id_firmy_filter = request.args.get('id_firmy', type=int)
+    id_projektu_filter = request.args.get('id_projektu', type=int)
+
+    if nazwa_roboty_filter:
+        query = query.filter(UnitPrice.id_work_type == nazwa_roboty_filter)
+    if kategoria_filter:
+        query = query.filter(UnitPrice.id_kategorii == kategoria_filter)
+    if id_oferty_filter:
+        query = query.filter(UnitPrice.id_oferty == id_oferty_filter)
+    if id_firmy_filter:
+        query = query.filter(Tender.id_firmy == id_firmy_filter)
+    if id_projektu_filter:
+        query = query.filter(Tender.id_projektu == id_projektu_filter)
+
+    unit_prices = query.order_by(UnitPrice.id.desc()).all()
+
+    # Prepare data for filter dropdowns
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
+    firmy = Firmy.query.order_by(Firmy.nazwa_firmy).all()
+    projects = Project.query.order_by(Project.nazwa_projektu).all()
+
+    return render_template(
+        'unit_prices_list.html',
+        unit_prices=unit_prices,
+        work_types=work_types,
+        categories=categories,
+        tenders=tenders,
+        firmy=firmy,
+        projects=projects,
+        selected_nazwa_roboty=nazwa_roboty_filter,
+        selected_kategoria=kategoria_filter,
+        selected_id_oferty=id_oferty_filter,
+        selected_id_firmy=id_firmy_filter,
+        selected_id_projektu=id_projektu_filter,
+        title='Wszystkie pozycje cenowe'
+    )
+
+@tenders_bp.route('/unit_prices/analysis')
+@login_required
+def unit_prices_analysis():
+    query = db.session.query(
+        WorkType.name,
+        func.min(UnitPrice.cena_jednostkowa),
+        func.max(UnitPrice.cena_jednostkowa),
+        func.avg(UnitPrice.cena_jednostkowa),
+        func.count(UnitPrice.id)
+    ).join(UnitPrice)
+
+    # Filtrowanie
+    work_type_filter = request.args.get('work_type', type=int)
+    category_filter = request.args.get('category', type=int)
+    tender_filter = request.args.get('tender', type=int)
+    firmy_filter = request.args.get('firmy', type=int)
+    project_filter = request.args.get('project', type=int)
+
+    if work_type_filter:
+        query = query.filter(WorkType.id == work_type_filter)
+    if category_filter:
+        query = query.join(Category).filter(Category.id == category_filter)
+    if tender_filter:
+        query = query.join(Tender).filter(Tender.id == tender_filter)
+    if firmy_filter:
+        query = query.join(Tender).join(Firmy).filter(Firmy.id_firmy == firmy_filter)
+    if project_filter:
+        query = query.join(Tender).join(Project).filter(Project.id == project_filter)
+
+    analysis_results = query.group_by(WorkType.name).all()
+
+    # Przygotowanie danych dla dropdownów filtrowania
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
+    firmy = Firmy.query.order_by(Firmy.nazwa_firmy).all()
+    projects = Project.query.order_by(Project.nazwa_projektu).all()
+
+    return render_template(
+        'unit_prices_analysis.html',
+        analysis_results=analysis_results,
+        work_types=work_types,
+        categories=categories,
+        tenders=tenders,
+        firmy=firmy,
+        projects=projects,
+        selected_work_type=work_type_filter,
+        selected_category=category_filter,
+        selected_tender=tender_filter,
+        selected_firmy=firmy_filter,
+        selected_project=project_filter,
+        title='Analiza cen jednostkowych'
+    )
+
+@tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')
+@login_required
+def unit_prices_time_series_data(work_type_id):
+    # Grupowanie po miesiącu i roku
+    time_series_data = db.session.query(
+        func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).join(Tender).filter(UnitPrice.id_work_type == work_type_id).group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).all()
+
+    labels = [row[0] for row in time_series_data]
+    data = [float(row[1]) for row in time_series_data]
+
+    return jsonify({'labels': labels, 'data': data})
+
+@tenders_bp.route('/unit_prices/analysis/by_contractor/<int:work_type_id>')
+@login_required
+def unit_prices_by_contractor_data(work_type_id):
+    # Porównanie cen wykonawców
+    contractor_data = db.session.query(
+        Firmy.nazwa_firmy,
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).select_from(UnitPrice).join(Tender).join(Firmy).filter(UnitPrice.id_work_type == work_type_id).group_by(Firmy.nazwa_firmy).order_by(Firmy.nazwa_firmy).all()
+
+    labels = [row[0] for row in contractor_data]
+    data = [float(row[1]) for row in contractor_data]
+
+    return jsonify({'labels': labels, 'data': data})
+
+@tenders_bp.route('/unit_prices/new_global', methods=['GET', 'POST'])
+@login_required
+def new_global_unit_price():
+    form = UnitPriceForm()
+    if form.validate_on_submit():
+        try:
+            work_type_id = form.id_work_type.data
+            category_id = form.id_kategorii.data if form.id_kategorii.data != 0 else None
+            tender_id = form.id_oferty.data
+
+            work_type = WorkType.query.get(work_type_id)
+            new_unit_price = UnitPrice(
+                id_work_type=work_type_id,
+                nazwa_roboty=work_type.name if work_type else None,
+                jednostka_miary=form.jednostka_miary.data,
+                cena_jednostkowa=form.cena_jednostkowa.data,
+                id_oferty=tender_id,
+                id_kategorii=category_id,
+                uwagi=form.uwagi.data
+            )
+            db.session.add(new_unit_price)
+            db.session.commit()
+            flash('Pozycja cenowa została dodana pomyślnie!', 'success')
+            return redirect(url_for('tenders.list_all_unit_prices'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
+
+    return render_template('unit_price_form.html', form=form, title='Dodaj nową pozycję cenową', show_tender_select=True)
+
+@tenders_bp.route('/unit_price/<int:price_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_unit_price(price_id):
+    price = UnitPrice.query.get_or_404(price_id)
+    form = UnitPriceForm(obj=price)
+    if form.validate_on_submit():
+        price.id_work_type = form.id_work_type.data
+        work_type = WorkType.query.get(price.id_work_type)
+        price.nazwa_roboty = work_type.name if work_type else None
+        price.jednostka_miary = form.jednostka_miary.data
+        price.cena_jednostkowa = form.cena_jednostkowa.data
+        price.id_kategorii = form.id_kategorii.data if form.id_kategorii.data != 0 else None
+        price.uwagi = form.uwagi.data
+        db.session.commit()
+        flash('Pozycja cenowa została zaktualizowana.', 'success')
+        return redirect(url_for('tenders.tender_details', tender_id=price.id_oferty))
+
+
+
+    # Przekazujemy tender_id do szablonu, aby link "Anuluj" działał poprawnie
+    return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty)
+
+@tenders_bp.route('/unit_price/<int:price_id>/delete', methods=['POST'])
+@login_required
+def delete_unit_price(price_id):
+    price = UnitPrice.query.get_or_404(price_id)
+    tender_id = price.id_oferty
+    db.session.delete(price)
+    db.session.commit()
+    flash('Pozycja cenowa została usunięta.', 'success')
+    return redirect(url_for('tenders.tender_details', tender_id=tender_id))

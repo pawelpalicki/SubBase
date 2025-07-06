@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        {% if show_tender_select %}
+                        <div class="mb-3">
+                            {{ form.id_oferty.label(class="form-label") }}
+                            {{ form.id_oferty(class="form-control select2-enable", id="id_oferty_select") }}
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            {{ form.id_work_type.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.id_work_type(class="form-control select2-enable", id="id_work_type_select") }}
+                                <button class="btn btn-outline-secondary add-new-item-btn" type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#dynamicFormModal"
+                                    data-url="{{ url_for('main.add_work_type') }}"
+                                    data-target-select="#id_work_type_select"
+                                    data-title="Dodaj nową nazwę roboty">+</button>
+                        </div>
+                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.jednostka_miary.label(class="form-label") }}
+                                {{ form.jednostka_miary(class="form-control") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.cena_jednostkowa.label(class="form-label") }}
+                                {{ form.cena_jednostkowa(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.id_kategorii.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.id_kategorii(class="form-control select2-enable", id="id_kategorii_select") }}
+                                <button class="btn btn-outline-secondary add-new-item-btn" type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#dynamicFormModal"
+                                    data-url="{{ url_for('main.add_category') }}"
+                                    data-target-select="#id_kategorii_select"
+                                    data-title="Dodaj nową kategorię">+</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.uwagi.label(class="form-label") }}
+                            {{ form.uwagi(class="form-control", rows=3) }}
+                        </div>
+                        <div class="text-end">
+                            {% if show_tender_select %}<a href="{{ url_for('tenders.list_all_unit_prices') }}" class="btn btn-secondary">Anuluj</a>{% else %}<a href="{{ url_for('tenders.tender_details', tender_id=tender_id) }}" class="btn btn-secondary">Anuluj</a>{% endif %}
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

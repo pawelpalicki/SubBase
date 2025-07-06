@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% set full_width_page = True %}
+
+{% block content %}
+<style>
+    .full-width-container {
+        max-width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .split-container {
+        display: flex;
+        flex-direction: row;
+        height: 75vh; /* Wysokość kontenera */
+    }
+    .split {
+        overflow: hidden; /* Ukryj paski przewijania na głównym kontenerze */
+    }
+    .split .card-body {
+        height: calc(100% - 50px); /* Wysokość ciała karty, uwzględniając nagłówek */
+        overflow: auto; /* Pionowy i poziomy pasek przewijania */
+    }
+    .pre-container {
+        width: 100%;
+        overflow: auto;
+    }
+    .gutter {
+        background-color: #eee;
+        background-repeat: no-repeat;
+        background-position: 50%;
+    }
+    .gutter.gutter-horizontal {
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bM/5+BgeEzkGDAoHwMBl3wH5HAGAAc2Qp3B2+xXAAAAABJRU5ErkJggg==');
+        cursor: col-resize;
+    }
+</style>
+
+<div class="full-width-container">
+    <h2>{{ title }}</h2>
+    <p><strong>Oferta:</strong> {{ tender.nazwa_oferty }}</p>
+
+    <div class="split-container">
+        <div id="split-left" class="split">
+            <div class="card h-100">
+                <div class="card-header">
+                    Wyodrębniony tekst
+                </div>
+                <div class="card-body">
+                    <div class="pre-container">
+                        <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() if extracted_text.strip() else 'Brak tekstu do wyświetlenia.' }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="split-right" class="split">
+            <div class="card h-100">
+                <div class="card-header">
+                    Wprowadź pozycje cenowe
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ unit_price_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ unit_price_form.id_work_type.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ unit_price_form.id_work_type(class="form-control select2-enable" + (' is-invalid' if unit_price_form.id_work_type.errors else ''), id="id_work_type_select") }}
+                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.add_work_type') }}" data-target-select="#id_work_type_select" data-title="Dodaj nową nazwę roboty">+</button>
+                                {% for error in unit_price_form.id_work_type.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ unit_price_form.jednostka_miary.label(class="form-label") }}
+                            {{ unit_price_form.jednostka_miary(class="form-control" + (' is-invalid' if unit_price_form.jednostka_miary.errors else '')) }}
+                            {% for error in unit_price_form.jednostka_miary.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ unit_price_form.cena_jednostkowa.label(class="form-label") }}
+                            {{ unit_price_form.cena_jednostkowa(class="form-control" + (' is-invalid' if unit_price_form.cena_jednostkowa.errors else '')) }}
+                            {% for error in unit_price_form.cena_jednostkowa.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ unit_price_form.id_kategorii.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ unit_price_form.id_kategorii(class="form-control select2-enable" + (' is-invalid' if unit_price_form.id_kategorii.errors else ''), id="id_kategorii_select") }}
+                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.add_category') }}" data-target-select="#id_kategorii_select" data-title="Dodaj nową kategorię">+</button>
+                                {% for error in unit_price_form.id_kategorii.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ unit_price_form.uwagi.label(class="form-label") }}
+                            {{ unit_price_form.uwagi(class="form-control", rows="3" + (' is-invalid' if unit_price_form.uwagi.errors else '')) }}
+                            {% for error in unit_price_form.uwagi.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {{ unit_price_form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Dodane pozycje cenowe</h4>
+        {% if unit_prices %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-responsive-stacking">
+                <thead>
+                    <tr>
+                        <th>Nazwa roboty</th>
+                        <th>J.m.</th>
+                        <th>Cena jedn.</th>
+                        <th>Kategoria</th>
+                        <th>Uwagi</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for price in unit_prices %}
+                    <tr>
+                        <td data-label="Nazwa roboty">{{ price.work_type.name if price.work_type else 'Brak' }}</td>
+                        <td data-label="J.m.">{{ price.jednostka_miary }}</td>
+                        <td data-label="Cena jedn.">{{ "%.2f"|format(price.cena_jednostkowa) }}</td>
+                        <td data-label="Kategoria">{{ price.category.nazwa_kategorii if price.category else 'Brak' }}</td>
+                        <td data-label="Uwagi">{{ price.uwagi if price.uwagi else 'Brak' }}</td>
+                        <td data-label="Akcje">
+                            <a href="{{ url_for('tenders.edit_unit_price', price_id=price.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
+                            <form action="{{ url_for('tenders.delete_unit_price', price_id=price.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć tę pozycję cenową?');">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Brak dodanych pozycji cenowych dla tej oferty.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('tenders.tender_details', tender_id=tender.id) }}" class="btn btn-secondary">Powrót do szczegółów oferty</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    Split(['#split-left', '#split-right'], {
+        sizes: [50, 50],
+        gutterSize: 10,
+        cursor: 'col-resize',
+        minSize: 100,
+    });
+</script>
+{% endblock %}

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
-from flask_login import current_user # Importujemy tylko 'current_user' (do użycia w szablonach/logice)
+from flask_login import current_user, login_required # Importujemy tylko 'current_user' (do użycia w szablonach/logice)
 from sqlalchemy import or_, and_, func
-from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny, Project
+from app.models import Firmy, FirmyTyp, Adresy, AdresyTyp, Email, EmailTyp, Telefon, TelefonTyp, Specjalnosci, FirmySpecjalnosci, Kraj, Wojewodztwa, Powiaty, FirmyObszarDzialania, Osoby, Oceny, Project, WorkType, Category
 from app import db # Importujesz 'db' z zainicjalizowanej aplikacji
 from unidecode import unidecode
 from app.forms import CompanyForm, SimplePersonForm, SimpleRatingForm, SpecialtyForm, AddressTypeForm, EmailTypeForm, PhoneTypeForm, CompanyTypeForm, ProjectForm
@@ -48,7 +48,6 @@ def index():
         def normalize_text(text):
             if text is None:
                 return ""
-            # Usuwanie znaków specjalnych i normalizacja do ASCII
             text = str(text)
             normalized = unidecode(text).lower()  # konwersja do ASCII i małych liter
             return ''.join(c for c in normalized if c.isalnum() or c.isspace())
@@ -1579,3 +1578,127 @@ def normalize_text(text):
     text = str(text)
     normalized = unidecode(text).lower()
     return ''.join(c for c in normalized if c.isalnum() or c.isspace())
+
+# Routes for Categories
+@main.route('/categories')
+@login_required
+def list_categories():
+    from app.models import Category
+    from app.forms import CategoryForm
+    categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    return render_template('categories.html', categories=categories, title='Kategorie Cen Jednostkowych')
+
+@main.route('/categories/new', methods=['GET', 'POST'])
+@login_required
+def new_category():
+    from app.models import Category
+    from app.forms import CategoryForm
+    form = CategoryForm()
+    if form.validate_on_submit():
+        new_category = Category(nazwa_kategorii=form.name.data)
+        db.session.add(new_category)
+        db.session.commit()
+        flash('Nowa kategoria została dodana.', 'success')
+        return redirect(url_for('main.list_categories'))
+    return render_template('simple_form.html', form=form, title='Nowa Kategoria')
+
+@main.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_category(category_id):
+    from app.models import Category
+    from app.forms import CategoryForm
+    category = Category.query.get_or_404(category_id)
+    form = CategoryForm(obj=category)
+    if form.validate_on_submit():
+        category.nazwa_kategorii = form.name.data
+        db.session.commit()
+        flash('Kategoria została zaktualizowana.', 'success')
+        return redirect(url_for('main.list_categories'))
+    # Trzeba ręcznie ustawić pole 'name' dla metody GET, bo nazwy w modelu i formularzu się różnią
+    if request.method == 'GET':
+        form.name.data = category.nazwa_kategorii
+    return render_template('simple_form.html', form=form, title='Edycja Kategorii')
+
+@main.route('/categories/<int:category_id>/delete', methods=['POST'])
+@login_required
+def delete_category(category_id):
+    from app.models import Category
+    category = Category.query.get_or_404(category_id)
+    if category.unit_prices.first():
+        flash('Nie można usunąć kategorii, która jest przypisana do pozycji cenowych.', 'danger')
+        return redirect(url_for('main.list_categories'))
+    db.session.delete(category)
+    db.session.commit()
+    flash('Kategoria została usunięta.', 'success')
+    return redirect(url_for('main.list_categories'))
+
+# API endpoints for Select2
+@main.route('/api/work_types', methods=['GET', 'POST'])
+@login_required
+def add_work_type():
+    if request.method == 'GET':
+        return render_template('simple_work_type_form.html')
+    
+    # Zmieniono z request.json na request.form
+    name = request.form.get('name')
+    if not name:
+        return jsonify({'error': 'Brak wymaganych danych'}), 400
+
+    try:
+        existing = WorkType.query.filter(func.lower(WorkType.name) == func.lower(name)).first()
+        if existing:
+            return jsonify({'error': 'Ta nazwa roboty już istnieje', 'id': existing.id}), 400
+
+        new_work_type = WorkType(name=name)
+        db.session.add(new_work_type)
+        db.session.commit()
+
+        return jsonify({'id': new_work_type.id, 'name': new_work_type.name}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@main.route('/api/categories', methods=['GET', 'POST'])
+@login_required
+def add_category():
+    if request.method == 'GET':
+        return render_template('simple_category_form.html')
+    
+    # Zmieniono z request.json na request.form
+    name = request.form.get('name')
+    if not name:
+        return jsonify({'error': 'Brak wymaganych danych'}), 400
+
+    try:
+        # UWAGA: Tutaj używasz Category.name, ale Twój model ma pole nazwa_kategorii!
+        # Zmień to na właściwe pole:
+        existing = Category.query.filter(func.lower(Category.nazwa_kategorii) == func.lower(name)).first()
+        if existing:
+            return jsonify({'error': 'Ta kategoria już istnieje', 'id': existing.id}), 400
+
+        # Tutaj też zmień na właściwe pole:
+        new_category = Category(nazwa_kategorii=name)
+        db.session.add(new_category)
+        db.session.commit()
+
+        # W odpowiedzi zwróć właściwe pole:
+        return jsonify({'id': new_category.id, 'name': new_category.nazwa_kategorii}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@main.route('/api/work_types_list')
+@login_required
+def api_work_types_list():
+    query = request.args.get('q', '')
+    work_types = WorkType.query.filter(WorkType.name.ilike(f'%{query}%')).order_by(WorkType.name).limit(20).all()
+    results = [{'id': wt.id, 'text': wt.name} for wt in work_types]
+    return jsonify(results)
+
+@main.route('/api/categories_list')
+@login_required
+def api_categories_list():
+    query = request.args.get('q', '')
+    categories = Category.query.filter(Category.name.ilike(f'%{query}%')).order_by(Category.name).limit(20).all()
+    results = [{'id': cat.id, 'text': cat.name} for cat in categories]
+    return jsonify(results)
