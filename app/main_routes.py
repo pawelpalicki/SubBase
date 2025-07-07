@@ -1133,6 +1133,34 @@ def new_project():
             flash(f'Wystąpił błąd podczas dodawania projektu: {e}', 'danger')
     return render_template('project_form.html', form=form, title='Dodaj Projekt', back_url=url_for('main.list_projects'))
 
+@main.route('/api/projects', methods=['GET', 'POST'])
+@login_required
+def add_project_api():
+    from app.forms import ProjectForm
+    form = ProjectForm()
+    if request.method == 'POST': # Explicitly check for POST
+        if form.validate_on_submit():
+            try:
+                existing = Project.query.filter(func.lower(Project.nazwa_projektu) == func.lower(form.nazwa_projektu.data)).first()
+                if existing:
+                    return jsonify({'success': False, 'errors': {'nazwa_projektu': ['Projekt o tej nazwie już istnieje.']}}), 400
+                new_project = Project(
+                    nazwa_projektu=form.nazwa_projektu.data,
+                    skrot=form.skrot.data,
+                    rodzaj=form.rodzaj.data,
+                    uwagi=form.uwagi.data
+                )
+                db.session.add(new_project)
+                db.session.commit()
+                return jsonify({'success': True, 'id': new_project.id, 'name': new_project.nazwa_projektu}), 201
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                return jsonify({'success': False, 'errors': {'_form': [f'Błąd bazy danych: {str(e)}']}}), 500
+        else: # Validation failed for POST request
+            return jsonify({'success': False, 'errors': form.errors}), 400
+    # For GET request
+    return render_template('project_form_modal.html', form=form)
+
 @main.route('/projects/<int:id>/edit', methods=['GET', 'POST'])
 def edit_project(id):
     project = Project.query.get_or_404(id)

@@ -25,9 +25,13 @@
 
                 <dt class="col-sm-3">Załącznik</dt>
                 <dd class="col-sm-9">
-                    <a href="{{ url_for('tenders.download_file', tender_id=tender.id) }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-download me-1"></i> Pobierz ({{ tender.original_filename }})
-                    </a>
+                    {% if tender.original_filename %}
+                        <a href="{{ url_for('tenders.download_file', tender_id=tender.id) }}" class="btn btn-success btn-sm">
+                            <i class="bi bi-download me-1"></i> Pobierz ({{ tender.original_filename }})
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Brak załącznika</span>
+                    {% endif %}
                 </dd>
             </dl>
         </div>

@@ -48,6 +48,20 @@
         </div>
         <div class="mb-3">
             {{ form.plik_oferty.label(class="form-label") }}
+            {% if tender and tender.original_filename %}
+                <div class="card px-3 py-2 mb-3 shadow-none border rounded-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <p class="mb-0">Istniejący plik: <a href="{{ url_for('tenders.download_file', tender_id=tender.id) }}" target="_blank">{{ tender.original_filename }}</a></p>
+                        <div class="form-check form-switch">
+                            {{ form.delete_existing_file(class="form-check-input" + (' is-invalid' if form.delete_existing_file.errors else '')) }}
+                            {{ form.delete_existing_file.label(class="form-check-label") }}
+                            {% for error in form.delete_existing_file.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
             {{ form.plik_oferty(class="form-control" + (' is-invalid' if form.plik_oferty.errors else '')) }}
             {% for error in form.plik_oferty.errors %}
                 <div class="invalid-feedback">{{ error }}</div>

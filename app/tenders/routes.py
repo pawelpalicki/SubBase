@@ -201,18 +201,36 @@ def edit_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     form = TenderForm(obj=tender)
     
+    if request.method == 'GET':
+        form.delete_existing_file.data = False # Upewnij się, że checkbox jest domyślnie odznaczony
+
     if form.validate_on_submit():
         tender.nazwa_oferty = form.nazwa_oferty.data
         tender.data_otrzymania = form.data_otrzymania.data
         tender.status = form.status.data
         tender.id_firmy = form.id_firmy.data
         tender.id_projektu = form.id_projektu.data if form.id_projektu.data else None
-        
+
+        storage_service = get_storage_service()
+
+        # Obsługa usuwania istniejącego pliku
+        if form.delete_existing_file.data and not form.plik_oferty.data: # Jeśli zaznaczono usunięcie i nie przesłano nowego pliku
+            if tender.storage_path:
+                if current_app.config.get('GCS_BUCKET_NAME'):
+                    delete_from_gcs(tender.storage_path)
+                elif os.path.exists(tender.storage_path):
+                    os.remove(tender.storage_path)
+            tender.original_filename = None
+            tender.storage_path = None
+            tender.file_type = None
+            flash('Istniejący plik został usunięty.', 'info')
+
         if form.plik_oferty.data:
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
             
-            if tender.storage_path:
+            # Usuń stary plik, jeśli istnieje i jest zastępowany nowym
+            if tender.storage_path and not form.delete_existing_file.data: # Usuń tylko jeśli nie zaznaczono usunięcia, ale jest nowy plik
                 if current_app.config.get('GCS_BUCKET_NAME'):
                     delete_from_gcs(tender.storage_path)
                 elif os.path.exists(tender.storage_path):
@@ -235,7 +253,7 @@ def edit_tender(tender_id):
         flash('Oferta została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=tender.id))
         
-    return render_template('tender_form.html', form=form, title=f"Edycja oferty: {tender.nazwa_oferty}")
+    return render_template('tender_form.html', form=form, tender=tender, title=f"Edycja oferty: {tender.nazwa_oferty}")
 
 @tenders_bp.route('/<int:tender_id>/delete', methods=['POST'])
 @login_required

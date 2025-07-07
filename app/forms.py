@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField, HiddenField
+from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField, HiddenField, BooleanField
 from wtforms.validators import DataRequired, Email, Optional, NumberRange
 from wtforms.widgets import ListWidget, CheckboxInput, Select
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -201,6 +201,7 @@ class TenderForm(FlaskForm):
         Optional(),
         FileAllowed(['pdf', 'jpg', 'jpeg', 'png', 'xls', 'xlsx'], 'Dozwolone są tylko pliki PDF, obrazów i Excel!')
     ])
+    delete_existing_file = BooleanField('Usuń istniejący plik')
     submit = SubmitField('Zapisz Ofertę')
 
     def __init__(self, *args, **kwargs):
