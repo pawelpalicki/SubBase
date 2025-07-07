@@ -46,9 +46,31 @@
                     Wyodrębniony tekst
                 </div>
                 <div class="card-body">
-                    <div class="pre-container">
-                        <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() if extracted_text.strip() else 'Brak tekstu do wyświetlenia.' }}</pre>
-                    </div>
+                    {% if table_data %}
+                        <h5>Wykryte tabele:</h5>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered table-sm table-hover">
+                                <tbody>
+                                    {% for row in table_data %}
+                                    <tr>
+                                        {% for cell in row %}
+                                        <td>{{ cell }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    {% if extracted_text and extracted_text.strip() %}
+                        <h5>Pozostały tekst:</h5>
+                        <div class="pre-container">
+                            <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() }}</pre>
+                        </div>
+                    {% endif %}
+                    {% if not table_data and not (extracted_text and extracted_text.strip()) %}
+                        <p class="text-muted">Brak danych do wyświetlenia. Plik może być pusty lub jego zawartość nie mogła zostać odczytana.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

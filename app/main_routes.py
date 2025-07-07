@@ -33,6 +33,10 @@ def require_login_for_main_blueprint():
 
 @main.route('/')
 def index():
+    return render_template('dashboard.html', title='Dashboard')
+
+@main.route('/companies')
+def list_companies():
     query = Firmy.query
 
     # Handle search filter
@@ -149,8 +153,7 @@ def index():
     # Handle specialty filter
     specialties = request.args.getlist('specialties')
     if specialties:
-        query = query.join(FirmySpecjalnosci)\
-                    .filter(FirmySpecjalnosci.id_specjalnosci.in_(specialties))
+        query = query.join(FirmySpecjalnosci).filter(FirmySpecjalnosci.id_specjalnosci.in_(specialties))
 
     # Handle area filter
     wojewodztwo = request.args.get('wojewodztwo')
@@ -158,9 +161,7 @@ def index():
 
     if powiat:
         # Include companies with nationwide service
-        nationwide_companies = db.session.query(Firmy.id_firmy)\
-                                .join(FirmyObszarDzialania)\
-                                .filter(FirmyObszarDzialania.id_kraj == 'POL')
+        nationwide_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_kraj == 'POL')
 
         # Get powiat data to find its wojewodztwo
         powiat_data = Powiaty.query.filter_by(id_powiaty=powiat).first()
@@ -169,25 +170,13 @@ def index():
             wojewodztwo_id = powiat_data.id_wojewodztwa
 
             # Companies serving the specific powiat
-            powiat_companies = db.session.query(Firmy.id_firmy)\
-                                .join(FirmyObszarDzialania)\
-                                .filter(FirmyObszarDzialania.id_powiaty == powiat)
+            powiat_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_powiaty == powiat)
 
             # Companies serving the whole wojewodztwo (with empty powiat fields)
-            wojewodztwo_empty_powiat_companies = db.session.query(Firmy.id_firmy)\
-                                    .join(FirmyObszarDzialania)\
-                                    .filter(
-                                        and_(
-                                            FirmyObszarDzialania.id_wojewodztwa == wojewodztwo_id,
-                                            FirmyObszarDzialania.id_powiaty == 0
-                                        )
-                                    )
+            wojewodztwo_empty_powiat_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(and_(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo_id, FirmyObszarDzialania.id_powiaty == 0))
 
             # Combine all relevant companies
-            combined_companies = nationwide_companies.union(
-                powiat_companies, 
-                wojewodztwo_empty_powiat_companies
-            ).subquery()
+            combined_companies = nationwide_companies.union(powiat_companies, wojewodztwo_empty_powiat_companies).subquery()
         else:
             # If powiat not found, only include nationwide companies
             combined_companies = nationwide_companies.subquery()
@@ -197,19 +186,10 @@ def index():
 
     elif wojewodztwo and not powiat:
         # Firmy o zasięgu ogólnokrajowym
-        nationwide_companies = db.session.query(Firmy.id_firmy)\
-                                .join(FirmyObszarDzialania)\
-                                .filter(FirmyObszarDzialania.id_kraj == 'POL')
+        nationwide_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_kraj == 'POL')
 
-        wojewodztwo_companies = db.session.query(Firmy.id_firmy)\
-                                 .join(FirmyObszarDzialania)\
-                                 .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                 .filter(FirmyObszarDzialania.id_powiaty == 0)\
-                                 .except_(
-                                     db.session.query(Firmy.id_firmy)\
-                                     .join(FirmyObszarDzialania)\
-                                     .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                     .filter(FirmyObszarDzialania.id_powiaty != 0)
+        wojewodztwo_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo).filter(FirmyObszarDzialania.id_powiaty == 0).except_(
+                                     db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo).filter(FirmyObszarDzialania.id_powiaty != 0)
                                  )
 
         combined_companies_ids_subquery = nationwide_companies.union(wojewodztwo_companies).subquery()
@@ -235,7 +215,8 @@ def index():
                            all_specialties=all_specialties,
                            all_wojewodztwa=all_wojewodztwa,
                            all_powiaty=all_powiaty,
-                           all_company_types=all_company_types)
+                           all_company_types=all_company_types,
+                           title='Lista Firm')
 
 @main.route('/instrukcja')
 def instrukcja():
@@ -246,34 +227,18 @@ def company_details(company_id):
     company = Firmy.query.get_or_404(company_id)
 
     # Calculate average rating
-    avg_rating = db.session.query(func.avg(Oceny.ocena))\
-                            .filter(Oceny.id_firmy == company_id)\
-                            .scalar() or 0
+    avg_rating = db.session.query(func.avg(Oceny.ocena)).filter(Oceny.id_firmy == company_id).scalar() or 0
     avg_rating = round(avg_rating, 1)
 
     # Get area of operation
-    nationwide = db.session.query(FirmyObszarDzialania)\
-                            .filter(FirmyObszarDzialania.id_firmy == company_id,\
-                                    FirmyObszarDzialania.id_kraj == 'POL')\
-                            .first() is not None
+    nationwide = db.session.query(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_firmy == company_id, FirmyObszarDzialania.id_kraj == 'POL').first() is not None
 
-    wojewodztwa = db.session.query(Wojewodztwa)\
-                           .join(FirmyObszarDzialania)\
-                           .filter(FirmyObszarDzialania.id_firmy == company_id,\
-                                   Wojewodztwa.wojewodztwo != 'Nie dotyczy / Brak danych')\
-                           .all()
+    wojewodztwa = db.session.query(Wojewodztwa).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_firmy == company_id, Wojewodztwa.wojewodztwo != 'Nie dotyczy / Brak danych').all()
 
-    powiaty = db.session.query(Powiaty, Wojewodztwa.id_wojewodztwa)\
-                       .join(FirmyObszarDzialania, Powiaty.id_powiaty == FirmyObszarDzialania.id_powiaty)\
-                       .join(Wojewodztwa, Powiaty.id_wojewodztwa == Wojewodztwa.id_wojewodztwa)\
-                       .filter(FirmyObszarDzialania.id_firmy == company_id)\
-                       .all()
+    powiaty = db.session.query(Powiaty, Wojewodztwa.id_wojewodztwa).join(FirmyObszarDzialania, Powiaty.id_powiaty == FirmyObszarDzialania.id_powiaty).join(Wojewodztwa, Powiaty.id_wojewodztwa == Wojewodztwa.id_wojewodztwa).filter(FirmyObszarDzialania.id_firmy == company_id).all()
 
     # Get company specialties
-    specialties = db.session.query(Specjalnosci)\
-                            .join(FirmySpecjalnosci)\
-                            .filter(FirmySpecjalnosci.id_firmy == company_id)\
-                            .all()
+    specialties = db.session.query(Specjalnosci).join(FirmySpecjalnosci).filter(FirmySpecjalnosci.id_firmy == company_id).all()
 
     # Determine if it's an AJAX request
     is_ajax = request.args.get('ajax', False) # Check for 'ajax=true' in query parameters
@@ -811,7 +776,7 @@ def delete_company(company_id):
         db.session.delete(company)
         db.session.commit()
         flash('Firma została usunięta pomyślnie!', 'success')
-        return jsonify({'success': True, 'redirect': url_for('main.index')})
+        return jsonify({'success': True, 'redirect': url_for('main.list_companies')})
     except SQLAlchemyError as e:
         db.session.rollback()
         flash(f'Wystąpił błąd podczas usuwania firmy: {str(e)}', 'danger')
@@ -1440,8 +1405,7 @@ def export_companies_html():
     specialties = request.args.getlist('specialties')
     if specialties:
         # Apply the filter to the current query state
-        query = query.join(FirmySpecjalnosci)\
-                     .filter(FirmySpecjalnosci.id_specjalnosci.in_(specialties))
+        query = query.join(FirmySpecjalnosci).filter(FirmySpecjalnosci.id_specjalnosci.in_(specialties))
 
     # Handle area filter
     wojewodztwo = request.args.get('wojewodztwo')
@@ -1449,27 +1413,16 @@ def export_companies_html():
 
     if powiat:
         # Replicate powiat logic
-        nationwide_companies = db.session.query(Firmy.id_firmy)\
-                                 .join(FirmyObszarDzialania)\
-                                 .filter(FirmyObszarDzialania.id_kraj == 'POL')
+        nationwide_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_kraj == 'POL')
 
         powiat_data = Powiaty.query.filter_by(id_powiaty=powiat).first()
 
         if powiat_data:
             wojewodztwo_id = powiat_data.id_wojewodztwa
 
-            powiat_companies = db.session.query(Firmy.id_firmy)\
-                                 .join(FirmyObszarDzialania)\
-                                 .filter(FirmyObszarDzialania.id_powiaty == powiat)
+            powiat_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_powiaty == powiat)
 
-            wojewodztwo_empty_powiat_companies = db.session.query(Firmy.id_firmy)\
-                                     .join(FirmyObszarDzialania)\
-                                     .filter(
-                                         and_(
-                                             FirmyObszarDzialania.id_wojewodztwa == wojewodztwo_id,
-                                             FirmyObszarDzialania.id_powiaty == 0
-                                         )
-                                     )
+            wojewodztwo_empty_powiat_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(and_(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo_id, FirmyObszarDzialania.id_powiaty == 0))
 
             combined_companies_ids_subquery = nationwide_companies.union(
                 powiat_companies,
@@ -1483,19 +1436,10 @@ def export_companies_html():
 
     elif wojewodztwo and not powiat:
         # Replicate wojewodztwo logic
-        nationwide_companies = db.session.query(Firmy.id_firmy)\
-                                 .join(FirmyObszarDzialania)\
-                                 .filter(FirmyObszarDzialania.id_kraj == 'POL')
+        nationwide_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_kraj == 'POL')
 
-        wojewodztwo_companies = db.session.query(Firmy.id_firmy)\
-                                 .join(FirmyObszarDzialania)\
-                                 .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                 .filter(FirmyObszarDzialania.id_powiaty == 0)\
-                                 .except_(
-                                     db.session.query(Firmy.id_firmy)\
-                                     .join(FirmyObszarDzialania)\
-                                     .filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo)\
-                                     .filter(FirmyObszarDzialania.id_powiaty != 0)
+        wojewodztwo_companies = db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo).filter(FirmyObszarDzialania.id_powiaty == 0).except_(
+                                     db.session.query(Firmy.id_firmy).join(FirmyObszarDzialania).filter(FirmyObszarDzialania.id_wojewodztwa == wojewodztwo).filter(FirmyObszarDzialania.id_powiaty != 0)
                                  )
 
         combined_companies_ids_subquery = nationwide_companies.union(wojewodztwo_companies).subquery()
@@ -1588,11 +1532,15 @@ def new_category():
     from app.forms import CategoryForm
     form = CategoryForm()
     if form.validate_on_submit():
-        new_category = Category(nazwa_kategorii=form.name.data)
-        db.session.add(new_category)
-        db.session.commit()
-        flash('Nowa kategoria została dodana.', 'success')
-        return redirect(url_for('main.list_categories'))
+        try:
+            new_category = Category(nazwa_kategorii=form.name.data)
+            db.session.add(new_category)
+            db.session.commit()
+            flash('Nowa kategoria została dodana.', 'success')
+            return redirect(url_for('main.list_categories'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas dodawania kategorii: {e}', 'danger')
     return render_template('simple_form.html', form=form, title='Nowa Kategoria', back_url=url_for('main.list_categories'))
 
 @main.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])

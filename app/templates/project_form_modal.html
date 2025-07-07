@@ -1,0 +1,31 @@
+<form id="addProjectFormModal" action="{{ url_for('main.add_project_api') }}" method="post">
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+        <div id="project-form-errors" class="alert alert-danger" style="display: none;"></div>
+        
+        <div class="form-group">
+            {{ form.nazwa_projektu.label(class="form-control-label") }}
+            {{ form.nazwa_projektu(class="form-control") }}
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="form-group">
+            {{ form.skrot.label(class="form-control-label") }}
+            {{ form.skrot(class="form-control") }}
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="form-group">
+            {{ form.rodzaj.label(class="form-control-label") }}
+            {{ form.rodzaj(class="form-control") }}
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="form-group">
+            {{ form.uwagi.label(class="form-control-label") }}
+            {{ form.uwagi(class="form-control", rows=3) }}
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        <button type="submit" class="btn btn-primary">Dodaj Projekt</button>
+    </div>
+</form>

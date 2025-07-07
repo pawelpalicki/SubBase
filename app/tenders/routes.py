@@ -4,14 +4,18 @@ from app import db
 from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
 from sqlalchemy import func
 from app.forms import TenderForm, UnitPriceForm
+from app.storage_service import get_storage_service
 import os
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
+import pdfplumber
+import xlrd
 from PIL import Image
 import pytesseract
 from google.cloud import storage
 import openpyxl
 import io
+import traceback
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
@@ -90,89 +94,106 @@ def download_file(tender_id):
 def extract_data(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     extracted_text = ""
+    table_data = []
     unit_price_form = UnitPriceForm()
-    unit_price_form.id_oferty.data = tender.id # Ustawiamy id_oferty z URL
+    unit_price_form.id_oferty.data = tender.id
 
-    print("Wchodzę do funkcji extract_data")
-    print("Wchodzę do funkcji extract_data")
     if unit_price_form.validate_on_submit():
-        print("Formularz przeszedł walidację.")
         try:
-            # Logika do obsługi kategorii
             work_type_id = unit_price_form.id_work_type.data
             work_type = WorkType.query.get(work_type_id)
             category_id = work_type.id_kategorii if work_type else None
             new_unit_price = UnitPrice(
                 id_work_type=work_type_id,
-                nazwa_roboty=work_type.name if work_type else None, # Ustawiamy nazwę roboty
+                nazwa_roboty=work_type.name if work_type else None,
                 jednostka_miary=unit_price_form.jednostka_miary.data,
                 cena_jednostkowa=unit_price_form.cena_jednostkowa.data,
                 id_oferty=tender.id,
                 id_kategorii=category_id,
                 uwagi=unit_price_form.uwagi.data
             )
-            print(f"Tworzę nowy obiekt UnitPrice: {new_unit_price}")
             db.session.add(new_unit_price)
-            print("Dodaję obiekt do sesji bazy danych.")
             db.session.commit()
-            print("Zatwierdzam zmiany w bazie danych.")
             flash('Pozycja cenowa została dodana pomyślnie!', 'success')
             return redirect(url_for('tenders.extract_data', tender_id=tender.id, from_submit=True))
         except Exception as e:
             db.session.rollback()
-            print(f"Wystąpił błąd podczas dodawania pozycji cenowej: {e}")
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
-    else:
-        print("Formularz NIE przeszedł walidacji. Błędy:")
-        for field, errors in unit_price_form.errors.items():
-            for error in errors:
-                print(f"Błąd w polu {field}: {error}")
-                flash(f"Błąd w polu {field}: {error}", 'danger')
 
     if request.method == 'GET' and not request.args.get('from_submit'):
+        file_content = None
         try:
-            file_content = None
-            if current_app.config.get('GCS_BUCKET_NAME'):
-                # Pobierz plik z GCS
-                file_stream = download_from_gcs(tender.storage_path)
-                file_stream.seek(0) # Przewiń strumień na początek
-                file_content = file_stream.read()
+            storage_service = get_storage_service()
+            if storage_service:
+                file_stream = storage_service.download(tender.storage_path)
+                file_content = io.BytesIO(file_stream.read())
             else:
-                # Pobierz plik lokalnie
-                with open(tender.storage_path, 'rb') as f:
-                    file_content = f.read()
+                if os.path.exists(tender.storage_path):
+                    with open(tender.storage_path, 'rb') as f:
+                        file_content = io.BytesIO(f.read())
+                else:
+                    flash(f"Plik lokalny nie został znaleziony: {tender.storage_path}", "danger")
 
-            if tender.file_type == 'application/pdf':
-                # PyMuPDF potrzebuje ścieżki do pliku lub obiektu BytesIO
-                if current_app.config.get('GCS_BUCKET_NAME'):
-                    with fitz.open(stream=file_content, filetype="pdf") as doc:
-                        for page in doc:
-                            extracted_text += page.get_text("text", sort=True)
+            if file_content:
+                file_content.seek(0)
+                filename_lower = tender.original_filename.lower()
+
+                if filename_lower.endswith('.pdf'):
+                    try:
+                        with pdfplumber.open(file_content) as pdf:
+                            has_tables = False
+                            for page in pdf.pages:
+                                tables = page.extract_tables()
+                                if tables:
+                                    has_tables = True
+                                    for table in tables:
+                                        table_data.extend(table)
+                            
+                            if not has_tables:
+                                extracted_text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                    except Exception as pdf_error:
+                        file_content.seek(0)
+                        with fitz.open(stream=file_content, filetype="pdf") as doc:
+                            for page in doc:
+                                extracted_text += page.get_text("text", sort=True)
+
+                elif filename_lower.endswith('.xlsx'):
+                    workbook = openpyxl.load_workbook(file_content, data_only=True)
+                    for sheet in workbook.worksheets:
+                        merged_ranges = list(sheet.merged_cells.ranges)
+                        for merged_range in merged_ranges:
+                            sheet.unmerge_cells(str(merged_range))
+
+                        for row in sheet.iter_rows():
+                            row_data = [str(cell.value) if cell.value is not None else "" for cell in row]
+                            if any(row_data):
+                                table_data.append(row_data)
+
+                elif filename_lower.endswith('.xls'):
+                    workbook = xlrd.open_workbook(file_contents=file_content.read())
+                    for sheet in workbook.sheets():
+                        for row_idx in range(sheet.nrows):
+                            row_data = []
+                            for col_idx in range(sheet.ncols):
+                                cell_value = sheet.cell_value(row_idx, col_idx)
+                                for rlo, rhi, clo, chi in sheet.merged_cells:
+                                    if rlo <= row_idx < rhi and clo <= col_idx < chi:
+                                        cell_value = sheet.cell_value(rlo, clo)
+                                        break
+                                row_data.append(str(cell_value) if cell_value is not None else "")
+                            if any(row_data):
+                                table_data.append(row_data)
+                
+                elif filename_lower.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp')):
+                    flash('Ekstrakcja z obrazów (OCR) jest obecnie wyłączona.', 'info')
                 else:
-                    with fitz.open(tender.storage_path) as doc:
-                        for page in doc:
-                            extracted_text += page.get_text("text", sort=True)
-            elif tender.file_type.startswith('image/'):
-                if current_app.config.get('GCS_BUCKET_NAME'):
-                    image = Image.open(io.BytesIO(file_content))
-                else:
-                    image = Image.open(tender.storage_path)
-                extracted_text = pytesseract.image_to_string(image, lang='pol')
-            elif tender.file_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                if current_app.config.get('GCS_BUCKET_NAME'):
-                    workbook = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-                else:
-                    workbook = openpyxl.load_workbook(tender.storage_path, data_only=True)
-                for sheetname in workbook.sheetnames:
-                    sheet = workbook[sheetname]
-                    for row in sheet.iter_rows():
-                        extracted_text += " | ".join([str(cell.value) if cell.value is not None else "" for cell in row]) + "\n"
-            else:
-                flash('Nieobsługiwany typ pliku do ekstrakcji danych.', 'warning')
+                    flash(f'Nieobsługiwany typ pliku do ekstrakcji danych: "{tender.original_filename}" (typ MIME: {tender.file_type})', 'warning')
+
         except Exception as e:
+            traceback.print_exc()
             flash(f'Wystąpił błąd podczas ekstrakcji danych: {e}', 'danger')
 
-    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty")
+    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, table_data=table_data, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty")
 
 @tenders_bp.route('/<int:tender_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -187,31 +208,25 @@ def edit_tender(tender_id):
         tender.id_firmy = form.id_firmy.data
         tender.id_projektu = form.id_projektu.data if form.id_projektu.data else None
         
-        # Sprawdź, czy użytkownik wgrał nowy plik
         if form.plik_oferty.data:
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
             
-            # Opcjonalnie: usuń stary plik, jeśli istnieje
             if tender.storage_path:
                 if current_app.config.get('GCS_BUCKET_NAME'):
                     delete_from_gcs(tender.storage_path)
                 elif os.path.exists(tender.storage_path):
                     os.remove(tender.storage_path)
 
-            # Zapisz nowy plik
             if current_app.config.get('GCS_BUCKET_NAME'):
-                # Przesyłanie do GCS
-                tender.storage_path = filename # W GCS przechowujemy tylko nazwę pliku
-                tender.original_filename = plik.filename
+                tender.storage_path = filename
+                tender.original_filename = filename
                 tender.file_type = plik.mimetype
                 upload_to_gcs(plik.stream, filename, plik.mimetype)
             else:
-                # Zapisz nowy plik lokalnie
                 upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 plik.save(upload_path)
                 
-                # Zaktualizuj dane pliku w modelu
                 tender.original_filename = filename
                 tender.storage_path = upload_path
                 tender.file_type = plik.mimetype
@@ -219,9 +234,6 @@ def edit_tender(tender_id):
         db.session.commit()
         flash('Oferta została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=tender.id))
-    else:
-        # Jeśli walidacja się nie powiodła, wyświetl błędy
-        pass # Błędy będą wyświetlane inline w szablonie
         
     return render_template('tender_form.html', form=form, title=f"Edycja oferty: {tender.nazwa_oferty}")
 
@@ -230,7 +242,6 @@ def edit_tender(tender_id):
 def delete_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     
-    # Usuń plik z serwera, jeśli istnieje
     if tender.storage_path:
         if current_app.config.get('GCS_BUCKET_NAME'):
             delete_from_gcs(tender.storage_path)
@@ -247,29 +258,26 @@ def delete_tender(tender_id):
 def new_tender():
     form = TenderForm()
     if form.validate_on_submit():
-        # Sprawdź, czy plik został załączony
         if form.plik_oferty.data:
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
             
+            storage_path = ""
             if current_app.config.get('GCS_BUCKET_NAME'):
-                # Przesyłanie do GCS
-                storage_path = filename # W GCS przechowujemy tylko nazwę pliku
+                storage_path = filename
                 upload_to_gcs(plik.stream, filename, plik.mimetype)
             else:
-                # Zapisz plik w skonfigurowanym folderze lokalnie
                 upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 plik.save(upload_path)
                 storage_path = upload_path
 
-            # Utwórz nowy obiekt Tender
             nowa_oferta = Tender(
                 nazwa_oferty=form.nazwa_oferty.data,
                 data_otrzymania=form.data_otrzymania.data,
                 status=form.status.data,
                 id_firmy=form.id_firmy.data,
                 id_projektu=form.id_projektu.data if form.id_projektu.data else None,
-                original_filename=plik.filename,
+                original_filename=filename,
                 storage_path=storage_path, 
                 file_type=plik.mimetype
             )
@@ -282,18 +290,13 @@ def new_tender():
         else:
             flash('Proszę załączyć plik oferty.', 'danger')
             
-    else:
-        # Jeśli walidacja się nie powiodła, wyświetl błędy
-        pass # Błędy będą wyświetlane inline w szablonie
-        
     return render_template('tender_form.html', form=form, title='Nowa Oferta')
 
 @tenders_bp.route('/unit_prices')
 @login_required
 def list_all_unit_prices():
-    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy) # Join with necessary tables for filtering
+    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy)
 
-    # Get filter parameters
     nazwa_roboty_filter = request.args.get('nazwa_roboty', type=int)
     kategoria_filter = request.args.get('kategoria', type=int)
     id_oferty_filter = request.args.get('id_oferty', type=int)
@@ -313,7 +316,6 @@ def list_all_unit_prices():
 
     unit_prices = query.order_by(UnitPrice.id.desc()).all()
 
-    # Prepare data for filter dropdowns
     work_types = WorkType.query.order_by(WorkType.name).all()
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
     tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
@@ -339,23 +341,19 @@ def list_all_unit_prices():
 @tenders_bp.route('/unit_prices/analysis')
 @login_required
 def unit_prices_analysis():
-    # Filtrowanie
     category_filter = request.args.get('category', type=int)
-    tender_ids_filter = request.args.getlist('tenders', type=int) # Zmieniono na getlist dla multiselect
+    tender_ids_filter = request.args.getlist('tenders', type=int)
 
-    # Pobierz wszystkie unikalne roboty (WorkType)
     work_types_query = WorkType.query.order_by(WorkType.name)
     if category_filter:
         work_types_query = work_types_query.filter(WorkType.id_kategorii == category_filter)
     all_work_types = work_types_query.all()
 
-    # Pobierz wszystkie oferty (Tender) wraz z firmami i projektami
     all_tenders_query = Tender.query.join(Firmy).outerjoin(Project).order_by(Tender.data_otrzymania.desc())
     if tender_ids_filter:
         all_tenders_query = all_tenders_query.filter(Tender.id.in_(tender_ids_filter))
     all_tenders = all_tenders_query.all()
 
-    # Pobierz wszystkie ceny jednostkowe, opcjonalnie filtrując po kategorii i ofertach
     unit_prices_query = UnitPrice.query.join(WorkType).join(Tender)
     if category_filter:
         unit_prices_query = unit_prices_query.filter(UnitPrice.id_kategorii == category_filter)
@@ -363,17 +361,14 @@ def unit_prices_analysis():
         unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_(tender_ids_filter))
     all_unit_prices = unit_prices_query.all()
 
-    # Przygotuj dane do wyświetlenia w tabeli
-    # Klucz: id_work_type, Wartość: {id_tender: cena_jednostkowa}
     prices_table = {}
     for up in all_unit_prices:
         if up.id_work_type not in prices_table:
             prices_table[up.id_work_type] = {}
         prices_table[up.id_work_type][up.id_oferty] = up.cena_jednostkowa
 
-    # Przygotowanie danych dla dropdownów filtrowania
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
-    all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all() # Wszystkie oferty do wyświetlenia w multiselect
+    all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
 
     return render_template(
         'unit_prices_analysis.html',
@@ -381,16 +376,15 @@ def unit_prices_analysis():
         all_tenders=all_tenders,
         prices_table=prices_table,
         categories=categories,
-        all_available_tenders=all_available_tenders, # Przekazujemy wszystkie oferty
+        all_available_tenders=all_available_tenders,
         selected_category=category_filter,
-        selected_tenders=tender_ids_filter, # Przekazujemy wybrane oferty
+        selected_tenders=tender_ids_filter,
         title='Analiza cen jednostkowych'
     )
 
 @tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')
 @login_required
 def unit_prices_time_series_data(work_type_id):
-    # Grupowanie po miesiącu i roku
     time_series_data = db.session.query(
         func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
         func.avg(UnitPrice.cena_jednostkowa)
@@ -404,7 +398,6 @@ def unit_prices_time_series_data(work_type_id):
 @tenders_bp.route('/unit_prices/analysis/by_contractor/<int:work_type_id>')
 @login_required
 def unit_prices_by_contractor_data(work_type_id):
-    # Porównanie cen wykonawców
     contractor_data = db.session.query(
         Firmy.nazwa_firmy,
         func.avg(UnitPrice.cena_jednostkowa)
@@ -460,7 +453,6 @@ def edit_unit_price(price_id):
         flash('Pozycja cenowa została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=price.id_oferty))
 
-    # Przekazujemy tender_id do szablonu, aby link "Anuluj" działał poprawnie
     return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty, category_field_always_disabled_unless_auto_filled=True)
 
 @tenders_bp.route('/unit_price/<int:price_id>/delete', methods=['POST'])
