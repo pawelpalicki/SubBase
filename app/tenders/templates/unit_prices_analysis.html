@@ -29,7 +29,9 @@
                         <label for="tenders" class="form-label">Oferty</label>
                         <select class="form-control select2-enable" id="filter_tenders" name="tenders" multiple="multiple">
                             {% for tender_item in all_available_tenders %}
-                            <option value="{{ tender_item.id }}" {% if tender_item.id in selected_tenders %}selected{% endif %}>{{ tender_item.nazwa_oferty }} ({{ tender_item.project.nazwa_projektu if tender_item.project else 'Brak projektu' }} - {{ tender_item.firma.nazwa_firmy }})</option>
+                            <option value="{{ tender_item.id }}" {% if tender_item.id in selected_tenders %}selected{% endif %}>
+                                             {{ tender_item.nazwa_oferty }} (Status: {{ tender_item.status }} ,
+                                              Projekt: {{ tender_item.project.nazwa_projektu if tender_item.project else 'Brak projektu' }} - {{ tender_item.firma.nazwa_firmy }})</option>
                             {% endfor %}
                         </select>
                     </div>
