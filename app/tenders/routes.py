@@ -107,7 +107,7 @@ def extract_data(tender_id):
                 id_work_type=work_type_id,
                 nazwa_roboty=work_type.name if work_type else None,
                 jednostka_miary=unit_price_form.jednostka_miary.data,
-                cena_jednostkowa=unit_price_form.cena_jednostkowa.data,
+                cena_jednostkowa=float(unit_price_form.cena_jednostkowa.data.replace(',', '.')),
                 id_oferty=tender.id,
                 id_kategorii=category_id,
                 uwagi=unit_price_form.uwagi.data
