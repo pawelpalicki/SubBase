@@ -25,7 +25,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top custom-navbar-style">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
-                <i class="bi bi-house-door-fill me-2"></i>SubBase
+                <i class="bi bi-house-door-fill me-2"></i>Strona główna
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -77,7 +77,6 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                             <li><h6 class="dropdown-header">Słowniki Firm</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_projects') }}"><i class="bi bi-folder me-2"></i>Projekty</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_specialties') }}"><i class="bi bi-wrench-adjustable-circle me-2"></i>Specjalności</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_company_types') }}"><i class="bi bi-building me-2"></i>Typy firm</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_address_types') }}"><i class="bi bi-geo-alt me-2"></i>Typy adresów</a></li>
@@ -85,6 +84,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('main.list_email_types') }}"><i class="bi bi-envelope me-2"></i>Typy e-maili</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Słowniki Ofert</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_projects') }}"><i class="bi bi-folder me-2"></i>Projekty</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_categories') }}"><i class="bi bi-tags me-2"></i>Kategorie cen</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_work_types') }}"><i class="bi bi-tools me-2"></i>Rodzaje robót</a></li>
                             <li><hr class="dropdown-divider"></li>

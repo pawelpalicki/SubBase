@@ -556,6 +556,19 @@ html[data-theme="dark"] .select2-container--default .select2-selection--multiple
 /* ===== ISTNIEJĄCE STYLE (upewnij się, że nie ma konfliktów, przejrzyj w razie potrzeby) ===== */
 /* ... (wszystkie pozostałe istniejące style z main.css) ... */
 
+.text-right {
+    text-align: right;
+}
+
+#price-analysis-table td.text-right { /* Specific rule for unit_prices_list.html */
+    text-align: right !important; 
+}
+
+#unit-prices-analysis-table td {
+    border-right: 1px solid #ccc; /* Dodaje linię po prawej stronie każdej komórki */
+    padding: 8px; /* Upewnij się, że padding jest odpowiedni */
+}
+
 /* NOWE STYLE PASKA NAWIGACYJNEGO (istniejące, dostosowane w sekcji ciemnej) */
 .custom-navbar-style {
     background: linear-gradient(to bottom, var(--navbar-bg-start), var(--navbar-bg-end));
