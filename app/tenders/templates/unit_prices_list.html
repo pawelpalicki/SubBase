@@ -90,7 +90,7 @@
                 <tr>
                     <td data-label="Nazwa roboty">{{ price.work_type.name if price.work_type else 'Brak' }}</td>
                     <td data-label="J.m.">{{ price.jednostka_miary }}</td>
-                    <td data-label="Cena jedn.">{{ "%.2f"|format(price.cena_jednostkowa) }}</td>
+                    <td data-label="Cena jedn." class="text-right">{{ "{:,.2f}".format(price.cena_jednostkowa).replace(",", " ") }}</td>
                     <td data-label="Kategoria">{{ price.category.nazwa_kategorii if price.category else 'Brak' }}</td>
                     <td data-label="Oferta"><a href="{{ url_for('tenders.tender_details', tender_id=price.tender.id) }}">{{ price.tender.nazwa_oferty }}</a></td>
                     <td data-label="Wykonawca">{{ price.tender.firma.nazwa_firmy if price.tender.firma else 'Brak' }}</td>

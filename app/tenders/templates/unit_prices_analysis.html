@@ -46,7 +46,7 @@
 
     {% if all_work_types %}
     <div class="table-responsive">
-        <table class="table table-striped table-hover" id="price-analysis-table">
+        <table class="table table-striped table-hover table-bordered" id="price-analysis-table">
             <thead>
                 <tr>
                     <th>Nazwa roboty</th>
@@ -60,11 +60,11 @@
                 <tr>
                     <td data-label="Nazwa roboty">{{ work_type.name }}</td>
                     {% for tender in all_tenders %}
-                    <td data-label="{{ tender.firma.nazwa_firmy }} ({% if tender.project %}{{ tender.project.nazwa_projektu }}{% else %}Brak projektu{% endif %})">
+                    <td data-label="{{ tender.firma.nazwa_firmy }} ({% if tender.project %}{{ tender.project.nazwa_projektu }}{% else %}Brak projektu{% endif %})" class="text-right">
                         {% if prices_table[work_type.id] and prices_table[work_type.id][tender.id] %}
                             {% set price_data = prices_table[work_type.id][tender.id] %}
                             {% for price_entry in price_data %}
-                                    {{ "%.2f"|format(price_entry.cena) }}   
+                            {{ "{:,.2f}".format(price_entry.cena).replace(",", " ") }}   
                                     {% if price_entry.uwagi %}
                                         <i class="bi bi-info-circle" title="{{ price_entry.uwagi }}"></i>
                                         <style> .bi-info-circle { cursor: pointer; } </style>
