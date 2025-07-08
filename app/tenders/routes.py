@@ -383,7 +383,14 @@ def unit_prices_analysis():
     for up in all_unit_prices:
         if up.id_work_type not in prices_table:
             prices_table[up.id_work_type] = {}
-        prices_table[up.id_work_type][up.id_oferty] = up.cena_jednostkowa
+        # Store price and notes (if available) in a dictionary
+        if up.id_oferty not in prices_table[up.id_work_type]:
+            prices_table[up.id_work_type][up.id_oferty] = []
+
+        prices_table[up.id_work_type][up.id_oferty].append({
+            'cena': up.cena_jednostkowa,
+            'uwagi': up.uwagi or ""  # Use empty string if no notes
+        })
 
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
     all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all()

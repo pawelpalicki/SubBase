@@ -62,15 +62,24 @@
                     {% for tender in all_tenders %}
                     <td data-label="{{ tender.firma.nazwa_firmy }} ({% if tender.project %}{{ tender.project.nazwa_projektu }}{% else %}Brak projektu{% endif %})">
                         {% if prices_table[work_type.id] and prices_table[work_type.id][tender.id] %}
-                            {{ "%.2f"|format(prices_table[work_type.id][tender.id]) }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
+                            {% set price_data = prices_table[work_type.id][tender.id] %}
+                            {% for price_entry in price_data %}
+                                    {{ "%.2f"|format(price_entry.cena) }}   
+                                    {% if price_entry.uwagi %}
+                                        <i class="bi bi-info-circle" title="{{ price_entry.uwagi }}"></i>
+                                        <style> .bi-info-circle { cursor: pointer; } </style>
+                                    {% endif %}
+                                    {% if not loop.last %}<hr style="margin: 5px 0;">{% endif %}
+                                {% endfor %}
+
+                        {% else %} 
+                            - 
+                        {% endif %} 
+                    </td> 
+                    {% endfor %} 
+                </tr> 
+                {% endfor %} 
+            </tbody>            
         </table>
     </div>
     {% else %}

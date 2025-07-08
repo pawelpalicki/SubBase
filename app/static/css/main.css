@@ -1168,6 +1168,14 @@ h6 { /* Globalny styl dla h6, który powodował problem */
     background-color: #f8f9fa; /* Lekkie tło przy hover */
 }
 
+/* ===== STYLING DLA TABELI BEZ STACKINGU ===== */
+
+.table th,
+.table thead th {
+    background-color: #aaaaaa; /* Jaśniejszy szary dla nagłówków */
+    font-weight: bold;
+} 
+
 /* ===== STYLE RESPONSYWNYCH TABEL (STACKING) ===== */
 
 /* Domyślnie pokazuj wszystko */
