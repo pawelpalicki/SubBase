@@ -71,7 +71,7 @@
 
     {% if unit_prices %}
     <div class="table-responsive">
-        <table class="table table-striped table-hover table-responsive-stacking">
+        <table class="table table-striped table-hover table-responsive-stacking" id="unit-prices-table">
             <thead>
                 <tr>
                     <th>Nazwa roboty</th>
@@ -120,6 +120,65 @@
         $('.select2-enable').select2({
             placeholder: "-- Wybierz --",
             allowClear: true // Allow clearing selection for filters
+        });
+
+        // Table sorting
+        const table = document.getElementById('unit-prices-table');
+        const headers = table.querySelectorAll('thead th');
+        const tableBody = table.querySelector('tbody');
+
+        headers.forEach((header, index) => {
+            header.style.cursor = 'pointer';
+            let isAscending = true;
+
+            header.addEventListener('click', () => {
+                const columnValues = Array.from(tableBody.querySelectorAll('tr'))
+                    .map(row => {
+                        const cell = row.querySelectorAll('td')[index];
+                        let text = cell.textContent.trim();
+                        let value;
+
+                        if (index === 0 || index === 3 || index === 4 || index === 5 || index === 6 || index === 7) {
+                            // String comparison for columns: "Nazwa roboty", "Kategoria", "Oferta", "Wykonawca", "Projekt", "Uwagi"
+                            value = text;
+                        } else {
+                            // Numeric or empty comparison for other columns ("J.m.", "Cena jedn.")
+                            value = text === "-" ? null : parseFloat(text);
+                            if (isNaN(value)) {
+                                value = null; // Ensure NaN is treated as null
+                            }
+                        }
+
+                        return {
+                            row: row,
+                            value: value
+                        };
+                    });
+
+                columnValues.sort((a, b) => {
+                    if (a.value === null && b.value === null) return 0;
+                    if (a.value === null) return isAscending ? 1 : -1;
+                    if (b.value === null) return isAscending ? -1 : 1;
+
+                    if (typeof a.value === 'string') {
+                        return isAscending ? a.value.localeCompare(b.value) : b.value.localeCompare(a.value);
+                    } else {
+                        return isAscending ? a.value - b.value : b.value - a.value;
+                    }
+                });
+
+                // Clear existing rows
+                while (tableBody.firstChild) {
+                    tableBody.removeChild(tableBody.firstChild);
+                }
+
+                // Append sorted rows
+                columnValues.forEach(item => tableBody.appendChild(item.row));
+
+                isAscending = !isAscending;
+                header.textContent = header.textContent.replace(/ (▲|▼)$/, ""); // Remove previous indicator
+                header.textContent += isAscending ? " ▼" : " ▲"; // Add new indicator
+            });
         });
     });
 </script>
