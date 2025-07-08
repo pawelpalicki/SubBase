@@ -190,10 +190,10 @@ class TenderForm(FlaskForm):
     nazwa_oferty = StringField('Nazwa oferty', validators=[DataRequired('To pole jest wymagane.')])
     data_otrzymania = DateField('Data otrzymania', format='%Y-%m-%d', validators=[DataRequired('To pole jest wymagane.')])
     status = SelectField('Status', choices=[
-        ('Nowa', 'Nowa'),
-        ('W analizie', 'W analizie'),
-        ('Zaakceptowana', 'Zaakceptowana'),
-        ('Odrzucona', 'Odrzucona')
+        ('Przetarg', 'Przetarg'),
+        ('Realizacja', 'Realizacja'),
+        ('Umowa', 'Umowa'),
+        ('Inna', 'Inna')
     ], validators=[DataRequired('To pole jest wymagane.')])
     id_firmy = SelectField('Firma', coerce=int, validators=[DataRequired('To pole jest wymagane.')])
     id_projektu = SelectField('Projekt (opcjonalnie)', coerce=int, validators=[Optional()])
