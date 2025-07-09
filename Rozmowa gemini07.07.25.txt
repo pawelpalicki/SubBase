@@ -381,8 +381,7 @@ Ta zmiana sprawi, że Twój kod będzie czystszy, bardziej zgodny z zasadą "Don
 Rate this answer: 
 Context Sources (4)
 
-Paweł Palicki
-(.venv) pawelpalicki@cloudshell:~/projects/SubBase$ pip cache purge Files removed: 270 (.venv) pawelpalicki@cloudshell:~/projects/SubBase$ python run.py KONFIGURACJA: Aplikacja łączy się z bazą -> postgresql://neondb_owner:npg_xkCSH81rPBfW@ep-wandering-voice-a94f0po8-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require Traceback (most recent call last): File "/home/pawelpalicki/projects/SubBase/run.py", line 10, in <module> flask_app = create_app() ^^^^^^^^^^^^ File "/home/pawelpalicki/projects/SubBase/app/init.py", line 81, in create_app from app.tenders.routes import tenders_bp File "/home/pawelpalicki/projects/SubBase/app/tenders/routes.py", line 452 return redirect(url_for('tenders.tender_details', tender_id=tender_ ^ SyntaxError: '(' was never closed
+
 
 
 Gemini

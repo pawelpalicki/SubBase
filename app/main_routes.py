@@ -1591,14 +1591,23 @@ def edit_category(category_id):
 @main.route('/categories/<int:category_id>/delete', methods=['POST'])
 @login_required
 def delete_category(category_id):
-    from app.models import Category
+    from app.models import Category, WorkType
     category = Category.query.get_or_404(category_id)
-    if category.unit_prices:
-        flash('Nie można usunąć kategorii, która jest przypisana do pozycji cenowych.', 'danger')
-        return redirect(url_for('main.list_categories'))
-    db.session.delete(category)
-    db.session.commit()
-    flash('Kategoria została usunięta.', 'success')
+    try:
+        # Sprawdź, czy kategoria jest przypisana do pozycji cenowych
+        if category.unit_prices:
+            flash('Nie można usunąć kategorii, która jest przypisana do pozycji cenowych.', 'danger')
+            return redirect(url_for('main.list_categories'))
+
+        # Ustaw id_kategorii na NULL dla wszystkich work_types powiązanych z tą kategorią
+        WorkType.query.filter_by(id_kategorii=category_id).update({'id_kategorii': None})
+        
+        db.session.delete(category)
+        db.session.commit()
+        flash('Kategoria została usunięta.', 'success')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'Wystąpił błąd podczas usuwania kategorii: {e}', 'danger')
     return redirect(url_for('main.list_categories'))
 
 # API endpoints for Select2

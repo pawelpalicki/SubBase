@@ -157,7 +157,7 @@ class WorkType(db.Model):
     __tablename__ = 'work_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False, unique=True)
-    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     category = db.relationship('Category', backref='work_types')
     unit_prices = db.relationship('UnitPrice', backref='work_type', lazy='dynamic')
 
