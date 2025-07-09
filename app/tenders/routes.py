@@ -10,8 +10,6 @@ from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 import pdfplumber
 import xlrd
-from PIL import Image
-import pytesseract
 from google.cloud import storage
 import openpyxl
 import io
@@ -89,6 +87,22 @@ def download_file(tender_id):
         filename = tender.original_filename
         return send_from_directory(directory, filename, as_attachment=True)
 
+@tenders_bp.route('/display/<int:tender_id>')
+@login_required
+def display_file(tender_id):
+    tender = Tender.query.get_or_404(tender_id)
+    if current_app.config.get('GCS_BUCKET_NAME'):
+        try:
+            file_stream = download_from_gcs(tender.storage_path)
+            return send_file(file_stream, mimetype=tender.file_type)
+        except Exception as e:
+            flash(f'Błąd wyświetlania pliku z GCS: {e}', 'danger')
+            return redirect(url_for('tenders.tender_details', tender_id=tender.id))
+    else:
+        directory = current_app.config['UPLOAD_FOLDER']
+        filename = tender.original_filename
+        return send_from_directory(directory, filename)
+
 @tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST'])
 @login_required
 def extract_data(tender_id):
@@ -139,6 +153,7 @@ def extract_data(tender_id):
                 filename_lower = tender.original_filename.lower()
 
                 if filename_lower.endswith('.pdf'):
+                    pdf_extracted_successfully = False
                     try:
                         with pdfplumber.open(file_content) as pdf:
                             has_tables = False
@@ -149,13 +164,23 @@ def extract_data(tender_id):
                                     for table in tables:
                                         table_data.extend(table)
                             
-                            if not has_tables:
+                            if has_tables:
+                                pdf_extracted_successfully = True
+                            else:
                                 extracted_text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                                if extracted_text.strip():
+                                    pdf_extracted_successfully = True
                     except Exception as pdf_error:
+                        # Fallback to PyMuPDF if pdfplumber fails
                         file_content.seek(0)
                         with fitz.open(stream=file_content, filetype="pdf") as doc:
                             for page in doc:
                                 extracted_text += page.get_text("text", sort=True)
+                            if extracted_text.strip():
+                                pdf_extracted_successfully = True
+                    
+                    if not pdf_extracted_successfully:
+                        display_original_pdf = True
 
                 elif filename_lower.endswith('.xlsx'):
                     workbook = openpyxl.load_workbook(file_content, data_only=True)
@@ -185,15 +210,15 @@ def extract_data(tender_id):
                                 table_data.append(row_data)
                 
                 elif filename_lower.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp')):
-                    flash('Ekstrakcja z obrazów (OCR) jest obecnie wyłączona.', 'info')
+                    is_image_file = True
                 else:
                     flash(f'Nieobsługiwany typ pliku do ekstrakcji danych: "{tender.original_filename}" (typ MIME: {tender.file_type})', 'warning')
 
         except Exception as e:
             traceback.print_exc()
             flash(f'Wystąpił błąd podczas ekstrakcji danych: {e}', 'danger')
-
-    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, table_data=table_data, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty")
+    
+    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, table_data=table_data, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty", is_image_file=is_image_file if 'is_image_file' in locals() else False, display_original_pdf=display_original_pdf if 'display_original_pdf' in locals() else False)
 
 @tenders_bp.route('/<int:tender_id>/edit', methods=['GET', 'POST'])
 @login_required

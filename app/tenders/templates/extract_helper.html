@@ -46,7 +46,11 @@
                     Wyodrębniony tekst
                 </div>
                 <div class="card-body">
-                    {% if table_data %}
+                    {% if is_image_file %}
+                        <img src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" class="img-fluid" alt="Podgląd obrazu">
+                    {% elif display_original_pdf %}
+                        <iframe src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" style="width:100%; height:100%;" frameborder="0"></iframe>
+                    {% elif table_data %}
                         <h5>Wykryte tabele:</h5>
                         <div class="table-responsive mb-3">
                             <table class="table table-bordered table-sm table-hover">
@@ -68,7 +72,7 @@
                             <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() }}</pre>
                         </div>
                     {% endif %}
-                    {% if not table_data and not (extracted_text and extracted_text.strip()) %}
+                    {% if not is_image_file and not display_original_pdf and not table_data and not (extracted_text and extracted_text.strip()) %}
                         <p class="text-muted">Brak danych do wyświetlenia. Plik może być pusty lub jego zawartość nie mogła zostać odczytana.</p>
                     {% endif %}
                 </div>
