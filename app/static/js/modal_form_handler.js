@@ -107,15 +107,17 @@ $(document).ready(function() {
             },
             error: function(jqXHR) {
                 // Obsługa błędów HTTP (np. 400 Bad Request, 500 Internal Server Error)
-                var errorData = jqXHR.responseJSON;
-                if (errorData && errorData.errors) {
-                    $.each(errorData.errors, function(field, messages) {
-                        var input = form.find('[name="' + field + '"]');
-                        if (input.length) {
-                            input.addClass('is-invalid');
-                            $.each(messages, function(i, message) {
-                                input.after('<div class="invalid-feedback">' + message + '</div>');
-                            });
+                if (jqXHR.status >= 400 && jqXHR.status < 500) {
+                    var errorData = jqXHR.responseJSON;
+                    if (errorData && errorData.errors) {
+                        $.each(errorData.errors, function(field, messages) {
+                            var input = form.find('[name="' + field + '"]');
+                            if (input.length) {
+                                input.addClass('is-invalid');
+                                $.each(messages, function(i, message) {
+                                    input.after('<div class="invalid-feedback">' + message + '</div>');
+                                });
+                            }
                         });
                     } else {
                         toastr.error('Wystąpił błąd serwera: ' + (jqXHR.responseJSON && jqXHR.responseJSON.message ? jqXHR.responseJSON.message : jqXHR.statusText));

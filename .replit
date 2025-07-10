@@ -1,0 +1,8 @@
+modules = ["python-3.11"]
+
+[nix]
+packages = ["cacert", "cargo", "file", "geos", "glibcLocales", "grpc", "libGL", "libffi", "libiconv", "libjpeg_turbo", "libpng", "libxcrypt", "openssl", "pkg-config", "rustc", "which", "xsimd"]
+
+[[ports]]
+localPort = 8080
+externalPort = 80

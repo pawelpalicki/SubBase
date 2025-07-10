@@ -4,45 +4,18 @@ from app import db
 from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
 from sqlalchemy import func
 from app.forms import TenderForm, UnitPriceForm
-from app.storage_service import get_storage_service
+from app.storage_service import get_storage_service # <-- Główny import serwisu
 import os
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 import pdfplumber
 import xlrd
-from google.cloud import storage
 import openpyxl
 import io
 import traceback
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
-# Inicjalizacja klienta Google Cloud Storage
-def get_gcs_client():
-    return storage.Client()
-
-def upload_to_gcs(file_stream, filename, content_type):
-    client = get_gcs_client()
-    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
-    blob = bucket.blob(filename)
-    blob.upload_from_file(file_stream, content_type=content_type)
-    return blob.public_url # Lub inna ścieżka, którą będziesz przechowywać
-
-def download_from_gcs(filename):
-    client = get_gcs_client()
-    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
-    blob = bucket.blob(filename)
-    # Zwracamy strumień bajtów, aby Flask mógł go wysłać jako plik
-    return io.BytesIO(blob.download_as_bytes())
-
-def delete_from_gcs(filename):
-    client = get_gcs_client()
-    bucket = client.bucket(current_app.config['GCS_BUCKET_NAME'])
-    blob = bucket.blob(filename)
-    if blob.exists():
-        blob.delete()
-        return True
-    return False
 
 @tenders_bp.route('/')
 @login_required
@@ -74,33 +47,39 @@ def tender_details(tender_id):
 @login_required
 def download_file(tender_id):
     tender = Tender.query.get_or_404(tender_id)
-    if current_app.config.get('GCS_BUCKET_NAME'):
+    storage_service = get_storage_service() # <-- Używamy serwisu
+
+    if storage_service:
         try:
-            file_stream = download_from_gcs(tender.storage_path) # storage_path będzie teraz nazwą pliku w GCS
+            # Używamy metody z serwisu
+            file_stream = storage_service.download(tender.storage_path) 
             return send_file(file_stream, download_name=tender.original_filename, mimetype=tender.file_type, as_attachment=True)
         except Exception as e:
             flash(f'Błąd pobierania pliku z GCS: {e}', 'danger')
             return redirect(url_for('tenders.tender_details', tender_id=tender.id))
     else:
-        # Fallback do lokalnego przechowywania, jeśli GCS nie jest skonfigurowane
         directory = current_app.config['UPLOAD_FOLDER']
-        filename = tender.original_filename
+        # Upewnijmy się, że używamy prawidłowej nazwy pliku dla ścieżki lokalnej
+        filename = os.path.basename(tender.storage_path) 
         return send_from_directory(directory, filename, as_attachment=True)
 
 @tenders_bp.route('/display/<int:tender_id>')
 @login_required
 def display_file(tender_id):
     tender = Tender.query.get_or_404(tender_id)
-    if current_app.config.get('GCS_BUCKET_NAME'):
+    storage_service = get_storage_service() # <-- Używamy serwisu
+
+    if storage_service:
         try:
-            file_stream = download_from_gcs(tender.storage_path)
+            # Używamy metody z serwisu
+            file_stream = storage_service.download(tender.storage_path)
             return send_file(file_stream, mimetype=tender.file_type)
         except Exception as e:
             flash(f'Błąd wyświetlania pliku z GCS: {e}', 'danger')
             return redirect(url_for('tenders.tender_details', tender_id=tender.id))
     else:
         directory = current_app.config['UPLOAD_FOLDER']
-        filename = tender.original_filename
+        filename = os.path.basename(tender.storage_path)
         return send_from_directory(directory, filename)
 
 @tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST'])
@@ -239,10 +218,10 @@ def edit_tender(tender_id):
         storage_service = get_storage_service()
 
         # Obsługa usuwania istniejącego pliku
-        if form.delete_existing_file.data and not form.plik_oferty.data: # Jeśli zaznaczono usunięcie i nie przesłano nowego pliku
+        if form.delete_existing_file.data and not form.plik_oferty.data:
             if tender.storage_path:
-                if current_app.config.get('GCS_BUCKET_NAME'):
-                    delete_from_gcs(tender.storage_path)
+                if storage_service:
+                    storage_service.delete(tender.storage_path) # <-- Używamy metody z serwisu
                 elif os.path.exists(tender.storage_path):
                     os.remove(tender.storage_path)
             tender.original_filename = None
@@ -251,46 +230,47 @@ def edit_tender(tender_id):
             flash('Istniejący plik został usunięty.', 'info')
 
         if form.plik_oferty.data:
-            plik = form.plik_oferty.data
-            filename = secure_filename(plik.filename)
-            
-            # Usuń stary plik, jeśli istnieje i jest zastępowany nowym
-            if tender.storage_path and not form.delete_existing_file.data: # Usuń tylko jeśli nie zaznaczono usunięcia, ale jest nowy plik
-                if current_app.config.get('GCS_BUCKET_NAME'):
-                    delete_from_gcs(tender.storage_path)
-                elif os.path.exists(tender.storage_path):
-                    os.remove(tender.storage_path)
-
-            if current_app.config.get('GCS_BUCKET_NAME'):
-                tender.storage_path = filename
+                plik = form.plik_oferty.data
+                filename = secure_filename(plik.filename)
+    
+                # Usuń stary plik
+                if tender.storage_path:
+                    if storage_service:
+                        storage_service.delete(tender.storage_path) # <-- Używamy metody z serwisu
+                    elif os.path.exists(tender.storage_path):
+                        os.remove(tender.storage_path)
+    
+                if storage_service:
+                    # Używamy metody z serwisu
+                    storage_service.upload(plik.stream, filename, plik.mimetype)
+                    tender.storage_path = filename
+                else:
+                    upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    plik.save(upload_path)
+                    tender.storage_path = upload_path
+    
                 tender.original_filename = filename
                 tender.file_type = plik.mimetype
-                upload_to_gcs(plik.stream, filename, plik.mimetype)
-            else:
-                upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                plik.save(upload_path)
-                
-                tender.original_filename = filename
-                tender.storage_path = upload_path
-                tender.file_type = plik.mimetype
-
+    
         db.session.commit()
         flash('Oferta została zaktualizowana.', 'success')
         return redirect(url_for('tenders.tender_details', tender_id=tender.id))
-        
+    
     return render_template('tender_form.html', form=form, tender=tender, title=f"Edycja oferty: {tender.nazwa_oferty}")
+
 
 @tenders_bp.route('/<int:tender_id>/delete', methods=['POST'])
 @login_required
 def delete_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
-    
+    storage_service = get_storage_service() # <-- Używamy serwisu
+
     if tender.storage_path:
-        if current_app.config.get('GCS_BUCKET_NAME'):
-            delete_from_gcs(tender.storage_path)
+        if storage_service:
+            storage_service.delete(tender.storage_path) # <-- Używamy metody z serwisu
         elif os.path.exists(tender.storage_path):
             os.remove(tender.storage_path)
-        
+
     db.session.delete(tender)
     db.session.commit()
     flash('Oferta została usunięta.', 'success')
@@ -304,14 +284,17 @@ def new_tender():
         if form.plik_oferty.data:
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
-            
+
+            storage_service = get_storage_service() # <-- Używamy serwisu
             storage_path = ""
-            if current_app.config.get('GCS_BUCKET_NAME'):
-                storage_path = filename
-                upload_to_gcs(plik.stream, filename, plik.mimetype)
+
+            if storage_service:
+                storage_service.upload(plik.stream, filename, plik.mimetype) # <-- Używamy metody z serwisu
+                storage_path = filename # W GCS przechowujemy tylko nazwę pliku
             else:
                 upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 plik.save(upload_path)
+                storage_path = upload_path
                 storage_path = upload_path
 
             nowa_oferta = Tender(
@@ -327,7 +310,7 @@ def new_tender():
             
             db.session.add(nowa_oferta)
             db.session.commit()
-            
+
             flash('Nowa oferta została dodana pomyślnie!', 'success')
             return redirect(url_for('tenders.list_tenders'))
         else:
