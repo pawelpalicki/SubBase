@@ -9,46 +9,74 @@
                     <h3>{{ title }}</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" novalidate>
                         {{ form.hidden_tag() }}
                         {% if show_tender_select %}
                         <div class="mb-3">
                             {{ form.id_oferty.label(class="form-label") }}
-                            {{ form.id_oferty(class="form-control select2-enable", id="id_oferty_select") }}
+                            {% if form.id_oferty.errors %}
+                                {{ form.id_oferty(class="form-control select2-enable is-invalid", id="id_oferty_select") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.id_oferty.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.id_oferty(class="form-control select2-enable", id="id_oferty_select") }}
+                            {% endif %}
                         </div>
                         {% endif %}
                         <div class="mb-3">
                             {{ form.id_work_type.label(class="form-label") }}
-                            <div class="input-group">
-                                {{ form.id_work_type(class="form-control select2-enable", id="id_work_type_select") }}
+                            <div class="input-group {% if form.id_work_type.errors %}has-validation{% endif %}">
+                                {{ form.id_work_type(class="form-control select2-enable" ~ (" is-invalid" if form.id_work_type.errors else ""), id="id_work_type_select") }}
                                 <button class="btn btn-outline-secondary add-new-item-btn" type="button"
                                     data-bs-toggle="modal"
                                     data-bs-target="#mainModal"
                                     data-url="{{ url_for('main.add_work_type') }}"
                                     data-target-select="#id_work_type_select"
                                     data-title="Dodaj nową nazwę roboty">+</button>
+                                {% if form.id_work_type.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.id_work_type.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 {{ form.jednostka_miary.label(class="form-label") }}
-                                {{ form.jednostka_miary(class="form-control") }}
+                                {% if form.jednostka_miary.errors %}
+                                    {{ form.jednostka_miary(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.jednostka_miary.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.jednostka_miary(class="form-control") }}
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 {{ form.cena_jednostkowa.label(class="form-label") }}
-                                {{ form.cena_jednostkowa(class="form-control") }}
+                                {% if form.cena_jednostkowa.errors %}
+                                    {{ form.cena_jednostkowa(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.cena_jednostkowa.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.cena_jednostkowa(class="form-control") }}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="mb-3">
                             {{ form.id_kategorii.label(class="form-label") }}
                             <div class="input-group">
                                 {{ form.id_kategorii(class="form-control select2-enable", id="id_kategorii_select") }}
-                                <!-- <button class="btn btn-outline-secondary add-new-item-btn" type="button"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#mainModal"
-                                    data-url="{{ url_for('main.add_category') }}"
-                                    data-target-select="#id_kategorii_select"
-                                    data-title="Dodaj nową kategorię">+</button> -->
                             </div>
                         </div>
                         <div class="mb-3">
@@ -74,65 +102,55 @@
         const workTypeSelect = $('#id_work_type_select');
         const categorySelect = $('#id_kategorii_select');
 
-        // Flaga przekazana z backendu
         const categoryFieldAlwaysDisabledUnlessAutoFilled = {{ category_field_always_disabled_unless_auto_filled | tojson }};
 
         function updateCategoryField(workTypeId) {
             if (workTypeId && workTypeId !== 0) {
                 $.getJSON(`/api/work_type_category/${workTypeId}`, function(data) {
                     if (data.id) {
-                        // Jeśli kategoria została znaleziona, ustaw ją i zablokuj pole
                         const newOption = new Option(data.name, data.id, true, true);
                         categorySelect.empty().append(newOption).trigger('change');
                         categorySelect.prop('disabled', true);
                     } else {
-                        // Jeśli nie znaleziono kategorii, ustaw placeholder i zablokuj pole (jeśli flaga jest true)
                         categorySelect.empty().append(new Option('Brak kategorii', 0, true, true)).trigger('change');
                         if (categoryFieldAlwaysDisabledUnlessAutoFilled) {
                             categorySelect.prop('disabled', true);
                         } else {
-                            categorySelect.prop('disabled', false); // Pozwól na ręczny wybór, jeśli flaga jest false
+                            categorySelect.prop('disabled', false);
                         }
                     }
                 }).fail(function() {
-                    // W przypadku błędu ładowania, ustaw placeholder i zablokuj pole (jeśli flaga jest true)
                     categorySelect.empty().append(new Option('Błąd ładowania kategorii', 0, true, true)).trigger('change');
                     if (categoryFieldAlwaysDisabledUnlessAutoFilled) {
                         categorySelect.prop('disabled', true);
                     } else {
-                        categorySelect.prop('disabled', false); // Pozwól na ręczny wybór, jeśli flaga jest false
+                        categorySelect.prop('disabled', false);
                     }
                 });
             } else {
-                // Jeśli nie wybrano rodzaju roboty
                 categorySelect.empty().append(new Option('Brak kategorii', 0, true, true)).trigger('change');
                 if (categoryFieldAlwaysDisabledUnlessAutoFilled) {
-                    categorySelect.prop('disabled', true); // Zawsze zablokuj, jeśli flaga jest true
+                    categorySelect.prop('disabled', true);
                 } else {
-                    categorySelect.prop('disabled', false); // Pozwól na ręczny wybór, jeśli flaga jest false
+                    categorySelect.prop('disabled', false);
                 }
             }
         }
 
-        // Obsługa zmiany wyboru rodzaju roboty
         workTypeSelect.on('change', function() {
             updateCategoryField($(this).val());
         });
 
-        // Inicjalizacja przy ładowaniu strony
         if (workTypeSelect.val() && workTypeSelect.val() !== "0") {
-            // Jeśli jest już wybrany rodzaj roboty (np. przy edycji), zaktualizuj kategorię
             updateCategoryField(workTypeSelect.val());
         } else {
-            // Domyślne ustawienie przy ładowaniu strony
             categorySelect.empty().append(new Option('Brak kategorii', 0, true, true)).trigger('change');
             if (categoryFieldAlwaysDisabledUnlessAutoFilled) {
-                categorySelect.prop('disabled', true); // Domyślnie zablokuj, jeśli flaga jest true
+                categorySelect.prop('disabled', true);
             } else {
-                categorySelect.prop('disabled', false); // Domyślnie odblokuj, jeśli flaga jest false
+                categorySelect.prop('disabled', false);
             }
         }
     });
 </script>
 {% endblock %}
-

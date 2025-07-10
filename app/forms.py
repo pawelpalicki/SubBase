@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, IntegerField, FormField, FieldList, SubmitField, RadioField, DateField, HiddenField, BooleanField
-from wtforms.validators import DataRequired, Email, Optional, NumberRange
+from wtforms.validators import DataRequired, Email, Optional, NumberRange, ValidationError
 from wtforms.widgets import ListWidget, CheckboxInput, Select
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
@@ -11,6 +11,11 @@ class Select2MultipleField(SelectMultipleField):
         super(Select2MultipleField, self).__init__(label, validators, **kwargs)
         # Dodajemy klasę CSS dla łatwej identyfikacji przez JavaScript
         self.render_kw = {"class": "select2-multiple", "data-placeholder": "Wybierz opcje..."}
+
+# Definicja niestandardowego walidatora
+def a_value_must_be_selected(form, field):
+    if field.data == 0:
+        raise ValidationError('Proszę wybrać opcję z listy.')
 
 class AddressForm(FlaskForm):
     typ_adresu = SelectField('Typ adresu', coerce=int)
@@ -94,8 +99,6 @@ class CompanyForm(FlaskForm):
         # Ustaw opcje dla istniejących wpisów ORAZ dla pola szablonu (jeśli WTForms go udostępnia - ale my użyjemy self.address_type_choices)
         for adres_entry in self.adresy:
             adres_entry.typ_adresu.choices = self.address_type_choices
-        # if hasattr(self.adresy, 'template'): # Sprawdzenie, czy WTForms udostępnia szablon - zazwyczaj nie
-        #     self.adresy.template.typ_adresu.choices = self.address_type_choices
 
         self.email_type_choices = [(t.id_email_typ, t.typ_emaila) for t in EmailTyp.query.order_by(EmailTyp.typ_emaila).all()]
         for email_entry in self.emaile:
@@ -210,7 +213,7 @@ class TenderForm(FlaskForm):
         self.id_firmy.choices = [(f.id_firmy, f.nazwa_firmy) for f in Firmy.query.order_by(Firmy.nazwa_firmy).all()]
         self.id_firmy.choices.insert(0, (0, '--- Wybierz firmę ---'))
         # Ustawienie walidatora DataRequired z polskim komunikatem
-        self.id_firmy.validators = [DataRequired('To pole jest wymagane.')]
+        self.id_firmy.validators = [DataRequired('To pole jest wymagane.'), a_value_must_be_selected]
         
         self.id_projektu.choices = [(p.id, p.nazwa_projektu) for p in Project.query.order_by(Project.nazwa_projektu).all()]
         self.id_projektu.choices.insert(0, (0, '--- Brak projektu ---'))
@@ -220,8 +223,8 @@ class CategoryForm(FlaskForm):
     submit = SubmitField('Zapisz')
 
 class UnitPriceForm(FlaskForm):
-    id_oferty = SelectField('Oferta', coerce=int, validators=[DataRequired('To pole jest wymagane.')]) # Nowe pole
-    id_work_type = SelectField('Nazwa roboty', coerce=int, validators=[DataRequired('To pole jest wymagane.')])
+    id_oferty = SelectField('Oferta', coerce=int, validators=[a_value_must_be_selected])
+    id_work_type = SelectField('Nazwa roboty', coerce=int, validators=[a_value_must_be_selected])
     jednostka_miary = StringField('J.m.', validators=[DataRequired('To pole jest wymagane.')])
     cena_jednostkowa = StringField('Cena jednostatkowa', validators=[DataRequired('To pole jest wymagane.')])
     id_kategorii = HiddenField('Kategoria')
@@ -230,16 +233,39 @@ class UnitPriceForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(UnitPriceForm, self).__init__(*args, **kwargs)
-        from app.models import WorkType, Category, Tender # Dodano Tender
-        self.id_oferty.choices = [(t.id, f"{t.nazwa_oferty} ({t.project.nazwa_projektu if t.project else 'Brak projektu'})" ) for t in Tender.query.order_by(Tender.nazwa_oferty).all()] # Wypełnienie ofert
-        self.id_oferty.choices.insert(0, (0, '--- Wybierz ofertę ---'))
+        from app.models import WorkType, Tender, Firmy, Project
+        from sqlalchemy.orm import joinedload
+
+        # Zoptymalizowane zapytanie, które od razu dociąga powiązane obiekty
+        tenders_query = Tender.query.options(
+            joinedload(Tender.firma),
+            joinedload(Tender.project)
+        ).order_by(Tender.data_otrzymania.desc())
+
+        choices = []
+        for t in tenders_query.all():
+            # Formatowanie nazwy firmy
+            company_name = t.firma.nazwa_firmy if t.firma else "Brak firmy"
+            if len(company_name) > 10:
+                company_name = company_name[:10] + "..."
+
+            # Formatowanie nazwy projektu
+            project_name = "Brak projektu"
+            if t.project:
+                project_name = t.project.skrot if t.project.skrot else t.project.nazwa_projektu
+
+            # Tworzenie finalnego stringu
+            label = f"{t.nazwa_oferty} ({t.status}) - {company_name} ({project_name})"
+            choices.append((t.id, label))
+
+        self.id_oferty.choices = [(0, '--- Wybierz ofertę ---')] + choices
 
         self.id_work_type.choices = [(wt.id, wt.name) for wt in WorkType.query.order_by(WorkType.name).all()]
         self.id_work_type.choices.insert(0, (0, '--- Wybierz nazwę roboty ---'))
 
 class WorkTypeForm(FlaskForm):
     name = StringField('Nazwa roboty', validators=[DataRequired('To pole jest wymagane.')])
-    id_kategorii = SelectField('Kategoria', coerce=int, validators=[DataRequired('Proszę wybrać kategorię.')])
+    id_kategorii = SelectField('Kategoria', coerce=int, validators=[DataRequired('Proszę wybrać kategorię.'), a_value_must_be_selected])
     submit = SubmitField('Zapisz')
 
     def __init__(self, *args, **kwargs):

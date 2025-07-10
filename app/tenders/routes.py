@@ -13,6 +13,7 @@ import xlrd
 import openpyxl
 import io
 import traceback
+from sqlalchemy.orm import joinedload # Dodany import
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
@@ -317,13 +318,16 @@ def new_tender():
 @tenders_bp.route('/unit_prices')
 @login_required
 def list_all_unit_prices():
-    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy)
+    PER_PAGE = 15 # Liczba elementów na stronę
 
     nazwa_roboty_filter = request.args.get('nazwa_roboty', type=int)
     kategoria_filter = request.args.get('kategoria', type=int)
     id_oferty_filter = request.args.get('id_oferty', type=int)
     id_firmy_filter = request.args.get('id_firmy', type=int)
     id_projektu_filter = request.args.get('id_projektu', type=int)
+    page = request.args.get('page', 1, type=int) # Pobierz numer strony
+
+    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy)
 
     if nazwa_roboty_filter:
         query = query.filter(UnitPrice.id_work_type == nazwa_roboty_filter)
@@ -336,11 +340,33 @@ def list_all_unit_prices():
     if id_projektu_filter:
         query = query.filter(Tender.id_projektu == id_projektu_filter)
 
-    unit_prices = query.order_by(UnitPrice.id.desc()).all()
+    # Paginacja
+    pagination = query.order_by(UnitPrice.id.desc()).paginate(page=page, per_page=PER_PAGE, error_out=False)
+    unit_prices = pagination.items # Elementy dla bieżącej strony
 
     work_types = WorkType.query.order_by(WorkType.name).all()
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
-    tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
+    
+    # Zoptymalizowane zapytanie do pobierania ofert do filtra
+    all_tenders_for_filter = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc()).all()
+
+    # Formatowanie ofert dla listy rozwijanej filtra
+    formatted_tenders_for_filter = []
+    for t in all_tenders_for_filter:
+        company_name = t.firma.nazwa_firmy if t.firma else "Brak firmy"
+        if len(company_name) > 10:
+            company_name = company_name[:10] + "..."
+
+        project_info = "Brak projektu"
+        if t.project:
+            project_info = t.project.skrot if t.project.skrot else t.project.nazwa_projektu
+
+        label = f"{t.nazwa_oferty} ({t.status}) - {company_name} ({project_info})"
+        formatted_tenders_for_filter.append((t.id, label))
+
     firmy = Firmy.query.order_by(Firmy.nazwa_firmy).all()
     projects = Project.query.order_by(Project.nazwa_projektu).all()
 
@@ -349,7 +375,7 @@ def list_all_unit_prices():
         unit_prices=unit_prices,
         work_types=work_types,
         categories=categories,
-        tenders=tenders,
+        tenders=formatted_tenders_for_filter, # Przekazujemy sformatowane oferty
         firmy=firmy,
         projects=projects,
         selected_nazwa_roboty=nazwa_roboty_filter,
@@ -357,12 +383,16 @@ def list_all_unit_prices():
         selected_id_oferty=id_oferty_filter,
         selected_id_firmy=id_firmy_filter,
         selected_id_projektu=id_projektu_filter,
+        pagination=pagination, # Przekazujemy obiekt paginacji
         title='Wszystkie pozycje cenowe'
     )
 
 @tenders_bp.route('/unit_prices/analysis')
 @login_required
 def unit_prices_analysis():
+    DEFAULT_TENDER_LIMIT = 10
+    MAX_TENDER_LIMIT = 20
+
     category_filter = request.args.get('category', type=int)
     tender_ids_filter = request.args.getlist('tenders', type=int)
 
@@ -371,16 +401,55 @@ def unit_prices_analysis():
         work_types_query = work_types_query.filter(WorkType.id_kategorii == category_filter)
     all_work_types = work_types_query.all()
 
-    all_tenders_query = Tender.query.join(Firmy).outerjoin(Project).order_by(Tender.data_otrzymania.desc())
+    tenders_truncated = False
+    
+    # Zapytanie bazowe dla ofert, zawsze sortowane od najnowszych
+    base_tenders_query = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc())
+
     if tender_ids_filter:
-        all_tenders_query = all_tenders_query.filter(Tender.id.in_(tender_ids_filter))
-    all_tenders = all_tenders_query.all()
+        # Jeśli filtry są podane, filtrujemy i ograniczamy do MAX_TENDER_LIMIT
+        all_tenders = base_tenders_query.filter(Tender.id.in_(tender_ids_filter)).all()
+        if len(all_tenders) > MAX_TENDER_LIMIT:
+            all_tenders = all_tenders[:MAX_TENDER_LIMIT]
+            tenders_truncated = True
+            flash(f'Wybrano więcej niż {MAX_TENDER_LIMIT} ofert. Wyświetlono tylko {MAX_TENDER_LIMIT} najnowszych z wybranych.', 'info')
+    else:
+        # Jeśli brak filtrów, domyślnie 10 najnowszych
+        all_tenders = base_tenders_query.limit(DEFAULT_TENDER_LIMIT).all()
+        flash(f'Domyślnie wyświetlono {DEFAULT_TENDER_LIMIT} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
+
+    # Formatowanie nagłówków dla tabeli analizy
+    formatted_tender_headers = {}
+    # Określ próg, od którego nazwy firm będą skracane
+    # Możesz dostosować tę wartość w zależności od preferencji
+    SHORTEN_COMPANY_NAME_THRESHOLD = 5 
+
+    for tender in all_tenders:
+        company_name = tender.firma.nazwa_firmy if tender.firma else "Brak firmy"
+        
+        # Skracaj nazwę firmy tylko jeśli jest wiele kolumn
+        if len(all_tenders) > SHORTEN_COMPANY_NAME_THRESHOLD and len(company_name) > 10:
+            company_name = company_name[:10] + "..."
+
+        project_info = "Brak projektu"
+        if tender.project:
+            project_info = tender.project.skrot if tender.project.skrot else tender.project.nazwa_projektu
+
+        header_label = f"{company_name} ({project_info})"
+        formatted_tender_headers[tender.id] = header_label
 
     unit_prices_query = UnitPrice.query.join(WorkType).join(Tender)
     if category_filter:
         unit_prices_query = unit_prices_query.filter(UnitPrice.id_kategorii == category_filter)
-    if tender_ids_filter:
-        unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_(tender_ids_filter))
+    # Filtruj ceny jednostkowe tylko dla ofert, które faktycznie zostaną wyświetlone
+    if all_tenders: # Sprawdź, czy all_tenders nie jest puste
+        unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_([t.id for t in all_tenders]))
+    else: # Jeśli nie ma ofert do wyświetlenia, nie pobieraj cen jednostkowych
+        unit_prices_query = unit_prices_query.filter(False) # Zwróć pusty wynik
+
     all_unit_prices = unit_prices_query.all()
 
     prices_table = {}
@@ -396,17 +465,20 @@ def unit_prices_analysis():
         })
 
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    # all_available_tenders do filtra ofert - to jest pełna lista, nie obcinamy jej
     all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
 
     return render_template(
         'unit_prices_analysis.html',
         all_work_types=all_work_types,
-        all_tenders=all_tenders,
+        all_tenders=all_tenders, # Nadal przekazujemy all_tenders, ale już obcięte/domyślne
         prices_table=prices_table,
         categories=categories,
         all_available_tenders=all_available_tenders,
         selected_category=category_filter,
         selected_tenders=tender_ids_filter,
+        formatted_tender_headers=formatted_tender_headers,
+        tenders_truncated=tenders_truncated, # Nowa flaga
         title='Analiza cen jednostkowych'
     )
 
@@ -450,7 +522,7 @@ def new_global_unit_price():
                 nazwa_roboty=work_type.name if work_type else None,
                 jednostka_miary=form.jednostka_miary.data,
                 cena_jednostkowa=form.cena_jednostkowa.data,
-                id_oferty=tender_id,
+                id_oferty=form.id_oferty.data,
                 id_kategorii=category_id,
                 uwagi=form.uwagi.data
             )

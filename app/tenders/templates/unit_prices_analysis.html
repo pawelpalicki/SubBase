@@ -46,14 +46,20 @@
         </div>
     </div>
 
-    {% if all_work_types %}
+    {% if tenders_truncated %}
+    <div class="alert alert-info" role="alert">
+        Wybrano więcej niż 20 ofert. Wyświetlono tylko 20 najnowszych z wybranych.
+    </div>
+{% endif %}
+
+{% if all_work_types %}
     <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered" id="price-analysis-table">
             <thead>
                 <tr>
                     <th>Nazwa roboty</th>
-                    {% for tender in all_tenders %}
-                    <th>{{ tender.firma.nazwa_firmy }} ({% if tender.project %}{{ tender.project.nazwa_projektu }}{% else %}Brak projektu{% endif %})</th>
+                    {% for tender_id, header_label in formatted_tender_headers.items() %}
+                    <th>{{ header_label }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -62,7 +68,7 @@
                 <tr>
                     <td data-label="Nazwa roboty">{{ work_type.name }}</td>
                     {% for tender in all_tenders %}
-                    <td data-label="{{ tender.firma.nazwa_firmy }} ({% if tender.project %}{{ tender.project.nazwa_projektu }}{% else %}Brak projektu{% endif %})" class="text-right">
+                    <td data-label="{{ formatted_tender_headers[tender.id] }}" class="text-right">
                         {% if prices_table[work_type.id] and prices_table[work_type.id][tender.id] %}
                             {% set price_data = prices_table[work_type.id][tender.id] %}
                             {% for price_entry in price_data %}
