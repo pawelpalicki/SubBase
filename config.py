@@ -33,19 +33,17 @@ class Config:
     GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME')
 
     # --- Dynamiczna konfiguracja Google Credentials ---
-    # Ta sekcja sprawia, że kod jest uniwersalny
     google_creds_json_str = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    GOOGLE_CREDS_OBJECT = None
 
     if google_creds_json_str:
-        # Jeśli dane logowania są w zmiennej środowiskowej (np. Replit Secrets)
-        # Zapisz je do tymczasowego pliku, którego ścieżkę przekażemy do os.environ
-        creds_path = os.path.join(basedir, 'google-credentials.json')
-        with open(creds_path, 'w') as f:
-            f.write(google_creds_json_str)
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = creds_path
-        print("KONFIGURACJA: Użyto danych logowania Google Cloud z zmiennej środowiskowej.")
+        try:
+            GOOGLE_CREDS_OBJECT = json.loads(google_creds_json_str)
+            print("KONFIGURACJA: Pomyślnie wczytano dane logowania Google Cloud ze zmiennej środowiskowej (w pamięci).")
+        except json.JSONDecodeError:
+            print("BŁĄD KONFIGURACJI: Nie udało się sparsować JSON z GOOGLE_APPLICATION_CREDENTIALS_JSON.")
     elif os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
-        # Jeśli zmienna wskazuje na istniejący plik (standardowe podejście)
+        # Jeśli zmienna wskazuje na istniejący plik (standardowe podejście dla środowiska lokalnego)
         print(f"KONFIGURACJA: Użyto danych logowania Google Cloud z pliku: {os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')}")
     else:
         print("KONFIGURACJA: Brak skonfigurowanych danych logowania Google Cloud. Operacje na GCS będą niedostępne.")
