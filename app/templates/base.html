@@ -70,7 +70,7 @@
                 <!-- Przyciski akcji i menu użytkownika -->
                 <ul class="navbar-nav ms-auto align-items-center">
                      <!-- Ustawienia i słowniki (dla admina) -->
-                    {% if current_user.is_authenticated and current_user.username != 'ptbnickel' %}
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-gear-fill me-1"></i>Ustawienia
