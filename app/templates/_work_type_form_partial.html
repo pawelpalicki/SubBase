@@ -10,7 +10,7 @@
     <div class="mb-3">
         {{ form.id_kategorii.label(class="form-label") }}
         <div class="input-group">
-            {{ form.id_kategorii(class="form-select" + (' is-invalid' if form.id_kategorii.errors else ''), id='work_type_category_select_modal') }}
+            {{ form.id_kategorii(class="form-select select2-enable" + (' is-invalid' if form.id_kategorii.errors else ''), id='work_type_category_select_modal') }}
             <button type="button" class="btn btn-outline-secondary js-open-secondary-modal"
                         data-url="{{ url_for('main.add_category') }}"
                         data-title="Dodaj nową kategorię">

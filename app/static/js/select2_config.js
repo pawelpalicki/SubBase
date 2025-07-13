@@ -10,12 +10,15 @@ window.Select2Config = {
         }
     },
 
-    initWithPlaceholder: function(selector, placeholder, allowClear = true) {
+    initWithPlaceholder: function(selector, placeholder, allowClear = true, dropdownParent = null) {
         const config = {
             ...this.defaultConfig,
             placeholder: placeholder,
             allowClear: allowClear
         };
+        if (dropdownParent) {
+            config.dropdownParent = dropdownParent;
+        }
         $(selector).select2(config);
     },
 

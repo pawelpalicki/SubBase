@@ -12,7 +12,7 @@
             <form method="GET" action="{{ url_for('tenders.list_tenders') }}">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-5">
-                        <label for="id_firmy" class="form-label">Firma</label>
+                        <label for="filter_id_firmy" class="form-label">Firma</label>
                         <select name="id_firmy" id="filter_id_firmy" class="form-select select2-enable">
                             <option value="">Wszystkie firmy</option>
                             {% for firma in form.id_firmy.choices %}
@@ -23,7 +23,7 @@
                         </select>
                     </div>
                     <div class="col-md-5">
-                        <label for="id_projektu" class="form-label">Projekt</label>
+                        <label for="filter_id_projektu" class="form-label">Projekt</label>
                         <select name="id_projektu" id="filter_id_projektu" class="form-select select2-enable">
                             <option value="">Wszystkie projekty</option>
                             {% for projekt in projects %}

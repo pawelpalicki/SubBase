@@ -1614,66 +1614,74 @@ def delete_category(category_id):
 @main.route('/api/work_types', methods=['GET', 'POST'])
 @login_required
 def add_work_type():
-    from app.forms import WorkTypeForm
     form = WorkTypeForm()
+    template = '_work_type_form_partial.html'
 
-    if request.method == 'POST': # Only process POST for form submission
-        if form.validate_on_submit():
-            try:
-                existing = WorkType.query.filter(func.lower(WorkType.name) == func.lower(form.name.data)).first()
-                if existing:
-                    # Return JSON with error if work type already exists
-                    return jsonify({'success': False, 'errors': {'name': ['Ta nazwa roboty już istnieje.']}}), 400
-                
-                new_work_type = WorkType(
-                    name=form.name.data,
-                    id_kategorii=form.id_kategorii.data
-                )
-                db.session.add(new_work_type)
-                db.session.commit()
-                return jsonify({'success': True, 'id': new_work_type.id, 'name': new_work_type.name}), 201
-            except SQLAlchemyError as e:
-                db.session.rollback()
-                # Return JSON with database error
-                return jsonify({'success': False, 'errors': {'_form': [f'Błąd bazy danych: {str(e)}']}}), 500
-        else:
-            # Return JSON with validation errors
-            return jsonify({'success': False, 'errors': form.errors}), 400
+    if form.validate_on_submit():
+        try:
+            existing = WorkType.query.filter(func.lower(WorkType.name) == func.lower(form.name.data)).first()
+            if existing:
+                return jsonify({'success': False, 'errors': {'name': ['Ta nazwa roboty już istnieje.']}}), 422
+            
+            new_work_type = WorkType(
+                name=form.name.data,
+                id_kategorii=form.id_kategorii.data
+            )
+            db.session.add(new_work_type)
+            db.session.commit()
+            return jsonify({'success': True, 'id': new_work_type.id, 'name': new_work_type.name}), 201
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'errors': {'_form': [f'Błąd bazy danych: {str(e)}']}}), 500
     
-    # For GET request, render the form fragment
-    # Wstępne wypełnienie z parametrów GET
-    if request.method == 'GET':
-        work_type_name = request.args.get('work_type_name')
-        category_id = request.args.get('category_id')
-        if work_type_name:
-            form.name.data = work_type_name
-        if category_id:
-            form.id_kategorii.data = int(category_id)
+    if request.method == 'POST': # Validation failed
+        return jsonify({'success': False, 'errors': form.errors}), 422
+
+    # For GET request, pre-populate form from query args if present
+    work_type_name = request.args.get('work_type_name')
+    category_id = request.args.get('category_id')
+    if work_type_name:
+        form.name.data = work_type_name
+    if category_id:
+        form.id_kategorii.data = int(category_id)
     
-    return render_template('work_type_form_modal.html', form=form)
+    # Render only the form fragment if it's an AJAX request
+    if request.args.get('_partial') == 'true':
+        return render_template('_work_type_form_partial.html', form=form)
+    else:
+        # Otherwise, render the full page (e.g., for direct access)
+        return render_template('work_type_form.html', form=form, title='Nowy Rodzaj Roboty', back_url=url_for('main.list_work_types'))
 
 @main.route('/api/categories', methods=['GET', 'POST'])
 @login_required
 def add_category():
-    from app.forms import CategoryForm # Import CategoryForm here
-    form = CategoryForm() # Instantiate the form
+    form = CategoryForm()
+    template = '_category_form_partial.html'
+
     if form.validate_on_submit():
         try:
             existing = Category.query.filter(func.lower(Category.nazwa_kategorii) == func.lower(form.name.data)).first()
             if existing:
-                form.name.errors.append('Ta kategoria już istnieje.')
-                return render_template('category_form_modal.html', form=form), 400
+                return jsonify({'success': False, 'errors': {'name': ['Ta kategoria już istnieje.']}}), 422
+            
             new_category = Category(nazwa_kategorii=form.name.data)
             db.session.add(new_category)
             db.session.commit()
             return jsonify({'success': True, 'id': new_category.id, 'name': new_category.nazwa_kategorii}), 201
         except SQLAlchemyError as e:
             db.session.rollback()
-            form.name.errors.append(f'Błąd bazy danych: {str(e)}')
-            return render_template('category_form_modal.html', form=form), 500
-    
-    # For GET request or validation errors, render the form fragment
-    return render_template('category_form_modal.html', form=form)
+            return jsonify({'success': False, 'errors': {'_form': [f'Błąd bazy danych: {str(e)}']}}), 500
+
+    if request.method == 'POST': # Validation failed
+        return jsonify({'success': False, 'errors': form.errors}), 422
+
+    # For GET request, render the modal content
+    # Render only the form fragment if it's an AJAX request
+    if request.args.get('_partial') == 'true':
+        return render_template('_category_form_partial.html', form=form)
+    else:
+        # Otherwise, render the full page (e.g., for direct access)
+        return render_template('simple_category_form.html', form=form, title='Nowa Kategoria', back_url=url_for('main.list_categories'))
 
 @main.route('/api/categories/form', methods=['GET', 'POST'])
 @login_required

@@ -1,131 +1,157 @@
 $(document).ready(function() {
-    // Obsługa modala dla dynamicznych formularzy (np. dodawanie projektu, kategorii)
-    $('#mainModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Przycisk, który wywołał modal
-        var url = button.data('url'); // Pobierz URL z atrybutu data-url
-        var title = button.data('title'); // Pobierz tytuł z atrybutu data-title
+    var mainModal = $('#mainModal');
 
+    mainModal.on('show.bs.modal', function (event) {
         var modal = $(this);
-        modal.find('.modal-title').text(title);
-        modal.find('.modal-body').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Ładowanie...</span></div></div>'); // Pokaż spinner ładowania
+        var button = $(event.relatedTarget); // This can be an empty jQuery object or undefined
+        var url = ''; // Initialize url to an empty string
+        var title = '';
+        var updateTargetSelector = '';
 
-        // Załaduj zawartość formularza przez AJAX
-        $.get(url, function(data) {
-            modal.find('.modal-body').html(data);
-            // Ponownie zainicjuj Select2, jeśli formularz go używa
-            modal.find('select.select2-multiple').select2({
-                dropdownParent: modal.find('.modal-body')
+        // Determine URL, title, and updateTargetSelector based on how the modal was opened
+        if (button.length > 0) { // Modal opened by a button click
+            url = button.data('url') || '';
+            title = button.data('title') || '';
+            updateTargetSelector = button.data('update-target') || '';
+
+            // Add _partial=true only if it's not already there
+            if (url && !url.includes('_partial=true')) {
+                url = url + (url.includes('?') ? '&' : '?') + '_partial=true';
+            } else if (!url) { // If url was initially empty, just add _partial=true
+                url = '_partial=true';
+            }
+
+            modal.data('triggerElement', button); // Store the trigger element
+            modal.data('url', url); // Store the URL for nested modal logic
+            modal.data('update-target', updateTargetSelector);
+            modal.find('.modal-title').text(title);
+
+        } else { // Modal opened programmatically (e.g., after secondary modal closes)
+            // Retrieve stored data from the modal itself
+            url = modal.data('url') || '';
+            title = modal.find('.modal-title').text() || ''; // Keep existing title
+            updateTargetSelector = modal.data('update-target') || '';
+        }
+
+        // Always show loading spinner and load content
+        modal.find('.modal-body').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Ładowanie...</span></div></div>');
+
+        // Use the determined URL for loading content
+        if (url) {
+            $.get(url, function(data) {
+                modal.find('.modal-body').html(data);
+                if (window.Select2Config) {
+                modal.find('select.select2-enable').each(function() {
+                    var $this = $(this);
+                    // Destroy existing Select2 instance if it exists
+                    if ($this.data('select2')) {
+                        $this.select2('destroy');
+                    }
+                    // Initialize with dynamic dropdownParent
+                    window.Select2Config.initWithPlaceholder(this, $this.data('placeholder') || 'Wybierz...', true, modal.find('.modal-body'));
+                });
+
+                // --- FIX: Set selected category if category_id is in URL --- 
+                var categoryIdFromUrl = new URLSearchParams(url).get('category_id');
+                if (categoryIdFromUrl) {
+                    var categorySelect = modal.find('#work_type_category_select_modal');
+                    if (categorySelect.length) {
+                        categorySelect.val(categoryIdFromUrl).trigger('change');
+                    }
+                }
+            }
+            }).fail(function() {
+                modal.find('.modal-body').html('<p class="text-danger">Nie udało się załadować formularza.</p>');
             });
-            modal.find('select.select2-single').select2({
-                dropdownParent: modal.find('.modal-body')
-            });
-        }).fail(function() {
-            modal.find('.modal-body').html('<p class="text-danger">Nie udało się załadować formularza.</p>');
-        });
+        } else {
+            modal.find('.modal-body').html('<p class="text-danger">Błąd: Brak URL do załadowania treści modala.</p>');
+        }
     });
 
-    // Obsługa wysyłania formularza wewnątrz modala
-    $('#mainModal').on('submit', 'form', function(e) {
-        e.preventDefault(); // Zapobiegaj domyślnej wysyłce formularza
+    mainModal.on('submit', 'form', function(e) {
+        e.preventDefault(); 
 
         var form = $(this);
-        var url = form.attr('action') || $('#mainModal').data('url'); // Użyj action formularza lub data-url modala
+        var url = form.attr('action');
         var method = form.attr('method') || 'POST';
-        var formData = new FormData(form[0]); // Użyj FormData do obsługi plików i innych pól
+        var formData = new FormData(form[0]);
 
-        // Usuń poprzednie błędy walidacji
-        form.find('.invalid-feedback').remove();
         form.find('.is-invalid').removeClass('is-invalid');
+        form.find('.invalid-feedback').remove();
+        form.find('.alert').remove();
 
         $.ajax({
             url: url,
             method: method,
             data: formData,
-            processData: false, // Ważne: nie przetwarzaj danych
-            contentType: false, // Ważne: nie ustawiaj typu zawartości
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.success) {
-                    // Zamknij modal
-                    $('#mainModal').modal('hide');
-                    // Wyświetl komunikat sukcesu
-                    toastr.success('Operacja zakończona sukcesem!');
-
-                    // Odśwież pole select w formularzu głównym, jeśli istnieje
-                    var selectField = $('#id_projektu'); // ID pola select w głównym formularzu
-                    if (selectField.length) {
-                        // Zniszcz istniejącą instancję Select2
-                        if (selectField.data('select2')) {
-                            selectField.select2('destroy');
-                        }
-                        // Dodaj nową opcję
-                        var newOption = new Option(response.name, response.id, true, true);
-                        selectField.append(newOption);
-                        // Ustaw nowo dodany element jako wybrany
-                        selectField.val(response.id);
-                        // Ponownie zainicjuj Select2
-                        selectField.select2({
-                            placeholder: "--- Brak projektu ---", // Ustaw placeholder
-                            allowClear: true // Pozwól na wyczyszczenie wyboru
-                        });
-                        selectField.trigger('change'); // Wywołaj zdarzenie zmiany, aby Select2 odświeżył swój wygląd
-                    }
-                    // Możesz też odświeżyć inne pola Select2, jeśli są powiązane
-                    // np. dla kategorii, typów robót itp.
-                    var workTypeSelect = $('#id_work_type');
-                    if (workTypeSelect.length && response.type === 'work_type') { // Przykład dla typu roboty
-                        var newWorkTypeOption = new Option(response.name, response.id, true, true);
-                        workTypeSelect.append(newWorkTypeOption).trigger('change');
-                        workTypeSelect.val(response.id).trigger('change');
-                    }
-                    var categorySelect = $('#id_kategorii');
-                    if (categorySelect.length && response.type === 'category') { // Przykład dla kategorii
-                        var newCategoryOption = new Option(response.name, response.id, true, true);
-                        categorySelect.append(newCategoryOption).trigger('change');
-                        categorySelect.val(response.id).trigger('change');
-                    }
-
-
+                    mainModal.modal('hide');
+                    var updateTargetSelector = mainModal.data('update-target');
+                    // Emit a custom event with the new item's data
+                    $(document).trigger('itemAddedToSelect2', {
+                        id: response.id,
+                        name: response.name,
+                        updateTargetSelector: updateTargetSelector
+                    });
                 } else {
-                    // Wyświetl błędy walidacji
                     if (response.errors) {
                         $.each(response.errors, function(field, messages) {
                             var input = form.find('[name="' + field + '"]');
-                            if (input.length) {
-                                input.addClass('is-invalid');
-                                $.each(messages, function(i, message) {
-                                    input.after('<div class="invalid-feedback">' + message + '</div>');
-                                });
-                            } else {
-                                // Błędy globalne formularza (np. _form)
-                                form.prepend('<div class="alert alert-danger">' + messages.join('<br>') + '</div>');
-                            }
+                            input.addClass('is-invalid');
+                            var errorContainer = $('<div class="invalid-feedback"></div>');
+                            errorContainer.html(messages.join('<br>'));
+                            input.after(errorContainer);
                         });
                     } else {
-                        toastr.error('Wystąpił nieznany błąd podczas przetwarzania formularza.');
+                        var generalError = response.message || 'Wystąpił nieznany błąd.';
+                        form.prepend('<div class="alert alert-danger">' + generalError + '</div>');
                     }
                 }
             },
             error: function(jqXHR) {
-                // Obsługa błędów HTTP (np. 400 Bad Request, 500 Internal Server Error)
-                if (jqXHR.status >= 400 && jqXHR.status < 500) {
+                var form = mainModal.find('form');
+                if ((jqXHR.status === 400 || jqXHR.status === 422) && jqXHR.responseJSON) {
                     var errorData = jqXHR.responseJSON;
                     if (errorData && errorData.errors) {
                         $.each(errorData.errors, function(field, messages) {
                             var input = form.find('[name="' + field + '"]');
                             if (input.length) {
                                 input.addClass('is-invalid');
-                                $.each(messages, function(i, message) {
-                                    input.after('<div class="invalid-feedback">' + message + '</div>');
-                                });
+                                var errorContainer = input.next('.invalid-feedback');
+                                if (errorContainer.length === 0) {
+                                    errorContainer = $('<div class="invalid-feedback"></div>');
+                                    input.after(errorContainer);
+                                }
+                                errorContainer.html(messages.join('<br>'));
                             }
                         });
                     } else {
-                        toastr.error('Wystąpił błąd serwera: ' + (jqXHR.responseJSON && jqXHR.responseJSON.message ? jqXHR.responseJSON.message : jqXHR.statusText));
+                        var generalError = (errorData && errorData.message) ? errorData.message : 'Wystąpił błąd walidacji.';
+                        form.prepend('<div class="alert alert-danger">' + generalError + '</div>');
                     }
                 } else {
-                    toastr.error('Wystąpił błąd komunikacji z serwerem.');
+                    var errorMessage = (jqXHR.responseJSON && jqXHR.responseJSON.message) ? jqXHR.responseJSON.message : 'Wystąpił błąd komunikacji z serwerem.';
+                    form.prepend('<div class="alert alert-danger">' + errorMessage + '</div>');
                 }
             }
         });
+    });
+
+    // --- FIX: Simplified focus management on modal hide ---
+    mainModal.on('hide.bs.modal', function (e) {
+        if (document.activeElement) {
+            $(document.activeElement).blur(); // Remove focus from any element inside the modal
+        }
+        // Optionally, set focus to body or a known element outside the modal
+        $('body').focus(); 
+    });
+
+    mainModal.on('hidden.bs.modal', function (e) {
+        // Clear modal content and data after it's fully hidden
+        $(this).find('.modal-body').html('');
+        $(this).removeData('update-target').removeData('triggerElement');
     });
 });
