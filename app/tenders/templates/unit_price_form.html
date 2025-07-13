@@ -34,7 +34,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#mainModal"
                                     data-url="{{ url_for('main.add_work_type') }}"
-                                    data-target-select="#id_work_type_select"
+                                    data-update-target="#id_work_type_select"
                                     data-title="Dodaj nową nazwę roboty">+</button>
                                 {% if form.id_work_type.errors %}
                                     <div class="invalid-feedback">
@@ -85,7 +85,7 @@
                         </div>
                         <div class="text-end">
                             {% if show_tender_select %}<a href="{{ url_for('tenders.list_all_unit_prices') }}" class="btn btn-secondary">Anuluj</a>{% else %}<a href="{{ url_for('tenders.tender_details', tender_id=tender_id) }}" class="btn btn-secondary">Anuluj</a>{% endif %}
-                            {{ form.submit(class="btn btn-primary") }}
+                            {{ form.submit(class="btn btn-primary", id="submitMainFormBtn") }}
                         </div>
                     </form>
                 </div>

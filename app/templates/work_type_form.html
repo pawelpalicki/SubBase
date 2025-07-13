@@ -21,7 +21,7 @@
     {{ form.id_kategorii.label(class="form-label") }}
     <div class="input-group">
         {{ form.id_kategorii(class="form-select" + (' is-invalid' if form.id_kategorii.errors else ''), id='work_type_category_select') }}
-        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" data-url="{{ url_for('main.get_category_form') }}" data-target-select="#work_type_category_select" data-form-title="Dodaj nową kategorię">
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#mainModal" data-url="{{ url_for('main.get_category_form') }}" data-update-target="#work_type_category_select" data-form-title="Dodaj nową kategorię">
             <i class="bi bi-plus-lg"></i> Dodaj
         </button>
         {% for error in form.id_kategorii.errors %}

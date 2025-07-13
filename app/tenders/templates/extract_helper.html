@@ -7,6 +7,7 @@
         max-width: 100%;
         padding-left: 15px;
         padding-right: 15px;
+        /* padding-top: 60px; Zwiększ padding-top, aby uniknąć nakładania się z navbar */
     }
     .split-container {
         display: flex;
@@ -36,8 +37,8 @@
 </style>
 
 <div class="full-width-container">
-    <h2>{{ title }}</h2>
-    <p><strong>Oferta:</strong> {{ tender.nazwa_oferty }}</p>
+    <h3>{{ title }}</h3> 
+    <p><strong>Oferta:</strong> {{ tender.nazwa_oferty }}{% if tender.project %} ({{ tender.project.nazwa_projektu }}){% endif %}{% if tender.firma %} - {{ tender.firma.nazwa_firmy }}{% endif%}</p>
 
     <div class="split-container">
         <div id="split-left" class="split">

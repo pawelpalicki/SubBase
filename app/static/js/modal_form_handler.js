@@ -2,6 +2,8 @@ $(document).ready(function() {
     var mainModal = $('#mainModal');
 
     mainModal.on('show.bs.modal', function (event) {
+        // Disable the main form's submit button when modal opens
+        $('#submitMainFormBtn').prop('disabled', true);
         var modal = $(this);
         var button = $(event.relatedTarget); // This can be an empty jQuery object or undefined
         var url = ''; // Initialize url to an empty string
@@ -92,17 +94,27 @@ $(document).ready(function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: function(response, textStatus, jqXHR) {
+                // Special handling for login form
+                if (url.includes('/login')) {
+                    // For login, always reload the page on success (2xx status)
+                    // This handles both successful redirects and cases where the login form
+                    // is re-rendered with flashed messages (e.g., invalid credentials).
+                    window.location.reload();
+                    return; // Stop further processing for login form
+                }
+
+                // Original logic for other forms (expecting JSON response)
                 if (response.success) {
                     mainModal.modal('hide');
                     var updateTargetSelector = mainModal.data('update-target');
-                    // Emit a custom event with the new item's data
                     $(document).trigger('itemAddedToSelect2', {
                         id: response.id,
                         name: response.name,
                         updateTargetSelector: updateTargetSelector
                     });
                 } else {
+                    // Handle validation errors or other non-successful JSON responses
                     if (response.errors) {
                         $.each(response.errors, function(field, messages) {
                             var input = form.find('[name="' + field + '"]');
@@ -117,7 +129,18 @@ $(document).ready(function() {
                     }
                 }
             },
-            error: function(jqXHR) {
+            error: function(jqXHR, textStatus, errorThrown) {
+                // Special handling for login form
+                if (url.includes('/login')) {
+                    // For login, if an actual HTTP error occurs (e.g., 500), display a generic message.
+                    // Flask's login endpoint typically returns 200 OK with HTML for failed logins,
+                    // which would be caught by the 'success' callback and trigger a reload.
+                    var errorMessage = 'Wystąpił błąd komunikacji z serwerem podczas logowania. Spróbuj ponownie.';
+                    form.prepend('<div class="alert alert-danger">' + errorMessage + '</div>');
+                    return; // Stop further processing for login form
+                }
+
+                // Original logic for other forms
                 var form = mainModal.find('form');
                 if ((jqXHR.status === 400 || jqXHR.status === 422) && jqXHR.responseJSON) {
                     var errorData = jqXHR.responseJSON;
@@ -159,5 +182,7 @@ $(document).ready(function() {
         // Clear modal content and data after it's fully hidden
         $(this).find('.modal-body').html('');
         $(this).removeData('triggerElement');
+        // Enable the main form's submit button when modal closes
+        $('#submitMainFormBtn').prop('disabled', false);
     });
 });

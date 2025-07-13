@@ -26,7 +26,7 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-            <form method="POST">
+            <form method="POST" action="{{ url_for('auth.login') }}">
                 <div class="mb-3">
                     <label for="username" class="form-label">Nazwa użytkownika</label>
                     <input type="text" class="form-control" id="username" name="username" required autofocus>

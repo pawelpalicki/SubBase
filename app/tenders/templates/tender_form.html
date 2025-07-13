@@ -75,6 +75,7 @@
         </div>
         
         {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('tenders.list_tenders') }}" class="btn btn-secondary ms-2">Anuluj</a>
     </form>
 </div>
 {% endblock %}

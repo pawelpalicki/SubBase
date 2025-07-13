@@ -117,7 +117,7 @@ def extract_data(tender_id):
             db.session.rollback()
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
 
-    if request.method == 'GET' and not request.args.get('from_submit'):
+    if request.method == 'GET':
         file_content = None
         if not tender.storage_path:
             flash("Brak pliku do przetworzenia.", "warning")

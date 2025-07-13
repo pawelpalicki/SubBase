@@ -117,4 +117,29 @@ window.Select2Config = {
 
 $(document).ready(function() {
     window.Select2Config.initializeAll();
+
+    // Listen for the custom event to update Select2 dropdowns
+    $(document).on('itemAddedToSelect2', function(event, data) {
+        var newItemId = data.id;
+        var newItemName = data.name;
+        var updateTargetSelector = data.updateTargetSelector;
+
+        if (updateTargetSelector) {
+            var $selectElement = $(updateTargetSelector);
+            if ($selectElement.length) {
+                // Destroy existing Select2 instance if it exists
+                if ($selectElement.data('select2')) {
+                    $selectElement.select2('destroy');
+                }
+                // Create a new option
+                var newOption = new Option(newItemName, newItemId, true, true);
+                // Append it to the select
+                $selectElement.append(newOption);
+                // Set the new item as selected and trigger change to update Select2
+                $selectElement.val(newItemId).trigger('change');
+                // Re-initialize Select2 on the element
+                window.Select2Config.initWithPlaceholder($selectElement, $selectElement.data('placeholder') || 'Wybierz...', true);
+            }
+        }
+    });
 });
