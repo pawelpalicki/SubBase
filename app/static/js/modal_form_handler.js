@@ -53,10 +53,16 @@ $(document).ready(function() {
 
                 // --- FIX: Set selected category if category_id is in URL --- 
                 var categoryIdFromUrl = new URLSearchParams(url).get('category_id');
-                if (categoryIdFromUrl) {
+                var selectedCategoryId = modal.data('selectedCategoryId') || categoryIdFromUrl;
+                
+                if (selectedCategoryId) {
                     var categorySelect = modal.find('#work_type_category_select_modal');
+                    console.log('categorySelect length:', categorySelect.length);
                     if (categorySelect.length) {
-                        categorySelect.val(categoryIdFromUrl).trigger('change');
+                        setTimeout(function() {
+                            categorySelect.val(selectedCategoryId).trigger('change');
+                            
+                        }, 50); // Small delay to ensure Select2 is ready
                     }
                 }
             }
@@ -152,6 +158,6 @@ $(document).ready(function() {
     mainModal.on('hidden.bs.modal', function (e) {
         // Clear modal content and data after it's fully hidden
         $(this).find('.modal-body').html('');
-        $(this).removeData('update-target').removeData('triggerElement');
+        $(this).removeData('triggerElement');
     });
 });

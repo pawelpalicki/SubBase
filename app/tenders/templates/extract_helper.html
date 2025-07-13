@@ -121,14 +121,6 @@
                             {{ unit_price_form.id_kategorii.label(class="form-label") }}
                             <div class="input-group">
                                 {{ unit_price_form.id_kategorii(class="form-control select2-enable" + (' is-invalid' if unit_price_form.id_kategorii.errors else ''), id="id_kategorii_select") }}
-                                <button class="btn btn-outline-secondary add-new-item-btn" type="button" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#mainModal" 
-                                        data-url="{{ url_for('main.add_category') }}" 
-                                        data-title="Dodaj nową kategorię"
-                                        data-update-target="#id_kategorii_select">
-                                    <i class="bi bi-plus-circle me-1"></i>Dodaj
-                                </button>
                                 {% for error in unit_price_form.id_kategorii.errors %}
                                     <div class="invalid-feedback">{{ error }}</div>
                                 {% endfor %}
@@ -249,14 +241,18 @@
         if (data.updateTargetSelector === '#id_work_type_select') {
             var selectField = $(data.updateTargetSelector);
             if (selectField.length) {
-                var newOption = new Option(data.name, data.id, true, true);
-                selectField.append(newOption).val(data.id).trigger('change');
+                setTimeout(function() {
+                    var newOption = new Option(data.name, data.id, true, true);
+                    selectField.append(newOption).val(data.id).trigger('change');
+                }, 50); // Small delay
             }
         } else if (data.updateTargetSelector === '#id_kategorii_select') {
             var selectField = $(data.updateTargetSelector);
             if (selectField.length) {
-                var newOption = new Option(data.name, data.id, true, true);
-                selectField.append(newOption).val(data.id).trigger('change');
+                setTimeout(function() {
+                    var newOption = new Option(data.name, data.id, true, true);
+                    selectField.append(newOption).val(data.id).trigger('change');
+                }, 50); // Small delay
             }
         }
     });

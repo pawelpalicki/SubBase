@@ -205,6 +205,8 @@
                         console.log('Attempting to load mainModal with URL:', newUrl.href);
                         mainModal.find('.modal-body').load(newUrl.href, function() {
                             secondaryModal.modal('hide');
+                            // Store the category_id directly on mainModal for later use
+                            mainModal.data('selectedCategoryId', response.id);
                         });
                     } else {
                         $('#secondaryModal .modal-body').html(response.form_html || '<p>Wystąpił błąd.</p>');
