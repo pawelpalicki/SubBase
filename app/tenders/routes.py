@@ -609,25 +609,56 @@ def analysis_dashboard():
     """
     work_types = WorkType.query.order_by(WorkType.name).all()
     selected_work_type_id = request.args.get('work_type_id', type=int)
-    # Odczytaj ID pozycji z uwagami, które mają być włączone do analizy
     included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Nieprawidłowy format daty 'od'. Użyj formatu RRRR-MM-DD.", "warning")
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Nieprawidłowy format daty 'do'. Użyj formatu RRRR-MM-DD.", "warning")
+
+    # Pobierz zakres dat dla walidacji i ustawień datapickera
+    min_tender_date, max_tender_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
+
+    # Walidacja dat po stronie serwera
+    if date_from and min_tender_date and date_from < min_tender_date:
+        flash(f"Data 'od' ({date_from_str}) jest wcześniejsza niż najstarsza oferta ({min_tender_date}). Filtr daty 'od' został zignorowany.", "warning")
+        date_from = None
+        date_from_str = ''
+    
+    if date_to and max_tender_date and date_to > max_tender_date:
+        flash(f"Data 'do' ({date_to_str}) jest późniejsza niż najnowsza oferta ({max_tender_date}). Filtr daty 'do' został zignorowany.", "warning")
+        date_to = None
+        date_to_str = ''
 
     stats = {}
     source_data = []
     if selected_work_type_id:
-        # Podstawowe zapytanie o ceny dla wybranego rodzaju roboty
-        base_query = (db.session.query(UnitPrice.cena_jednostkowa)
-                        .filter(UnitPrice.id_work_type == selected_work_type_id))
+        base_query_stats = (db.session.query(UnitPrice.cena_jednostkowa)
+                            .join(Tender, UnitPrice.id_oferty == Tender.id)
+                            .filter(UnitPrice.id_work_type == selected_work_type_id))
 
-        # Warunek dołączenia pozycji: brak uwag LUB ID na liście dołączonych
+        if date_from:
+            base_query_stats = base_query_stats.filter(Tender.data_otrzymania >= date_from)
+        if date_to:
+            base_query_stats = base_query_stats.filter(Tender.data_otrzymania <= date_to)
+
         include_condition = or_(
             UnitPrice.uwagi.is_(None), 
             UnitPrice.uwagi == '',
             UnitPrice.id.in_(included_ids)
         )
 
-        # Pobieranie cen do statystyk z uwzględnieniem ręcznego wyboru
-        prices = base_query.filter(include_condition).all()
+        prices = base_query_stats.filter(include_condition).all()
         price_values = [float(p[0]) for p in prices]
         
         if price_values:
@@ -639,8 +670,7 @@ def analysis_dashboard():
                 'offer_count': len(price_values)
             }
             
-        # Pobieranie danych źródłowych (wszystkich, łącznie z uwagami)
-        source_data = (
+        base_query_source = (
             db.session.query(
                 UnitPrice.id,
                 UnitPrice.cena_jednostkowa,
@@ -656,9 +686,14 @@ def analysis_dashboard():
             .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
             .outerjoin(Project, Tender.id_projektu == Project.id)
             .filter(UnitPrice.id_work_type == selected_work_type_id)
-            .order_by(Tender.data_otrzymania.desc())
-            .all()
         )
+
+        if date_from:
+            base_query_source = base_query_source.filter(Tender.data_otrzymania >= date_from)
+        if date_to:
+            base_query_source = base_query_source.filter(Tender.data_otrzymania <= date_to)
+
+        source_data = base_query_source.order_by(Tender.data_otrzymania.desc()).all()
 
     return render_template('analysis_dashboard.html', 
                            title='Pulpit Analityczny Cen',
@@ -666,7 +701,11 @@ def analysis_dashboard():
                            selected_work_type_id=selected_work_type_id,
                            stats=stats,
                            source_data=source_data,
-                           included_ids=included_ids)
+                           included_ids=included_ids,
+                           date_from=date_from_str,
+                           date_to=date_to_str,
+                           min_tender_date=min_tender_date.strftime('%Y-%m-%d') if min_tender_date else '',
+                           max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '')
 
 @tenders_bp.route('/api/price_evolution/<int:work_type_id>')
 @login_required
@@ -675,13 +714,29 @@ def price_evolution_data(work_type_id):
     Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
     """
     included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+
     include_condition = or_(
         UnitPrice.uwagi.is_(None), 
         UnitPrice.uwagi == '',
         UnitPrice.id.in_(included_ids)
     )
 
-    data = (
+    query = (
         db.session.query(
             func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
             func.avg(UnitPrice.cena_jednostkowa)
@@ -689,10 +744,14 @@ def price_evolution_data(work_type_id):
         .join(Tender, UnitPrice.id_oferty == Tender.id)
         .filter(UnitPrice.id_work_type == work_type_id)
         .filter(include_condition)
-        .group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))
-        .order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))
-        .all()
     )
+
+    if date_from:
+        query = query.filter(Tender.data_otrzymania >= date_from)
+    if date_to:
+        query = query.filter(Tender.data_otrzymania <= date_to)
+
+    data = query.group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).all()
     
     labels = [row[0] for row in data]
     values = [float(row[1]) for row in data]
@@ -706,13 +765,29 @@ def price_by_contractor_data(work_type_id):
     Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
     """
     included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+
     include_condition = or_(
         UnitPrice.uwagi.is_(None), 
         UnitPrice.uwagi == '',
         UnitPrice.id.in_(included_ids)
     )
 
-    data = (
+    query = (
         db.session.query(
             Firmy.nazwa_firmy,
             func.avg(UnitPrice.cena_jednostkowa)
@@ -721,10 +796,14 @@ def price_by_contractor_data(work_type_id):
         .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
         .filter(UnitPrice.id_work_type == work_type_id)
         .filter(include_condition)
-        .group_by(Firmy.nazwa_firmy)
-        .order_by(func.avg(UnitPrice.cena_jednostkowa).desc())
-        .all()
     )
+
+    if date_from:
+        query = query.filter(Tender.data_otrzymania >= date_from)
+    if date_to:
+        query = query.filter(Tender.data_otrzymania <= date_to)
+
+    data = query.group_by(Firmy.nazwa_firmy).order_by(func.avg(UnitPrice.cena_jednostkowa).desc()).all()
 
     labels = [row[0] for row in data]
     values = [float(row[1]) for row in data]

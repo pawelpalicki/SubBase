@@ -9,7 +9,7 @@
         <div class="card-body">
             <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}" id="analysis-form">
                 <div class="row align-items-end">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <label for="work_type_id" class="form-label"><strong>Wybierz rodzaj roboty do analizy:</strong></label>
                         <select name="work_type_id" id="work_type_id" class="form-select select2-enable">
                             <option value="">-- Wybierz z listy --</option>
@@ -18,7 +18,15 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label">Data od:</label>
+                        <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from or '' }}" min="{{ min_tender_date }}" max="{{ max_tender_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label">Data do:</label>
+                        <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to or '' }}" min="{{ min_tender_date }}" max="{{ max_tender_date }}">
+                    </div>
+                    <div class="col-md-12 mt-3">
                         <button type="submit" class="btn btn-primary w-100">Analizuj</button>
                     </div>
                 </div>
@@ -166,7 +174,19 @@ $(document).ready(function() {
 
     {% if selected_work_type_id and stats %}
     const includedIds = new URLSearchParams(window.location.search).getAll('include');
-    const apiUrlSuffix = '&' + includedIds.map(id => `include=${id}`).join('&');
+    const dateFrom = $('#date_from').val();
+    const dateTo = $('#date_to').val();
+
+    let apiUrlSuffix = '';
+    if (includedIds.length > 0) {
+        apiUrlSuffix += '&' + includedIds.map(id => `include=${id}`).join('&');
+    }
+    if (dateFrom) {
+        apiUrlSuffix += `&date_from=${dateFrom}`;
+    }
+    if (dateTo) {
+        apiUrlSuffix += `&date_to=${dateTo}`;
+    }
 
     // Wykres Ewolucji Ceny
     $.ajax({
