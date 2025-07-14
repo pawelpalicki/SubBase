@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required
 from app import db
 from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from app.forms import TenderForm, UnitPriceForm
 from app.storage_service import get_storage_service # <-- Główny import serwisu
 import os
@@ -609,10 +609,25 @@ def analysis_dashboard():
     """
     work_types = WorkType.query.order_by(WorkType.name).all()
     selected_work_type_id = request.args.get('work_type_id', type=int)
-    
+    # Odczytaj ID pozycji z uwagami, które mają być włączone do analizy
+    included_ids = request.args.getlist('include', type=int)
+
     stats = {}
+    source_data = []
     if selected_work_type_id:
-        prices = db.session.query(UnitPrice.cena_jednostkowa).filter(UnitPrice.id_work_type == selected_work_type_id).all()
+        # Podstawowe zapytanie o ceny dla wybranego rodzaju roboty
+        base_query = (db.session.query(UnitPrice.cena_jednostkowa)
+                        .filter(UnitPrice.id_work_type == selected_work_type_id))
+
+        # Warunek dołączenia pozycji: brak uwag LUB ID na liście dołączonych
+        include_condition = or_(
+            UnitPrice.uwagi.is_(None), 
+            UnitPrice.uwagi == '',
+            UnitPrice.id.in_(included_ids)
+        )
+
+        # Pobieranie cen do statystyk z uwzględnieniem ręcznego wyboru
+        prices = base_query.filter(include_condition).all()
         price_values = [float(p[0]) for p in prices]
         
         if price_values:
@@ -623,12 +638,35 @@ def analysis_dashboard():
                 'median_price': median(price_values),
                 'offer_count': len(price_values)
             }
+            
+        # Pobieranie danych źródłowych (wszystkich, łącznie z uwagami)
+        source_data = (
+            db.session.query(
+                UnitPrice.id,
+                UnitPrice.cena_jednostkowa,
+                UnitPrice.jednostka_miary,
+                Tender.data_otrzymania,
+                Firmy.nazwa_firmy,
+                Tender.nazwa_oferty,
+                Tender.id.label('tender_id'),
+                Project.skrot.label('project_skrot'),
+                UnitPrice.uwagi
+            )
+            .join(Tender, UnitPrice.id_oferty == Tender.id)
+            .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
+            .outerjoin(Project, Tender.id_projektu == Project.id)
+            .filter(UnitPrice.id_work_type == selected_work_type_id)
+            .order_by(Tender.data_otrzymania.desc())
+            .all()
+        )
 
     return render_template('analysis_dashboard.html', 
                            title='Pulpit Analityczny Cen',
                            work_types=work_types,
                            selected_work_type_id=selected_work_type_id,
-                           stats=stats)
+                           stats=stats,
+                           source_data=source_data,
+                           included_ids=included_ids)
 
 @tenders_bp.route('/api/price_evolution/<int:work_type_id>')
 @login_required
@@ -636,14 +674,25 @@ def price_evolution_data(work_type_id):
     """
     Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
     """
-    data = db.session.query(
-        func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
-        func.avg(UnitPrice.cena_jednostkowa)
-    ).join(Tender, UnitPrice.id_oferty == Tender.id)\
-     .filter(UnitPrice.id_work_type == work_type_id)\
-     .group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))\
-     .order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))\
-     .all()
+    included_ids = request.args.getlist('include', type=int)
+    include_condition = or_(
+        UnitPrice.uwagi.is_(None), 
+        UnitPrice.uwagi == '',
+        UnitPrice.id.in_(included_ids)
+    )
+
+    data = (
+        db.session.query(
+            func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
+            func.avg(UnitPrice.cena_jednostkowa)
+        )
+        .join(Tender, UnitPrice.id_oferty == Tender.id)
+        .filter(UnitPrice.id_work_type == work_type_id)
+        .filter(include_condition)
+        .group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))
+        .order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))
+        .all()
+    )
     
     labels = [row[0] for row in data]
     values = [float(row[1]) for row in data]
@@ -656,15 +705,26 @@ def price_by_contractor_data(work_type_id):
     """
     Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
     """
-    data = db.session.query(
-        Firmy.nazwa_firmy,
-        func.avg(UnitPrice.cena_jednostkowa)
-    ).join(Tender, UnitPrice.id_oferty == Tender.id)\
-     .join(Firmy, Tender.id_firmy == Firmy.id_firmy)\
-     .filter(UnitPrice.id_work_type == work_type_id)\
-     .group_by(Firmy.nazwa_firmy)\
-     .order_by(func.avg(UnitPrice.cena_jednostkowa).desc())\
-     .all()
+    included_ids = request.args.getlist('include', type=int)
+    include_condition = or_(
+        UnitPrice.uwagi.is_(None), 
+        UnitPrice.uwagi == '',
+        UnitPrice.id.in_(included_ids)
+    )
+
+    data = (
+        db.session.query(
+            Firmy.nazwa_firmy,
+            func.avg(UnitPrice.cena_jednostkowa)
+        )
+        .join(Tender, UnitPrice.id_oferty == Tender.id)
+        .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
+        .filter(UnitPrice.id_work_type == work_type_id)
+        .filter(include_condition)
+        .group_by(Firmy.nazwa_firmy)
+        .order_by(func.avg(UnitPrice.cena_jednostkowa).desc())
+        .all()
+    )
 
     labels = [row[0] for row in data]
     values = [float(row[1]) for row in data]

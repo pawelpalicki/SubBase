@@ -7,7 +7,7 @@
             <h2>{{ title }}</h2>
         </div>
         <div class="card-body">
-            <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}">
+            <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}" id="analysis-form">
                 <div class="row align-items-end">
                     <div class="col-md-8">
                         <label for="work_type_id" class="form-label"><strong>Wybierz rodzaj roboty do analizy:</strong></label>
@@ -94,6 +94,57 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Dane Źródłowe</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}">
+                            <input type="hidden" name="work_type_id" value="{{ selected_work_type_id }}">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">W Analizie</th>
+                                        <th>Cena Jednostkowa</th>
+                                        <th>J.m.</th>
+                                        <th>Data Oferty</th>
+                                        <th>Wykonawca</th>
+                                        <th>Nazwa Oferty</th>
+                                        <th>Inwestycja</th>
+                                        <th>Uwagi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in source_data %}
+                                    <tr>
+                                        <td class="text-center">
+                                            {% if not row.uwagi %}
+                                                <span title="Tak, wliczono do analizy">✔️</span>
+                                            {% else %}
+                                                <input type="checkbox" name="include" value="{{ row.id }}" {% if row.id in included_ids %}checked{% endif %}>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ "%.2f"|format(row.cena_jednostkowa) }} zł</td>
+                                        <td>{{ row.jednostka_miary }}</td>
+                                        <td>{{ row.data_otrzymania.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ row.nazwa_firmy }}</td>
+                                        <td><a href="{{ url_for('tenders.tender_details', tender_id=row.tender_id) }}">{{ row.nazwa_oferty }}</a></td>
+                                        <td>{{ row.project_skrot or 'Brak' }}</td>
+                                        <td>{{ row.uwagi or '' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-secondary">Przelicz z uwzględnieniem wybranych</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% else %}
         <div class="alert alert-info mt-4">Brak danych cenowych dla wybranego rodzaju roboty.</div>
         {% endif %}
@@ -114,9 +165,12 @@ $(document).ready(function() {
     });
 
     {% if selected_work_type_id and stats %}
+    const includedIds = new URLSearchParams(window.location.search).getAll('include');
+    const apiUrlSuffix = '&' + includedIds.map(id => `include=${id}`).join('&');
+
     // Wykres Ewolucji Ceny
     $.ajax({
-        url: `/tenders/api/price_evolution/{{ selected_work_type_id }}`,
+        url: `/tenders/api/price_evolution/{{ selected_work_type_id }}?${apiUrlSuffix}`,
         success: function(data) {
             const ctx = document.getElementById('priceEvolutionChart').getContext('2d');
             new Chart(ctx, {
@@ -166,7 +220,7 @@ $(document).ready(function() {
 
     // Wykres Cen wg Wykonawcy
     $.ajax({
-        url: `/tenders/api/price_by_contractor/{{ selected_work_type_id }}`,
+        url: `/tenders/api/price_by_contractor/{{ selected_work_type_id }}?${apiUrlSuffix}`,
         success: function(data) {
             const ctx = document.getElementById('priceByContractorChart').getContext('2d');
             new Chart(ctx, {
