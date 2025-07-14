@@ -80,34 +80,69 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-2">
-            <div class="col-lg-4">
-                <div class="card h-100">
+        <!-- NOWA SEKCJA: Zakładki z wykresami -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Ewolucja Ceny w Czasie</h4>
+                        <h4 class="card-title">Analiza Graficzna</h4>
+                        <!-- Zakładki tutaj, w header karty -->
+                        <ul class="nav nav-tabs card-header-tabs" id="chartTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#basic-charts">Podstawowe</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#contractors-charts">Wykonawcy</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#trends-charts">Trendy</a>
+                            </li>
+                        </ul>
                     </div>
                     <div class="card-body">
-                        <canvas id="priceEvolutionChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h4 class="card-title">Średnia Cena wg Wykonawcy</h4>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="priceByContractorChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h4 class="card-title">Rozkład Cen (Histogram)</h4>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="priceDistributionChart"></canvas>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="basic-charts">
+                                <!-- Wykresy w jednej linii -->
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="card h-100">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Ewolucja Ceny w Czasie</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="priceEvolutionChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card h-100">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Średnia Cena wg Wykonawcy</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="priceByContractorChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card h-100">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Rozkład Cen (Histogram)</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="priceDistributionChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="contractors-charts">
+                                <!-- Nowe wykresy o wykonawcach -->
+                            </div>
+                            <div class="tab-pane fade" id="trends-charts">
+                                <!-- Wykresy trendów i sezonowości -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
