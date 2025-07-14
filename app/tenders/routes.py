@@ -393,8 +393,34 @@ def unit_prices_analysis():
     DEFAULT_TENDER_LIMIT = 10
     MAX_TENDER_LIMIT = 20
 
+    # Pobieranie parametrów filtrowania
     category_filter = request.args.get('category', type=int)
     tender_ids_filter = request.args.getlist('tenders', type=int)
+    status_filter = request.args.get('status', '')
+    date_from_filter = request.args.get('date_from', '')
+    date_to_filter = request.args.get('date_to', '')
+
+    # Pobierz zakres dat dla walidacji i ustawień datapickera
+    min_date, max_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
+
+    # Walidacja dat po stronie serwera
+    if date_from_filter:
+        try:
+            from_date = datetime.strptime(date_from_filter, '%Y-%m-%d').date()
+            if min_date and from_date < min_date:
+                flash(f"Data 'od' ({date_from_filter}) jest wcześniejsza niż najstarsza oferta ({min_date}). Filtr daty 'od' został zignorowany.", "warning")
+                date_from_filter = ''
+        except ValueError:
+            date_from_filter = '' # Ignoruj niepoprawny format
+    
+    if date_to_filter:
+        try:
+            to_date = datetime.strptime(date_to_filter, '%Y-%m-%d').date()
+            if max_date and to_date > max_date:
+                flash(f"Data 'do' ({date_to_filter}) jest późniejsza niż najnowsza oferta ({max_date}). Filtr daty 'do' został zignorowany.", "warning")
+                date_to_filter = ''
+        except ValueError:
+            date_to_filter = '' # Ignoruj niepoprawny format
 
     work_types_query = WorkType.query.order_by(WorkType.name)
     if category_filter:
@@ -403,34 +429,35 @@ def unit_prices_analysis():
 
     tenders_truncated = False
     
-    # Zapytanie bazowe dla ofert, zawsze sortowane od najnowszych
     base_tenders_query = Tender.query.options(
         joinedload(Tender.firma),
         joinedload(Tender.project)
     ).order_by(Tender.data_otrzymania.desc())
 
+    if status_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.status == status_filter)
+    if date_from_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.data_otrzymania >= date_from_filter)
+    if date_to_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.data_otrzymania <= date_to_filter)
+
     if tender_ids_filter:
-        # Jeśli filtry są podane, filtrujemy i ograniczamy do MAX_TENDER_LIMIT
         all_tenders = base_tenders_query.filter(Tender.id.in_(tender_ids_filter)).all()
         if len(all_tenders) > MAX_TENDER_LIMIT:
             all_tenders = all_tenders[:MAX_TENDER_LIMIT]
             tenders_truncated = True
             flash(f'Wybrano więcej niż {MAX_TENDER_LIMIT} ofert. Wyświetlono tylko {MAX_TENDER_LIMIT} najnowszych z wybranych.', 'info')
     else:
-        # Jeśli brak filtrów, domyślnie 10 najnowszych
         all_tenders = base_tenders_query.limit(DEFAULT_TENDER_LIMIT).all()
-        flash(f'Domyślnie wyświetlono {DEFAULT_TENDER_LIMIT} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
+        if not any([status_filter, date_from_filter, date_to_filter, tender_ids_filter]):
+             flash(f'Domyślnie wyświetlono {DEFAULT_TENDER_LIMIT} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
 
-    # Formatowanie nagłówków dla tabeli analizy
     formatted_tender_headers = {}
-    # Określ próg, od którego nazwy firm będą skracane
-    # Możesz dostosować tę wartość w zależności od preferencji
     SHORTEN_COMPANY_NAME_THRESHOLD = 5 
 
     for tender in all_tenders:
         company_name = tender.firma.nazwa_firmy if tender.firma else "Brak firmy"
         
-        # Skracaj nazwę firmy tylko jeśli jest wiele kolumn
         if len(all_tenders) > SHORTEN_COMPANY_NAME_THRESHOLD and len(company_name) > 10:
             company_name = company_name[:10] + "..."
 
@@ -444,11 +471,11 @@ def unit_prices_analysis():
     unit_prices_query = UnitPrice.query.join(WorkType).join(Tender)
     if category_filter:
         unit_prices_query = unit_prices_query.filter(UnitPrice.id_kategorii == category_filter)
-    # Filtruj ceny jednostkowe tylko dla ofert, które faktycznie zostaną wyświetlone
-    if all_tenders: # Sprawdź, czy all_tenders nie jest puste
+    
+    if all_tenders:
         unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_([t.id for t in all_tenders]))
-    else: # Jeśli nie ma ofert do wyświetlenia, nie pobieraj cen jednostkowych
-        unit_prices_query = unit_prices_query.filter(False) # Zwróć pusty wynik
+    else:
+        unit_prices_query = unit_prices_query.filter(False)
 
     all_unit_prices = unit_prices_query.all()
 
@@ -465,20 +492,27 @@ def unit_prices_analysis():
         })
 
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
-    # all_available_tenders do filtra ofert - to jest pełna lista, nie obcinamy jej
     all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
+    
+    all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
 
     return render_template(
         'unit_prices_analysis.html',
         all_work_types=all_work_types,
-        all_tenders=all_tenders, # Nadal przekazujemy all_tenders, ale już obcięte/domyślne
+        all_tenders=all_tenders,
         prices_table=prices_table,
         categories=categories,
         all_available_tenders=all_available_tenders,
         selected_category=category_filter,
         selected_tenders=tender_ids_filter,
         formatted_tender_headers=formatted_tender_headers,
-        tenders_truncated=tenders_truncated, # Nowa flaga
+        tenders_truncated=tenders_truncated,
+        all_statuses=all_statuses,
+        selected_status=status_filter,
+        selected_date_from=date_from_filter,
+        selected_date_to=date_to_filter,
+        min_date=min_date.strftime('%Y-%m-%d') if min_date else '',
+        max_date=max_date.strftime('%Y-%m-%d') if max_date else '',
         title='Porównanie cen jednostkowych'
     )
 
