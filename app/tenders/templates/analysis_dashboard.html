@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title }}</h2>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}">
+                <div class="row align-items-end">
+                    <div class="col-md-8">
+                        <label for="work_type_id" class="form-label"><strong>Wybierz rodzaj roboty do analizy:</strong></label>
+                        <select name="work_type_id" id="work_type_id" class="form-select select2-enable">
+                            <option value="">-- Wybierz z listy --</option>
+                            {% for wt in work_types %}
+                                <option value="{{ wt.id }}" {% if selected_work_type_id == wt.id %}selected{% endif %}>{{ wt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">Analizuj</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_work_type_id %}
+    <div id="analysis-results" class="mt-4">
+        {% if stats %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Kluczowe Statystyki</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col">
+                                <div class="stat-box p-3 border rounded">
+                                    <h5 class="stat-title">Cena Minimalna</h5>
+                                    <p class="stat-value fs-4">{{ "%.2f"|format(stats.min_price) }} zł</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-box p-3 border rounded">
+                                    <h5 class="stat-title">Cena Maksymalna</h5>
+                                    <p class="stat-value fs-4">{{ "%.2f"|format(stats.max_price) }} zł</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-box p-3 border rounded">
+                                    <h5 class="stat-title">Cena Średnia</h5>
+                                    <p class="stat-value fs-4">{{ "%.2f"|format(stats.avg_price) }} zł</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-box p-3 border rounded">
+                                    <h5 class="stat-title">Mediana Cen</h5>
+                                    <p class="stat-value fs-4">{{ "%.2f"|format(stats.median_price) }} zł</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-box p-3 border rounded">
+                                    <h5 class="stat-title">Liczba Ofert</h5>
+                                    <p class="stat-value fs-4">{{ stats.offer_count }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4 class="card-title">Ewolucja Ceny w Czasie</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="priceEvolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4 class="card-title">Średnia Cena wg Wykonawcy</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="priceByContractorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-4">Brak danych cenowych dla wybranego rodzaju roboty.</div>
+        {% endif %}
+        <!-- W kolejnych krokach tutaj będą ładowane widżety -->
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    // Inicjalizacja Select2
+    $('.select2-enable').select2({
+        placeholder: "-- Wybierz z listy --",
+        allowClear: true
+    });
+
+    {% if selected_work_type_id and stats %}
+    // Wykres Ewolucji Ceny
+    $.ajax({
+        url: `/tenders/api/price_evolution/{{ selected_work_type_id }}`,
+        success: function(data) {
+            const ctx = document.getElementById('priceEvolutionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Średnia cena',
+                        data: data.values,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toFixed(2) + ' zł';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    // Wykres Cen wg Wykonawcy
+    $.ajax({
+        url: `/tenders/api/price_by_contractor/{{ selected_work_type_id }}`,
+        success: function(data) {
+            const ctx = document.getElementById('priceByContractorChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Średnia cena',
+                        data: data.values,
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Osie zamienione miejscami dla lepszej czytelności
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toFixed(2) + ' zł';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,3 +1,5 @@
+from datetime import datetime
+from statistics import median
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify, send_file
 from flask_login import login_required
 from app import db
@@ -598,3 +600,73 @@ def delete_unit_price(price_id):
     db.session.commit()
     flash('Pozycja cenowa została usunięta.', 'success')
     return redirect(url_for('tenders.tender_details', tender_id=tender_id))
+
+@tenders_bp.route('/analysis_dashboard')
+@login_required
+def analysis_dashboard():
+    """
+    Wyświetla pulpit analityczny do interaktywnej analizy cen jednostkowych.
+    """
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    selected_work_type_id = request.args.get('work_type_id', type=int)
+    
+    stats = {}
+    if selected_work_type_id:
+        prices = db.session.query(UnitPrice.cena_jednostkowa).filter(UnitPrice.id_work_type == selected_work_type_id).all()
+        price_values = [float(p[0]) for p in prices]
+        
+        if price_values:
+            stats = {
+                'min_price': min(price_values),
+                'max_price': max(price_values),
+                'avg_price': sum(price_values) / len(price_values),
+                'median_price': median(price_values),
+                'offer_count': len(price_values)
+            }
+
+    return render_template('analysis_dashboard.html', 
+                           title='Pulpit Analityczny Cen',
+                           work_types=work_types,
+                           selected_work_type_id=selected_work_type_id,
+                           stats=stats)
+
+@tenders_bp.route('/api/price_evolution/<int:work_type_id>')
+@login_required
+def price_evolution_data(work_type_id):
+    """
+    Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
+    """
+    data = db.session.query(
+        func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).join(Tender, UnitPrice.id_oferty == Tender.id)\
+     .filter(UnitPrice.id_work_type == work_type_id)\
+     .group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))\
+     .order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM'))\
+     .all()
+    
+    labels = [row[0] for row in data]
+    values = [float(row[1]) for row in data]
+    
+    return jsonify({'labels': labels, 'values': values})
+
+@tenders_bp.route('/api/price_by_contractor/<int:work_type_id>')
+@login_required
+def price_by_contractor_data(work_type_id):
+    """
+    Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
+    """
+    data = db.session.query(
+        Firmy.nazwa_firmy,
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).join(Tender, UnitPrice.id_oferty == Tender.id)\
+     .join(Firmy, Tender.id_firmy == Firmy.id_firmy)\
+     .filter(UnitPrice.id_work_type == work_type_id)\
+     .group_by(Firmy.nazwa_firmy)\
+     .order_by(func.avg(UnitPrice.cena_jednostkowa).desc())\
+     .all()
+
+    labels = [row[0] for row in data]
+    values = [float(row[1]) for row in data]
+
+    return jsonify({'labels': labels, 'values': values})
