@@ -643,33 +643,7 @@ def analysis_dashboard():
     stats = {}
     source_data = []
     if selected_work_type_id:
-        base_query_stats = (db.session.query(UnitPrice.cena_jednostkowa)
-                            .join(Tender, UnitPrice.id_oferty == Tender.id)
-                            .filter(UnitPrice.id_work_type == selected_work_type_id))
-
-        if date_from:
-            base_query_stats = base_query_stats.filter(Tender.data_otrzymania >= date_from)
-        if date_to:
-            base_query_stats = base_query_stats.filter(Tender.data_otrzymania <= date_to)
-
-        include_condition = or_(
-            UnitPrice.uwagi.is_(None), 
-            UnitPrice.uwagi == '',
-            UnitPrice.id.in_(included_ids)
-        )
-
-        prices = base_query_stats.filter(include_condition).all()
-        price_values = [float(p[0]) for p in prices]
-        
-        if price_values:
-            stats = {
-                'min_price': min(price_values),
-                'max_price': max(price_values),
-                'avg_price': sum(price_values) / len(price_values),
-                'median_price': median(price_values),
-                'offer_count': len(price_values)
-            }
-            
+        # Pobierz wszystkie pozycje dla wybranego work_type_id (do wyświetlenia w tabeli)
         base_query_source = (
             db.session.query(
                 UnitPrice.id,
@@ -694,6 +668,34 @@ def analysis_dashboard():
             base_query_source = base_query_source.filter(Tender.data_otrzymania <= date_to)
 
         source_data = base_query_source.order_by(Tender.data_otrzymania.desc()).all()
+        
+        # Jeśli nie ma included_ids, domyślnie zaznacz pozycje bez uwag
+        if not included_ids and source_data:
+            included_ids = [row.id for row in source_data if not row.uwagi]
+        
+        # Oblicz statystyki na podstawie wybranych pozycji
+        if included_ids:
+            base_query_stats = (db.session.query(UnitPrice.cena_jednostkowa)
+                                .join(Tender, UnitPrice.id_oferty == Tender.id)
+                                .filter(UnitPrice.id_work_type == selected_work_type_id)
+                                .filter(UnitPrice.id.in_(included_ids)))
+
+            if date_from:
+                base_query_stats = base_query_stats.filter(Tender.data_otrzymania >= date_from)
+            if date_to:
+                base_query_stats = base_query_stats.filter(Tender.data_otrzymania <= date_to)
+
+            prices = base_query_stats.all()
+            price_values = [float(p[0]) for p in prices]
+            
+            if price_values:
+                stats = {
+                    'min_price': min(price_values),
+                    'max_price': max(price_values),
+                    'avg_price': sum(price_values) / len(price_values),
+                    'median_price': median(price_values),
+                    'offer_count': len(price_values)
+                }
 
     return render_template('analysis_dashboard.html', 
                            title='Pulpit Analityczny Cen',
@@ -730,11 +732,15 @@ def price_evolution_data(work_type_id):
         except ValueError:
             pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
 
-    include_condition = or_(
-        UnitPrice.uwagi.is_(None), 
-        UnitPrice.uwagi == '',
-        UnitPrice.id.in_(included_ids)
-    )
+    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
+    if not included_ids:
+        include_condition = or_(
+            UnitPrice.uwagi.is_(None), 
+            UnitPrice.uwagi == ''
+        )
+    else:
+        # Jeśli są included_ids, uwzględnij tylko te pozycje
+        include_condition = UnitPrice.id.in_(included_ids)
 
     query = (
         db.session.query(
@@ -781,11 +787,15 @@ def price_by_contractor_data(work_type_id):
         except ValueError:
             pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
 
-    include_condition = or_(
-        UnitPrice.uwagi.is_(None), 
-        UnitPrice.uwagi == '',
-        UnitPrice.id.in_(included_ids)
-    )
+    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
+    if not included_ids:
+        include_condition = or_(
+            UnitPrice.uwagi.is_(None), 
+            UnitPrice.uwagi == ''
+        )
+    else:
+        # Jeśli są included_ids, uwzględnij tylko te pozycje
+        include_condition = UnitPrice.id.in_(included_ids)
 
     query = (
         db.session.query(
@@ -833,11 +843,15 @@ def price_distribution_data(work_type_id):
         except ValueError:
             pass
 
-    include_condition = or_(
-        UnitPrice.uwagi.is_(None), 
-        UnitPrice.uwagi == '',
-        UnitPrice.id.in_(included_ids)
-    )
+    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
+    if not included_ids:
+        include_condition = or_(
+            UnitPrice.uwagi.is_(None), 
+            UnitPrice.uwagi == ''
+        )
+    else:
+        # Jeśli są included_ids, uwzględnij tylko te pozycje
+        include_condition = UnitPrice.id.in_(included_ids)
 
     query = (
         db.session.query(UnitPrice.cena_jednostkowa)

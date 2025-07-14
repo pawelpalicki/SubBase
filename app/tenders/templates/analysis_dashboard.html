@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-1">
     <div class="card">
         <div class="card-header">
-            <h2>{{ title }}</h2>
+            <h3>{{ title }}</h3>
         </div>
         <div class="card-body">
             <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}" id="analysis-form">
@@ -80,7 +80,7 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-4">
+        <div class="row mt-2">
             <div class="col-lg-4">
                 <div class="card h-100">
                     <div class="card-header">
@@ -140,11 +140,7 @@
                                     {% for row in source_data %}
                                     <tr>
                                         <td class="text-center">
-                                            {% if not row.uwagi %}
-                                                <span title="Tak, wliczono do analizy">✔️</span>
-                                            {% else %}
-                                                <input type="checkbox" name="include" value="{{ row.id }}" {% if row.id in included_ids %}checked{% endif %}>
-                                            {% endif %}
+                                            <input type="checkbox" name="include" value="{{ row.id }}" {% if row.id in included_ids %}checked{% endif %}>
                                         </td>
                                         <td>{{ "%.2f"|format(row.cena_jednostkowa) }} zł</td>
                                         <td>{{ row.jednostka_miary }}</td>
@@ -157,8 +153,15 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-secondary">Przelicz z uwzględnieniem wybranych</button>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="select-all">Zaznacz wszystkie</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all">Odznacz wszystkie</button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" id="select-no-comments">Zaznacz bez uwag</button>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-secondary">Przelicz z uwzględnieniem wybranych</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -368,6 +371,23 @@ $(document).ready(function() {
         }
     });
     {% endif %}
+
+    // Obsługa przycisków zaznaczania checkboxów
+    $('#select-all').click(function() {
+        $('input[name="include"]').prop('checked', true);
+    });
+
+    $('#deselect-all').click(function() {
+        $('input[name="include"]').prop('checked', false);
+    });
+
+    $('#select-no-comments').click(function() {
+        $('input[name="include"]').each(function() {
+            const row = $(this).closest('tr');
+            const uwagi = row.find('td:last').text().trim();
+            $(this).prop('checked', uwagi === '');
+        });
+    });
 });
 </script>
 {% endblock %}
