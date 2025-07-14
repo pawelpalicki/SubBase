@@ -479,7 +479,7 @@ def unit_prices_analysis():
         selected_tenders=tender_ids_filter,
         formatted_tender_headers=formatted_tender_headers,
         tenders_truncated=tenders_truncated, # Nowa flaga
-        title='Analiza cen jednostkowych'
+        title='Porównanie cen jednostkowych'
     )
 
 @tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')

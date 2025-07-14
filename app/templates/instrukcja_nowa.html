@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Instrukcja Obsługi{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h1>Instrukcja Obsługi Aplikacji SubBase</h1>
+        </div>
+        <div class="card-body">
+            <p class="lead">Niniejsza instrukcja opisuje kluczowe funkcje i sposób korzystania z aplikacji SubBase, która wspomaga zarządzanie bazą firm, ofertami przetargowymi oraz analizą cen jednostkowych.</p>
+
+            <h2 class="mt-4">Spis Treści</h2>
+            <div class="list-group">
+                <a href="#logowanie" class="list-group-item list-group-item-action">1. Logowanie i Nawigacja</a>
+                <a href="#baza-firm" class="list-group-item list-group-item-action">2. Baza Firm</a>
+                <a href="#zarzadzanie-ofertami" class="list-group-item list-group-item-action">3. Zarządzanie Ofertami (Tenders)</a>
+                <a href="#ceny-jednostkowe" class="list-group-item list-group-item-action">4. Ceny Jednostkowe</a>
+                <a href="#dane-slownikowe" class="list-group-item list-group-item-action">5. Zarządzanie Danymi Słownikowymi</a>
+                <a href="#pozostale" class="list-group-item list-group-item-action">6. Pozostałe Funkcje</a>
+            </div>
+
+            <hr class="my-4">
+
+            <section id="logowanie" class="mb-4">
+                <h2>1. Logowanie i Nawigacja</h2>
+                <p>Aby uzyskać dostęp do funkcji aplikacji, użytkownik musi się zalogować. Po zalogowaniu, główne menu nawigacyjne (na górze strony) zapewnia dostęp do wszystkich modułów:</p>
+                <ul>
+                    <li><strong>Baza Firm:</strong> Główny moduł do zarządzania kontrahentami.</li>
+                    <li><strong>Oferty:</strong> Moduł do ewidencji i zarządzania otrzymanymi ofertami.</li>
+                    <li><strong>Ceny Jednostkowe:</strong> Narzędzia do analizy i przeglądania cen z ofert.</li>
+                    <li><strong>Dodaj (+):</strong> Rozwijane menu z szybkimi linkami do dodawania nowych firm, ofert, projektów itp.</li>
+                    <li><strong>Ustawienia:</strong> Dostęp do zarządzania danymi słownikowymi (np. specjalnościami, kategoriami, typami).</li>
+                    <li><strong>Przycisk zmiany motywu (ikona słońca/księżyca):</strong> Pozwala przełączyć interfejs między jasnym a ciemnym motywem.</li>
+                    <li><strong>Wyloguj:</strong> Kończy sesję użytkownika.</li>
+                </ul>
+            </section>
+
+            <hr class="my-4">
+
+            <section id="baza-firm" class="mb-4">
+                <h2>2. Baza Firm</h2>
+                <p>Centralny moduł aplikacji, służący do gromadzenia informacji o firmach i kontrahentach.</p>
+                
+                <h3 class="mt-3">2.1. Przeglądanie i Filtrowanie</h3>
+                <p>Główny widok modułu to lista firm, którą można dynamicznie filtrować i przeszukiwać. Dostępne opcje:</p>
+                <ul>
+                    <li><strong>Wyszukiwanie tekstowe:</strong> Przeszukuje większość pól powiązanych z firmą (nazwę, dane kontaktowe, specjalności, uwagi itp.).</li>
+                    <li><strong>Filtry:</strong> Pozwalają zawęzić listę firm według specjalności, obszaru działania (województwa, powiaty) oraz typu firmy.</li>
+                    <li><strong>Resetowanie:</strong> Przycisk "Resetuj" czyści wszystkie aktywne filtry.</li>
+                </ul>
+
+                <h3 class="mt-3">2.2. Dodawanie i Edycja Firmy</h3>
+                <p>Formularz dodawania/edycji firmy jest podzielony na zakładki, co ułatwia wprowadzanie danych:</p>
+                <ul>
+                    <li><strong>Dane podstawowe:</strong> Nazwa firmy, typ, strona WWW, uwagi.</li>
+                    <li><strong>Kontakt:</strong> Możliwość dodania wielu adresów, telefonów i e-maili wraz z ich typami.</li>
+                    <li><strong>Specjalizacje i Rynek:</strong> Wybór specjalności oraz określenie obszaru działania (cały kraj, województwa, powiaty).</li>
+                    <li><strong>Osoby kontaktowe:</strong> Ewidencja osób powiązanych z firmą.</li>
+                    <li><strong>Oceny:</strong> Rejestr ocen współpracy z daną firmą.</li>
+                </ul>
+                <p>Podczas dodawania/edycji można również tworzyć nowe typy (np. typ adresu, specjalność) bezpośrednio z formularza za pomocą przycisku "Dodaj" obok odpowiedniego pola.</p>
+
+                <h3 class="mt-3">2.3. Szczegóły i Usuwanie</h3>
+                <p>Kliknięcie na firmę na liście rozwija panel ze szczegółowymi informacjami. Z poziomu formularza edycji można trwale usunąć firmę wraz ze wszystkimi powiązanymi danymi.</p>
+            </section>
+
+            <hr class="my-4">
+
+            <section id="zarzadzanie-ofertami" class="mb-4">
+                <h2>3. Zarządzanie Ofertami (Tenders)</h2>
+                <p>Moduł ten służy do ewidencjonowania i śledzenia ofert otrzymywanych od firm.</p>
+                
+                <h3 class="mt-3">3.1. Lista Ofert</h3>
+                <p>Główny widok modułu prezentuje listę wszystkich zarejestrowanych ofert. Listę można filtrować po statusie, firmie oraz projekcie.</p>
+
+                <h3 class="mt-3">3.2. Dodawanie i Edycja Oferty</h3>
+                <p>Formularz oferty pozwala na zapisanie kluczowych informacji:</p>
+                <ul>
+                    <li><strong>Nazwa oferty i data otrzymania.</strong></li>
+                    <li><strong>Status oferty</strong> (np. Nowa, Analizowana, Odrzucona).</li>
+                    <li><strong>Powiązanie z firmą:</strong> Wybór firmy z bazy, która złożyła ofertę.</li>
+                    <li><strong>Powiązanie z projektem:</strong> Opcjonalny wybór projektu, którego dotyczy oferta.</li>
+                    <li><strong>Załącznik:</strong> Możliwość wgrania oryginalnego pliku oferty (np. PDF, XLSX), który będzie przechowywany w systemie.</li>
+                </ul>
+
+                <h3 class="mt-3">3.3. Szczegóły Oferty</h3>
+                <p>Widok szczegółów oferty prezentuje wszystkie zapisane dane oraz listę cen jednostkowych powiązanych z tą ofertą.</p>
+            </section>
+
+            <hr class="my-4">
+
+            <section id="ceny-jednostkowe" class="mb-4">
+                <h2>4. Ceny Jednostkowe</h2>
+                <p>Moduł ten jest kluczowy dla analizy kosztorysów i porównywania stawek między ofertami.</p>
+
+                <h3 class="mt-3">4.1. Przeglądanie i Analiza</h3>
+                <p>Główny widok to lista wszystkich cen jednostkowych w bazie. Można ją przeszukiwać i filtrować, np. po rodzaju roboty, kategorii czy projekcie, aby porównać ceny z różnych ofert.</p>
+                <p>Dostępny jest również widok "Analiza Cen", który pozwala na bardziej zaawansowane porównania.</p>
+
+                <h3 class="mt-3">4.2. Dodawanie Cen</h3>
+                <p>Ceny jednostkowe można dodawać bezpośrednio z widoku szczegółów konkretnej oferty. Formularz dodawania ceny wymaga podania:</p>
+                <ul>
+                    <li><strong>Rodzaju roboty</strong> (wybór ze słownika).</li>
+                    <li><strong>Kategorii</strong> (wybór ze słownika, często powiązany z rodzajem roboty).</li>
+                    <li><strong>Jednostki miary</strong> (np. m², szt., mb).</li>
+                    <li><strong>Ceny jednostkowej netto.</strong></li>
+                    <li><strong>Uwag.</strong></li>
+                </ul>
+                <p>Nowe rodzaje robót i kategorie można dodawać "w locie" z poziomu formularza.</p>
+            </section>
+
+            <hr class="my-4">
+
+            <section id="dane-slownikowe" class="mb-4">
+                <h2>5. Zarządzanie Danymi Słownikowymi</h2>
+                <p>W menu "Ustawienia" znajduje się dostęp do zarządzania tzw. danymi słownikowymi, które zasilają pola wyboru w całej aplikacji. Umożliwia to utrzymanie porządku i spójności danych. Zarządzać można następującymi elementami:</p>
+                <ul>
+                    <li><strong>Projekty:</strong> Definiowanie projektów, do których przypisywane są oferty.</li>
+                    <li><strong>Specjalności:</strong> Lista specjalności dla firm.</li>
+                    <li><strong>Typy:</strong> Typy firm, adresów, e-maili i telefonów.</li>
+                    <li><strong>Kategorie i Rodzaje Robót:</strong> Słowniki używane w module Cen Jednostkowych.</li>
+                    <li><strong>Osoby i Oceny:</strong> Centralne listy osób kontaktowych i ocen, które można również edytować z poziomu konkretnej firmy.</li>
+                </ul>
+            </section>
+
+            <hr class="my-4">
+
+            <section id="pozostale" class="mb-4">
+                <h2>6. Pozostałe Funkcje</h2>
+                <h3 class="mt-3">6.1. Eksport Danych</h3>
+                <p>W menu nawigacyjnym Bazy Firm znajduje się przycisk "Eksportuj", który generuje stronę HTML z aktualnie przefiltrowaną listą firm. Strona ta jest gotowa do wydruku lub zapisu w formacie PDF z poziomu przeglądarki.</p>
+                
+                <h3 class="mt-3">6.2. Resetowanie Liczników Bazy Danych</h3>
+                <p>Po intensywnym testowaniu i usuwaniu danych, numery ID w tabelach mogą stać się nieciągłe. Dostępny jest specjalny skrypt (`reset_sequences.py`), który administrator może uruchomić, aby zresetować liczniki ID. Dzięki temu nowe rekordy będą tworzone z kolejnymi numerami po najwyższym istniejącym ID.</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

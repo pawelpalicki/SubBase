@@ -1,3 +1,4 @@
+#!/home/pawelpalicki/projects/SubBase/venv/bin/python
 import os
 from dotenv import load_dotenv
 
