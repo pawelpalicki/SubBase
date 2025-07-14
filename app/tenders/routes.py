@@ -809,3 +809,74 @@ def price_by_contractor_data(work_type_id):
     values = [float(row[1]) for row in data]
 
     return jsonify({'labels': labels, 'values': values})
+
+@tenders_bp.route('/api/price_distribution/<int:work_type_id>')
+@login_required
+def price_distribution_data(work_type_id):
+    """
+    Zwraca dane do wykresu rozkładu cen (histogramu) dla danego rodzaju roboty.
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    include_condition = or_(
+        UnitPrice.uwagi.is_(None), 
+        UnitPrice.uwagi == '',
+        UnitPrice.id.in_(included_ids)
+    )
+
+    query = (
+        db.session.query(UnitPrice.cena_jednostkowa)
+        .join(Tender, UnitPrice.id_oferty == Tender.id)
+        .filter(UnitPrice.id_work_type == work_type_id)
+        .filter(include_condition)
+    )
+
+    if date_from:
+        query = query.filter(Tender.data_otrzymania >= date_from)
+    if date_to:
+        query = query.filter(Tender.data_otrzymania <= date_to)
+
+    prices = [float(p[0]) for p in query.all()]
+
+    if not prices:
+        return jsonify({'labels': [], 'values': []})
+
+    min_price = min(prices)
+    max_price = max(prices)
+    num_bins = 7 # Można dostosować liczbę przedziałów
+
+    bin_width = (max_price - min_price) / num_bins
+    if bin_width == 0: # Obsługa przypadku, gdy wszystkie ceny są takie same
+        return jsonify({'labels': [f'{min_price:.2f} zł'], 'values': [len(prices)]})
+
+    bins = [0] * num_bins
+    labels = []
+
+    for i in range(num_bins):
+        lower_bound = min_price + i * bin_width
+        upper_bound = min_price + (i + 1) * bin_width
+        labels.append(f'{lower_bound:.2f} - {upper_bound:.2f} zł')
+
+    for price in prices:
+        if price == max_price: # Ostatnia cena w ostatnim przedziale
+            bins[num_bins - 1] += 1
+        else:
+            bin_index = int((price - min_price) / bin_width)
+            bins[bin_index] += 1
+
+    return jsonify({'labels': labels, 'values': bins})
