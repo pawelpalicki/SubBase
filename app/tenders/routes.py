@@ -16,6 +16,8 @@ import openpyxl
 import io
 import traceback
 from sqlalchemy.orm import joinedload # Dodany import
+import pandas as pd
+import numpy as np
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
@@ -612,6 +614,10 @@ def analysis_dashboard():
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
+    
+    # Dodaj parametr paginacji
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Liczba rekordów na stronę
 
     date_from = None
     date_to = None
@@ -641,7 +647,7 @@ def analysis_dashboard():
         date_to_str = ''
 
     stats = {}
-    source_data = []
+    source_data_pagination = None  # Zmieniamy na obiekt paginacji
     if selected_work_type_id:
         # Pobierz wszystkie pozycje dla wybranego work_type_id (do wyświetlenia w tabeli)
         base_query_source = (
@@ -667,11 +673,12 @@ def analysis_dashboard():
         if date_to:
             base_query_source = base_query_source.filter(Tender.data_otrzymania <= date_to)
 
-        source_data = base_query_source.order_by(Tender.data_otrzymania.desc()).all()
+        # Zastępujemy .all() paginacją
+        source_data_pagination = base_query_source.order_by(Tender.data_otrzymania.desc()).paginate(page=page, per_page=per_page, error_out=False)
         
         # Jeśli nie ma included_ids, domyślnie zaznacz pozycje bez uwag
-        if not included_ids and source_data:
-            included_ids = [row.id for row in source_data if not row.uwagi]
+        if not included_ids and source_data_pagination.items:
+            included_ids = [row.id for row in source_data_pagination.items if not row.uwagi]
         
         # Oblicz statystyki na podstawie wybranych pozycji
         if included_ids:
@@ -702,18 +709,16 @@ def analysis_dashboard():
                            work_types=work_types,
                            selected_work_type_id=selected_work_type_id,
                            stats=stats,
-                           source_data=source_data,
+                           source_data=source_data_pagination,  # Teraz przekazujemy obiekt paginacji
                            included_ids=included_ids,
                            date_from=date_from_str,
                            date_to=date_to_str,
                            min_tender_date=min_tender_date.strftime('%Y-%m-%d') if min_tender_date else '',
                            max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '')
 
-@tenders_bp.route('/api/price_evolution/<int:work_type_id>')
-@login_required
-def price_evolution_data(work_type_id):
+def _get_filtered_data_as_df(work_type_id):
     """
-    Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
+    Funkcja pomocnicza do pobierania i filtrowania danych cenowych jako DataFrame Pandas.
     """
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
@@ -725,42 +730,66 @@ def price_evolution_data(work_type_id):
         try:
             date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
         except ValueError:
-            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+            pass
     if date_to_str:
         try:
             date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
         except ValueError:
-            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
+            pass
 
-    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
-    if not included_ids:
-        include_condition = or_(
-            UnitPrice.uwagi.is_(None), 
-            UnitPrice.uwagi == ''
-        )
-    else:
-        # Jeśli są included_ids, uwzględnij tylko te pozycje
-        include_condition = UnitPrice.id.in_(included_ids)
-
+    # Podstawowe zapytanie
     query = (
         db.session.query(
-            func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
-            func.avg(UnitPrice.cena_jednostkowa)
+            UnitPrice.cena_jednostkowa,
+            Tender.data_otrzymania,
+            Firmy.nazwa_firmy,
+            UnitPrice.id,
+            UnitPrice.uwagi
         )
         .join(Tender, UnitPrice.id_oferty == Tender.id)
+        .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
         .filter(UnitPrice.id_work_type == work_type_id)
-        .filter(include_condition)
     )
 
+    # Filtrowanie po dacie
     if date_from:
         query = query.filter(Tender.data_otrzymania >= date_from)
     if date_to:
         query = query.filter(Tender.data_otrzymania <= date_to)
-
-    data = query.group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).all()
     
-    labels = [row[0] for row in data]
-    values = [float(row[1]) for row in data]
+    # Wczytanie danych do DataFrame
+    df = pd.read_sql(query.statement, db.get_engine())
+    if df.empty:
+        return pd.DataFrame()
+
+    # Konwersja typów
+    df['cena_jednostkowa'] = pd.to_numeric(df['cena_jednostkowa'])
+    df['data_otrzymania'] = pd.to_datetime(df['data_otrzymania'])
+
+    # Filtrowanie po ID (jeśli podane)
+    if not included_ids:
+        # Domyślnie użyj pozycji bez uwag
+        df_filtered = df[df['uwagi'].isnull() | (df['uwagi'] == '')].copy()
+    else:
+        df_filtered = df[df['id'].isin(included_ids)].copy()
+
+    return df_filtered
+
+@tenders_bp.route('/api/price_evolution/<int:work_type_id>')
+@login_required
+def price_evolution_data(work_type_id):
+    """
+    Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
+    """
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    df.set_index('data_otrzymania', inplace=True)
+    monthly_avg = df.resample('ME')['cena_jednostkowa'].mean().dropna()
+    
+    labels = monthly_avg.index.strftime('%Y-%m').tolist()
+    values = monthly_avg.values.tolist()
     
     return jsonify({'labels': labels, 'values': values})
 
@@ -770,53 +799,14 @@ def price_by_contractor_data(work_type_id):
     """
     Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
     """
-    included_ids = request.args.getlist('include', type=int)
-    date_from_str = request.args.get('date_from')
-    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
 
-    date_from = None
-    date_to = None
-    if date_from_str:
-        try:
-            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
-        except ValueError:
-            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
-    if date_to_str:
-        try:
-            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
-        except ValueError:
-            pass # Ignoruj błąd, jeśli format daty jest nieprawidłowy
-
-    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
-    if not included_ids:
-        include_condition = or_(
-            UnitPrice.uwagi.is_(None), 
-            UnitPrice.uwagi == ''
-        )
-    else:
-        # Jeśli są included_ids, uwzględnij tylko te pozycje
-        include_condition = UnitPrice.id.in_(included_ids)
-
-    query = (
-        db.session.query(
-            Firmy.nazwa_firmy,
-            func.avg(UnitPrice.cena_jednostkowa)
-        )
-        .join(Tender, UnitPrice.id_oferty == Tender.id)
-        .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
-        .filter(UnitPrice.id_work_type == work_type_id)
-        .filter(include_condition)
-    )
-
-    if date_from:
-        query = query.filter(Tender.data_otrzymania >= date_from)
-    if date_to:
-        query = query.filter(Tender.data_otrzymania <= date_to)
-
-    data = query.group_by(Firmy.nazwa_firmy).order_by(func.avg(UnitPrice.cena_jednostkowa).desc()).all()
-
-    labels = [row[0] for row in data]
-    values = [float(row[1]) for row in data]
+    avg_by_contractor = df.groupby('nazwa_firmy')['cena_jednostkowa'].mean().sort_values(ascending=False)
+    
+    labels = avg_by_contractor.index.tolist()
+    values = avg_by_contractor.values.tolist()
 
     return jsonify({'labels': labels, 'values': values})
 
@@ -826,71 +816,183 @@ def price_distribution_data(work_type_id):
     """
     Zwraca dane do wykresu rozkładu cen (histogramu) dla danego rodzaju roboty.
     """
-    included_ids = request.args.getlist('include', type=int)
-    date_from_str = request.args.get('date_from')
-    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
 
-    date_from = None
-    date_to = None
-    if date_from_str:
-        try:
-            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
-        except ValueError:
-            pass
-    if date_to_str:
-        try:
-            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
-        except ValueError:
-            pass
-
-    # Jeśli nie ma żadnych included_ids, domyślnie uwzględnij pozycje bez uwag
-    if not included_ids:
-        include_condition = or_(
-            UnitPrice.uwagi.is_(None), 
-            UnitPrice.uwagi == ''
-        )
-    else:
-        # Jeśli są included_ids, uwzględnij tylko te pozycje
-        include_condition = UnitPrice.id.in_(included_ids)
-
-    query = (
-        db.session.query(UnitPrice.cena_jednostkowa)
-        .join(Tender, UnitPrice.id_oferty == Tender.id)
-        .filter(UnitPrice.id_work_type == work_type_id)
-        .filter(include_condition)
-    )
-
-    if date_from:
-        query = query.filter(Tender.data_otrzymania >= date_from)
-    if date_to:
-        query = query.filter(Tender.data_otrzymania <= date_to)
-
-    prices = [float(p[0]) for p in query.all()]
-
+    prices = df['cena_jednostkowa'].dropna().tolist()
     if not prices:
         return jsonify({'labels': [], 'values': []})
 
     min_price = min(prices)
     max_price = max(prices)
-    num_bins = 7 # Można dostosować liczbę przedziałów
+    num_bins = 7
 
-    bin_width = (max_price - min_price) / num_bins
-    if bin_width == 0: # Obsługa przypadku, gdy wszystkie ceny są takie same
+    if min_price == max_price:
         return jsonify({'labels': [f'{min_price:.2f} zł'], 'values': [len(prices)]})
 
-    bins = [0] * num_bins
-    labels = []
+    # Użyj pd.cut do stworzenia przedziałów
+    bins = pd.cut(prices, bins=num_bins)
+    bin_counts = bins.value_counts().sort_index()
 
-    for i in range(num_bins):
-        lower_bound = min_price + i * bin_width
-        upper_bound = min_price + (i + 1) * bin_width
-        labels.append(f'{lower_bound:.2f} - {upper_bound:.2f} zł')
+    labels = [str(interval) for interval in bin_counts.index]
+    values = bin_counts.values.tolist()
 
-    for price in prices:
-        if price == max_price: # Ostatnia cena w ostatnim przedziale
-            bins[num_bins - 1] += 1
-        else:
-            bin_index = int((price - min_price) / bin_width)
-            bins[bin_index] += 1
+    return jsonify({'labels': labels, 'values': values})
 
-    return jsonify({'labels': labels, 'values': bins})
+@tenders_bp.route('/api/price_trends/<int:work_type_id>')
+@login_required
+def price_trends_data(work_type_id):
+    """
+    Zwraca dane do wykresu trendu cenowego wraz z linią trendu.
+    """
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty or len(df) < 2:
+        return jsonify({'labels': [], 'datasets': []})
+
+    df = df.sort_values('data_otrzymania')
+    
+    # Konwertuj daty na wartości numeryczne (liczba dni od daty minimalnej)
+    x_numeric = (df['data_otrzymania'] - df['data_otrzymania'].min()).dt.days
+    y = df['cena_jednostkowa']
+
+    # Oblicz linię trendu (regresja liniowa)
+    coeffs = np.polyfit(x_numeric, y, 1)
+    trend_line = np.poly1d(coeffs)
+    
+    # Przygotuj dane do wykresu
+    scatter_data = [{'x': row['data_otrzymania'].strftime('%Y-%m-%d'), 'y': row['cena_jednostkowa']} for index, row in df.iterrows()]
+    trend_data = [{'x': df['data_otrzymania'].min().strftime('%Y-%m-%d'), 'y': trend_line(x_numeric.min())},
+                  {'x': df['data_otrzymania'].max().strftime('%Y-%m-%d'), 'y': trend_line(x_numeric.max())}]
+
+    return jsonify({
+        'scatter_data': scatter_data,
+        'trend_data': trend_data
+    })
+
+@tenders_bp.route('/api/price_seasonality/<int:work_type_id>')
+@login_required
+def price_seasonality_data(work_type_id):
+    """
+    Zwraca dane do wykresu sezonowości cen (średnia cena w każdym miesiącu).
+    """
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    df['month'] = df['data_otrzymania'].dt.month
+    seasonality = df.groupby('month')['cena_jednostkowa'].mean()
+    
+    # Upewnij się, że mamy wszystkie 12 miesięcy
+    seasonality = seasonality.reindex(range(1, 13))
+
+    month_names = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień']
+    
+    labels = [month_names[i-1] for i in seasonality.index]
+    # Zamień NaN na None (który jest konwertowany na null w JSON)
+    values = [value if not np.isnan(value) else None for value in seasonality.values]
+
+    return jsonify({'labels': labels, 'values': values})
+
+# @tenders_bp.route('/api/contractor_competitiveness/<int:work_type_id>')
+# @login_required
+# def contractor_competitiveness_data(work_type_id):
+#     """
+#     Zwraca dane do wykresu pudełkowego (box plot) konkurencyjności wykonawców.
+#     """
+#     df = _get_filtered_data_as_df(work_type_id)
+#     if df.empty:
+#         return jsonify({'labels': [], 'datasets': []})
+
+#     # Grupuj po wykonawcy i oblicz statystyki dla box plot
+#     grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].apply(list)
+    
+#     # Filtruj wykonawców z małą liczbą ofert, aby wykres był czytelny
+#     grouped = grouped[grouped.apply(len) >= 2]
+    
+#     if grouped.empty:
+#         return jsonify({'labels': [], 'datasets': []})
+
+#     # Sortuj wg mediany ceny
+#     sorted_labels = grouped.apply(np.median).sort_values().index
+    
+#     # Przygotuj dane w formacie dla chartjs-chart-box-and-violin-plot
+#     # WAŻNE: Dane dla każdego wykonawcy muszą być posortowane rosnąco
+#     boxplot_data = [sorted(grouped[label]) for label in sorted_labels]
+
+#     return jsonify({
+#         'labels': sorted_labels.tolist(),
+#         'datasets': [{
+#             'label': 'Rozkład cen',
+#             'data': boxplot_data
+#         }]
+#     })
+
+# @tenders_bp.route('/api/contractor_stats/<int:work_type_id>')
+# @login_required
+# def contractor_stats_data(work_type_id):
+#     """
+#     Zwraca dane do prostego wykresu konkurencyjności wykonawców 
+#     z dodatkowymi statystykami w tooltipie.
+#     """
+#     df = _get_filtered_data_as_df(work_type_id)
+#     if df.empty:
+#         return jsonify({'labels': [], 'avg_values': [], 'stats': []})
+
+#     # Grupuj po wykonawcy i oblicz statystyki
+#     grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].agg(['mean', 'min', 'max', 'count'])
+    
+#     # Filtruj wykonawców z małą liczbą ofert
+#     grouped = grouped[grouped['count'] >= 2]
+    
+#     if grouped.empty:
+#         return jsonify({'labels': [], 'avg_values': [], 'stats': []})
+
+#     # Sortuj wg średniej ceny
+#     grouped = grouped.sort_values('mean')
+    
+#     # Przygotuj dane
+#     stats = []
+#     for _, row in grouped.iterrows():
+#         stats.append({
+#             'avg': float(row['mean']),
+#             'min': float(row['min']),
+#             'max': float(row['max']),
+#             'count': int(row['count'])
+#         })
+    
+#     return jsonify({
+#         'labels': grouped.index.tolist(),
+#         'avg_values': grouped['mean'].round(2).tolist(),
+#         'stats': stats
+#     })
+
+@tenders_bp.route('/api/contractor_competitiveness_alternative/<int:work_type_id>')
+@login_required
+def contractor_competitiveness_alternative_data(work_type_id):
+    """
+    Zwraca dane do alternatywnego wykresu konkurencyjności wykonawców 
+    (słupkowy z min, max, średnia zamiast box plot).
+    """
+    df = _get_filtered_data_as_df(work_type_id)
+    if df.empty:
+        return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
+
+    # Grupuj po wykonawcy i oblicz statystyki
+    grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].agg(['mean', 'min', 'max', 'count'])
+    
+    # Filtruj wykonawców z małą liczbą ofert
+    grouped = grouped[grouped['count'] >= 2]
+    
+    if grouped.empty:
+        return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
+
+    # Sortuj wg średniej ceny
+    grouped = grouped.sort_values('mean')
+    
+    return jsonify({
+        'labels': grouped.index.tolist(),
+        'avg_values': grouped['mean'].round(2).tolist(),
+        'min_values': grouped['min'].round(2).tolist(),
+        'max_values': grouped['max'].round(2).tolist()
+    })
