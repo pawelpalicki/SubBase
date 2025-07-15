@@ -144,6 +144,13 @@ $(document).ready(function() {
             detailsRow.addClass('d-none');
         }
     });
+
+    // Automatyczne zamykanie komunikatów flash po 5 sekundach
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+            $(this).remove(); 
+        });
+    }, 10000); // 5000 milisekund = 5 sekund
 });
 
 // Funkcja do obsługi filtra mobilnego

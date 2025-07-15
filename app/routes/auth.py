@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+import os
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from app import USERS # Importujemy słownik USERS z app/__init__.py
 
@@ -33,6 +34,18 @@ def login():
 @auth.route('/logout')
 @login_required # Tylko zalogowani użytkownicy mogą się wylogować
 def logout():
+    # Czyszczenie cache'u specyficznego dla sesji
+    session_id = session.get('_id', None)
+    if session_id:
+        cache_dir = os.path.join(current_app.instance_path, 'cache')
+        if os.path.exists(cache_dir):
+            for filename in os.listdir(cache_dir):
+                if filename.startswith(f"{session_id}_"):
+                    try:
+                        os.remove(os.path.join(cache_dir, filename))
+                    except Exception as e:
+                        flash(f"Nie udało się usunąć pliku z cache: {filename}. Błąd: {e}", "warning")
+
     logout_user() # Wyloguj użytkownika
     flash('Zostałeś wylogowany.', 'info')
     return redirect(url_for('auth.login')) # Przekieruj na stronę logowania

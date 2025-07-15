@@ -126,17 +126,20 @@
         </div>
     </nav>
 
-    <div class="{% if full_width_page %}container-fluid{% else %}container pt-5 pb-4 mt-5{% endif %}">
+    <div class="container-fluid fixed-top-alerts">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show m-2" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
+    </div>
+
+    <div class="{% if full_width_page %}container-fluid{% else %}container pt-5 pb-4 mt-5{% endif %}">
         {% block content %}{% endblock %}
     </div>
 

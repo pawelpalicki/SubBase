@@ -1450,3 +1450,19 @@ td[data-label="Akcje"] form:first-of-type {
 #overlay-form-container {
     background-color: rgba(0,0,0,0.5); /* Domyślne tło dla trybu jasnego */
 }
+
+/* Umieszcza komunikaty flash pod paskiem nawigacyjnym i nad resztą treści */
+.fixed-top-alerts {
+    position: fixed;
+    top: 60px; /* Wysokość paska nawigacyjnego */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050; /* Wyżej niż większość elementów, ale niżej niż modale */
+    width: 100%;
+    max-width: 960px; /* Opcjonalnie: ogranicz szerokość dla lepszego wyglądu */
+    padding: 0 15px;
+}
+
+.alert {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

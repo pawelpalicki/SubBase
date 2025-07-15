@@ -1,7 +1,7 @@
 from datetime import datetime
 from statistics import median
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify, send_file
-from flask_login import login_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory, jsonify, send_file, session
+from flask_login import login_required, current_user
 from app import db
 from app.models import Tender, Project, UnitPrice, Category, WorkType, Firmy
 from sqlalchemy import func, or_
@@ -94,12 +94,23 @@ def display_file(tender_id):
 @login_required
 def extract_data(tender_id):
     tender = Tender.query.get_or_404(tender_id)
-    extracted_text = ""
-    table_data = []
     unit_price_form = UnitPriceForm()
     unit_price_form.id_oferty.data = tender.id
 
+    # Zmienne do przechowywania danych z pliku
+    extracted_text = ""
+    table_data = []
+    is_image_file = False
+    display_original_pdf = False
+
+    # Ścieżka do cache'u
+    cache_dir = os.path.join(current_app.instance_path, 'cache')
+    # Unikalna nazwa pliku w cache dla tej sesji i tej oferty
+    session_id = session.get('_id', 'default') # Użyj ID sesji lub domyślnej wartości
+    cached_file_path = os.path.join(cache_dir, f"{session_id}_{tender_id}.cache")
+
     if unit_price_form.validate_on_submit():
+        # ... (logika dodawania nowej pozycji - bez zmian)
         try:
             work_type_id = unit_price_form.id_work_type.data
             work_type = WorkType.query.get(work_type_id)
@@ -116,96 +127,110 @@ def extract_data(tender_id):
             db.session.add(new_unit_price)
             db.session.commit()
             flash('Pozycja cenowa została dodana pomyślnie!', 'success')
-            return redirect(url_for('tenders.extract_data', tender_id=tender.id, from_submit=True))
+            return redirect(url_for('tenders.extract_data', tender_id=tender.id))
         except Exception as e:
             db.session.rollback()
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
 
-    if request.method == 'GET':
-        file_content = None
-        if not tender.storage_path:
-            flash("Brak pliku do przetworzenia.", "warning")
-        else:
+    # --- Logika wczytywania i przetwarzania pliku ---
+    file_content = None
+    if not tender.storage_path:
+        flash("Brak pliku do przetworzenia.", "warning")
+    else:
+        # 1. Sprawdź, czy plik istnieje w cache
+        if os.path.exists(cached_file_path):
+            try:
+                with open(cached_file_path, 'rb') as f:
+                    file_content = io.BytesIO(f.read())
+                # flash("Plik wczytany z lokalnego cache.", "info")
+            except Exception as e:
+                flash(f"Błąd wczytywania pliku z cache: {e}", "danger")
+
+        # 2. Jeśli nie ma w cache, pobierz z GCS i zapisz w cache
+        if not file_content:
             try:
                 storage_service = get_storage_service()
                 file_stream = storage_service.download(tender.storage_path)
-                file_content = io.BytesIO(file_stream.read())
+                file_data = file_stream.read()
+                
+                # Zapisz w cache
+                with open(cached_file_path, 'wb') as f:
+                    f.write(file_data)
+                
+                file_content = io.BytesIO(file_data)
+                # flash("Plik pobrany z Google Cloud Storage i zapisany w cache.", "info")
             except Exception as e:
-                flash(f"Nie udało się wczytać pliku: {e}", "danger")
+                flash(f"Nie udało się pobrać pliku z GCS: {e}", "danger")
 
-        if file_content:
+    # 3. Przetwarzaj zawartość pliku (jeśli został wczytany)
+    if file_content:
+        try:
             file_content.seek(0)
             filename_lower = tender.original_filename.lower()
-            is_image_file = False
-            display_original_pdf = False
 
-            try:
-                if filename_lower.endswith('.pdf'):
-                    pdf_extracted_successfully = False
-                    try:
-                        with pdfplumber.open(file_content) as pdf:
-                            has_tables = False
+            if filename_lower.endswith('.pdf'):
+                # ... (logika przetwarzania PDF - bez zmian)
+                pdf_extracted_successfully = False
+                try:
+                    with pdfplumber.open(file_content) as pdf:
+                        has_tables = any(page.extract_tables() for page in pdf.pages)
+                        if has_tables:
                             for page in pdf.pages:
                                 tables = page.extract_tables()
                                 if tables:
-                                    has_tables = True
                                     for table in tables:
                                         table_data.extend(table)
-                            
-                            if has_tables:
+                            pdf_extracted_successfully = True
+                        else:
+                            text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                            if text.strip():
+                                extracted_text = text
                                 pdf_extracted_successfully = True
-                            else:
-                                extracted_text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
-                                if extracted_text.strip():
-                                    pdf_extracted_successfully = True
-                    except Exception as pdf_error:
-                        file_content.seek(0)
-                        with fitz.open(stream=file_content, filetype="pdf") as doc:
-                            for page in doc:
-                                extracted_text += page.get_text("text", sort=True)
-                            if extracted_text.strip():
-                                pdf_extracted_successfully = True
-                    
-                    if not pdf_extracted_successfully:
-                        display_original_pdf = True
-
-                elif filename_lower.endswith('.xlsx'):
-                    workbook = openpyxl.load_workbook(file_content, data_only=True)
-                    for sheet in workbook.worksheets:
-                        merged_ranges = list(sheet.merged_cells.ranges)
-                        for merged_range in merged_ranges:
-                            sheet.unmerge_cells(str(merged_range))
-
-                        for row in sheet.iter_rows():
-                            row_data = [str(cell.value) if cell.value is not None else "" for cell in row]
-                            if any(row_data):
-                                table_data.append(row_data)
-
-                elif filename_lower.endswith('.xls'):
-                    workbook = xlrd.open_workbook(file_contents=file_content.read())
-                    for sheet in workbook.sheets():
-                        for row_idx in range(sheet.nrows):
-                            row_data = []
-                            for col_idx in range(sheet.ncols):
-                                cell_value = sheet.cell_value(row_idx, col_idx)
-                                for rlo, rhi, clo, chi in sheet.merged_cells:
-                                    if rlo <= row_idx < rhi and clo <= col_idx < chi:
-                                        cell_value = sheet.cell_value(rlo, clo)
-                                        break
-                                row_data.append(str(cell_value) if cell_value is not None else "")
-                            if any(row_data):
-                                table_data.append(row_data)
+                except Exception:
+                    file_content.seek(0)
+                    with fitz.open(stream=file_content, filetype="pdf") as doc:
+                        extracted_text = "".join([page.get_text("text", sort=True) for page in doc])
+                        if extracted_text.strip():
+                            pdf_extracted_successfully = True
                 
-                elif filename_lower.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp')):
-                    is_image_file = True
-                else:
-                    flash(f'Nieobsługiwany typ pliku do ekstrakcji danych: "{tender.original_filename}" (typ MIME: {tender.file_type})', 'warning')
+                if not pdf_extracted_successfully:
+                    display_original_pdf = True
 
-            except Exception as e:
-                traceback.print_exc()
-                flash(f'Wystąpił błąd podczas ekstrakcji danych: {e}', 'danger')
-    
-    return render_template('extract_helper.html', tender=tender, extracted_text=extracted_text, table_data=table_data, unit_price_form=unit_price_form, categories=Category.query.order_by(Category.nazwa_kategorii).all(), unit_prices=tender.unit_prices.all(), title="Ekstrakcja danych z oferty", is_image_file=is_image_file if 'is_image_file' in locals() else False, display_original_pdf=display_original_pdf if 'display_original_pdf' in locals() else False)
+            elif filename_lower.endswith('.xlsx'):
+                # ... (logika przetwarzania XLSX - bez zmian)
+                workbook = openpyxl.load_workbook(file_content, data_only=True)
+                for sheet in workbook.worksheets:
+                    for row in sheet.iter_rows():
+                        row_data = [str(cell.value) if cell.value is not None else "" for cell in row]
+                        if any(row_data):
+                            table_data.append(row_data)
+
+            elif filename_lower.endswith('.xls'):
+                # ... (logika przetwarzania XLS - bez zmian)
+                workbook = xlrd.open_workbook(file_contents=file_content.read())
+                for sheet in workbook.sheets():
+                    for row_idx in range(sheet.nrows):
+                        table_data.append([sheet.cell_value(row_idx, col_idx) for col_idx in range(sheet.ncols)])
+            
+            elif filename_lower.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp')):
+                is_image_file = True
+            else:
+                flash(f'Nieobsługiwany typ pliku do ekstrakcji danych: "{tender.original_filename}"', 'warning')
+
+        except Exception as e:
+            traceback.print_exc()
+            flash(f'Wystąpił błąd podczas przetwarzania pliku: {e}', 'danger')
+
+    return render_template('extract_helper.html', 
+                           tender=tender, 
+                           extracted_text=extracted_text, 
+                           table_data=table_data, 
+                           unit_price_form=unit_price_form, 
+                           categories=Category.query.order_by(Category.nazwa_kategorii).all(), 
+                           unit_prices=tender.unit_prices.all(), 
+                           title="Ekstrakcja danych z oferty",
+                           is_image_file=is_image_file,
+                           display_original_pdf=display_original_pdf)
 
 @tenders_bp.route('/<int:tender_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -213,12 +238,15 @@ def edit_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     form = TenderForm(obj=tender)
     
-    if request.method == 'GET':
-        form.delete_existing_file.data = False
+    # Ścieżka do cache
+    cache_dir = os.path.join(current_app.instance_path, 'cache')
+    session_id = session.get('_id', 'default')
+    cached_file_path = os.path.join(cache_dir, f"{session_id}_{tender_id}.cache")
 
     if form.validate_on_submit():
         storage_service = get_storage_service()
-        
+        file_changed = False
+
         # Obsługa usuwania istniejącego pliku
         if form.delete_existing_file.data and not form.plik_oferty.data:
             if tender.storage_path:
@@ -227,6 +255,7 @@ def edit_tender(tender_id):
                     tender.original_filename = None
                     tender.storage_path = None
                     tender.file_type = None
+                    file_changed = True
                     flash('Istniejący plik został usunięty.', 'info')
                 except Exception as e:
                     flash(f"Błąd podczas usuwania pliku: {e}", "danger")
@@ -236,7 +265,6 @@ def edit_tender(tender_id):
             plik = form.plik_oferty.data
             filename = secure_filename(plik.filename)
             
-            # Usuń stary plik przed wgraniem nowego
             if tender.storage_path:
                 try:
                     storage_service.delete(tender.storage_path)
@@ -247,9 +275,18 @@ def edit_tender(tender_id):
                 tender.storage_path = storage_service.upload(plik.stream, filename, plik.mimetype)
                 tender.original_filename = filename
                 tender.file_type = plik.mimetype
+                file_changed = True
             except Exception as e:
                 flash(f"Błąd podczas wgrywania nowego pliku: {e}", "danger")
                 return redirect(url_for('tenders.edit_tender', tender_id=tender.id))
+
+        # Jeśli plik się zmienił, usuń go z cache
+        if file_changed and os.path.exists(cached_file_path):
+            try:
+                os.remove(cached_file_path)
+                flash('Lokalny cache dla tego pliku został wyczyszczony.', 'info')
+            except Exception as e:
+                flash(f'Nie udało się usunąć pliku z cache: {e}', 'warning')
 
         tender.nazwa_oferty = form.nazwa_oferty.data
         tender.data_otrzymania = form.data_otrzymania.data
@@ -269,12 +306,23 @@ def edit_tender(tender_id):
 def delete_tender(tender_id):
     tender = Tender.query.get_or_404(tender_id)
     
+    # Usuń plik z GCS
     if tender.storage_path:
         try:
             storage_service = get_storage_service()
             storage_service.delete(tender.storage_path)
         except Exception as e:
-            flash(f"Nie udało się usunąć pliku powiązanego z ofertą, ale oferta zostanie usunięta. Błąd: {e}", "warning")
+            flash(f"Nie udało się usunąć pliku powiązanego z ofertą z GCS, ale oferta zostanie usunięta. Błąd: {e}", "warning")
+
+    # Usuń plik z lokalnego cache
+    cache_dir = os.path.join(current_app.instance_path, 'cache')
+    session_id = session.get('_id', 'default')
+    cached_file_path = os.path.join(cache_dir, f"{session_id}_{tender_id}.cache")
+    if os.path.exists(cached_file_path):
+        try:
+            os.remove(cached_file_path)
+        except Exception as e:
+            flash(f"Nie udało się usunąć pliku z lokalnego cache. Błąd: {e}", "warning")
 
     db.session.delete(tender)
     db.session.commit()

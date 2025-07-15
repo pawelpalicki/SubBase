@@ -7,7 +7,7 @@
         max-width: 100%;
         padding-left: 15px;
         padding-right: 15px;
-        /* padding-top: 60px; Zwiększ padding-top, aby uniknąć nakładania się z navbar */
+        padding-top: 70px; 
     }
     .split-container {
         display: flex;
@@ -47,6 +47,7 @@
                     Wyodrębniony tekst
                 </div>
                 <div class="card-body">
+                    
                     {% if is_image_file %}
                         <img src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" class="img-fluid" alt="Podgląd obrazu">
                     {% elif display_original_pdf %}
