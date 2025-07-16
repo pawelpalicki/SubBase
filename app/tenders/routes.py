@@ -132,6 +132,7 @@ def extract_data(tender_id):
             db.session.rollback()
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
 
+<<<<<<< HEAD
     # --- Logika wczytywania i przetwarzania pliku ---
     file_content = None
     if not tender.storage_path:
@@ -161,6 +162,42 @@ def extract_data(tender_id):
                 # flash("Plik pobrany z Google Cloud Storage i zapisany w cache.", "info")
             except Exception as e:
                 flash(f"Nie udało się pobrać pliku z GCS: {e}", "danger")
+=======
+    if request.method == 'GET':
+        file_content = None
+        if not tender.storage_path:
+            flash("Brak pliku do przetworzenia.", "warning")
+        else:
+            # --- NOWA LOGIKA CACHE'OWANIA PLIKÓW ---
+            local_file_path = os.path.join(current_app.instance_path, 'uploads', secure_filename(tender.original_filename))
+            print(f"DEBUG: Sprawdzam lokalną ścieżkę: {local_file_path}")
+
+            if os.path.exists(local_file_path):
+                print(f"DEBUG: Plik znaleziony lokalnie. Wczytuję z: {local_file_path}")
+                try:
+                    with open(local_file_path, 'rb') as f:
+                        file_content = io.BytesIO(f.read())
+                except Exception as e:
+                    flash(f"Nie udało się odczytać pliku z lokalnego cache: {e}", "danger")
+            else:
+                print(f"DEBUG: Pliku nie ma lokalnie. Pobieram z GCS: {tender.storage_path}")
+                try:
+                    storage_service = get_storage_service()
+                    file_stream = storage_service.download(tender.storage_path)
+                    file_bytes = file_stream.read()
+                    
+                    # Zapisz plik w lokalnym cache
+                    with open(local_file_path, 'wb') as f:
+                        f.write(file_bytes)
+                    print(f"DEBUG: Plik zapisany w lokalnym cache: {local_file_path}")
+
+                    # Użyj pobranej zawartości
+                    file_content = io.BytesIO(file_bytes)
+
+                except Exception as e:
+                    flash(f"Nie udało się wczytać pliku z GCS: {e}", "danger")
+            # --- KONIEC NOWEJ LOGIKI ---
+>>>>>>> origin/debug-render-deployment
 
     # 3. Przetwarzaj zawartość pliku (jeśli został wczytany)
     if file_content:
