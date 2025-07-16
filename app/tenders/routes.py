@@ -996,3 +996,28 @@ def contractor_competitiveness_alternative_data(work_type_id):
         'min_values': grouped['min'].round(2).tolist(),
         'max_values': grouped['max'].round(2).tolist()
     })
+
+# WAŻNE: To jest endpoint tylko do debugowania! Pamiętaj, aby go usunąć po zakończeniu testów.
+@tenders_bp.route('/debug/list_files')
+def list_uploaded_files():
+    # Importujemy 'os' i 'current_app' jeśli nie ma ich w zasięgu
+    import os
+    from flask import current_app
+
+    # Pobieramy ścieżkę do katalogu z konfiguracji aplikacji
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    
+    # Sprawdzamy, czy katalog w ogóle istnieje
+    if not os.path.exists(upload_folder):
+        return f"Katalog docelowy nie istnieje: {upload_folder}"
+
+    # Listujemy pliki w tym katalogu
+    try:
+        files = os.listdir(upload_folder)
+        if not files:
+            return "Katalog jest pusty."
+        else:
+            # Zwracamy listę plików jako prosty tekst
+            return f"Pliki w katalogu {upload_folder}:<br>" + "<br>".join(files)
+    except Exception as e:
+        return f"Wystąpił błąd podczas listowania plików: {e}"
