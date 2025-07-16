@@ -191,7 +191,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="{{ url_for('tenders.analysis_dashboard') }}">
+                        <form method="POST" action="{{ url_for('tenders.analysis_dashboard') }}">
                             <input type="hidden" name="work_type_id" value="{{ selected_work_type_id }}">
                             <input type="hidden" name="date_from" value="{{ date_from or '' }}">
                             <input type="hidden" name="date_to" value="{{ date_to or '' }}">
@@ -230,15 +230,10 @@
         
                             <!-- Paginacja -->
                             <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center">
+                                <ul class="pagination justify-content-center" id="pagination-controls">
                                     {% if source_data.has_prev %}
                                     <li class="page-item">
-                                        <a class="page-link" href="{{ url_for('tenders.analysis_dashboard', 
-                                            page=source_data.prev_num,
-                                            work_type_id=selected_work_type_id,
-                                            date_from=date_from,
-                                            date_to=date_to,
-                                            include=request.args.getlist('include')) }}">
+                                        <a class="page-link pagination-link" href="javascript:void(0);" data-page="{{ source_data.prev_num }}">
                                             &laquo; Poprzednia
                                         </a>
                                     </li>
@@ -251,12 +246,7 @@
                                     {% for p in source_data.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=3) %}
                                         {% if p %}
                                             <li class="page-item{% if p == source_data.page %} active{% endif %}">
-                                                <a class="page-link" href="{{ url_for('tenders.analysis_dashboard', 
-                                                    page=p,
-                                                    work_type_id=selected_work_type_id,
-                                                    date_from=date_from,
-                                                    date_to=date_to,
-                                                    include=request.args.getlist('include')) }}">
+                                                <a class="page-link pagination-link" href="javascript:void(0);" data-page="{{ p }}">
                                                     {{ p }}
                                                 </a>
                                             </li>
@@ -269,12 +259,7 @@
         
                                     {% if source_data.has_next %}
                                     <li class="page-item">
-                                        <a class="page-link" href="{{ url_for('tenders.analysis_dashboard', 
-                                            page=source_data.next_num,
-                                            work_type_id=selected_work_type_id,
-                                            date_from=date_from,
-                                            date_to=date_to,
-                                            include=request.args.getlist('include')) }}">
+                                        <a class="page-link pagination-link" href="javascript:void(0);" data-page="{{ source_data.next_num }}">
                                             Następna &raquo;
                                         </a>
                                     </li>
@@ -347,9 +332,9 @@
         }
     
         {% if selected_work_type_id and stats %}
-        const includedIds = new URLSearchParams(window.location.search).getAll('include');
-        const dateFrom = $('#date_from').val();
-        const dateTo = $('#date_to').val();
+        const includedIds = {{ included_ids | tojson }};
+        const dateFrom = $('#analysis-form input[name="date_from"]').val();
+        const dateTo = $('#analysis-form input[name="date_to"]').val();
     
         let apiUrlSuffix = `?`;
         if (includedIds.length > 0) {
@@ -361,6 +346,10 @@
         if (dateTo) {
             apiUrlSuffix += `&date_to=${dateTo}`;
         }
+
+        console.log("Included IDs for AJAX calls:", includedIds);
+        console.log("Date From for AJAX calls:", dateFrom);
+        console.log("Date To for AJAX calls:", dateTo);
     
         // Wykres Ewolucji Ceny
         $.ajax({
@@ -530,8 +519,8 @@
                     options: {
                         scales: { 
                             y: { 
-                                beginAtZero: false,
-                                suggestedMin: margins.suggestedMin,
+                                beginAtZero: true,
+                                suggestedMin: 0,
                                 suggestedMax: margins.suggestedMax
                             } 
                         },
@@ -659,9 +648,44 @@
             });
         });
 
-        // Automatyczne przesyłanie formularza przy zmianie checkboxów
-        $('input[name="include"]').change(function() {
-            $(this).closest('form').submit();
+        
+
+        // Obsługa kliknięć na linki paginacji
+        $('.pagination-link').on('click', function(e) {
+            e.preventDefault(); // Zapobiegaj domyślnej akcji linku
+            const page = $(this).data('page');
+            const form = $('#analysis-form'); // Główny formularz analizy
+
+            // Upewnij się, że formularz jest typu POST
+            form.attr('method', 'POST');
+            form.attr('action', '{{ url_for('tenders.analysis_dashboard') }}');
+
+            // Dodaj ukryte pole dla numeru strony
+            let pageInput = form.find('input[name="page"]');
+            if (pageInput.length === 0) {
+                pageInput = $('<input>').attr({ type: 'hidden', name: 'page' });
+                form.append(pageInput);
+            }
+            pageInput.val(page);
+
+            // Zbieranie wszystkich danych z formularza (w tym checkboxów)
+            const formData = new FormData(form[0]);
+
+            // Usuń istniejące pola include, jeśli są
+            form.find('input[name="include"]').remove();
+
+            // Dodaj ponownie zaznaczone checkboxy jako ukryte pola
+            $('input[name="include"]:checked').each(function() {
+                const hiddenInput = $('<input>').attr({
+                    type: 'hidden',
+                    name: 'include',
+                    value: $(this).val()
+                });
+                form.append(hiddenInput);
+            });
+
+            // Prześlij formularz
+            form.submit();
         });
 });
 </script>

@@ -656,17 +656,25 @@ def delete_unit_price(price_id):
     flash('Pozycja cenowa została usunięta.', 'success')
     return redirect(url_for('tenders.tender_details', tender_id=tender_id))
 
-@tenders_bp.route('/analysis_dashboard')
+@tenders_bp.route('/analysis_dashboard', methods=['GET', 'POST'])
 @login_required
 def analysis_dashboard():
+    if request.method == 'POST':
+        selected_work_type_id = request.form.get('work_type_id', type=int)
+        included_ids = request.form.getlist('include', type=int)
+        date_from_str = request.form.get('date_from')
+        date_to_str = request.form.get('date_to')
+    else: # GET request
+        selected_work_type_id = request.args.get('work_type_id', type=int)
+        included_ids = request.args.getlist('include', type=int)
+        date_from_str = request.args.get('date_from')
+        date_to_str = request.args.get('date_to')
+
+    work_types = WorkType.query.order_by(WorkType.name).all()
     """
     Wyświetla pulpit analityczny do interaktywnej analizy cen jednostkowych.
     """
-    work_types = WorkType.query.order_by(WorkType.name).all()
-    selected_work_type_id = request.args.get('work_type_id', type=int)
-    included_ids = request.args.getlist('include', type=int)
-    date_from_str = request.args.get('date_from')
-    date_to_str = request.args.get('date_to')
+    
     
     # Dodaj parametr paginacji
     page = request.args.get('page', 1, type=int)
@@ -769,13 +777,10 @@ def analysis_dashboard():
                            min_tender_date=min_tender_date.strftime('%Y-%m-%d') if min_tender_date else '',
                            max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '')
 
-def _get_filtered_data_as_df(work_type_id):
+def _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str):
     """
     Funkcja pomocnicza do pobierania i filtrowania danych cenowych jako DataFrame Pandas.
     """
-    included_ids = request.args.getlist('include', type=int)
-    date_from_str = request.args.get('date_from')
-    date_to_str = request.args.get('date_to')
 
     date_from = None
     date_to = None
@@ -834,7 +839,10 @@ def price_evolution_data(work_type_id):
     """
     Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -852,7 +860,10 @@ def price_by_contractor_data(work_type_id):
     """
     Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -869,7 +880,10 @@ def price_distribution_data(work_type_id):
     """
     Zwraca dane do wykresu rozkładu cen (histogramu) dla danego rodzaju roboty.
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -899,7 +913,10 @@ def price_trends_data(work_type_id):
     """
     Zwraca dane do wykresu trendu cenowego wraz z linią trendu.
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty or len(df) < 2:
         return jsonify({'labels': [], 'datasets': []})
 
@@ -929,7 +946,10 @@ def price_seasonality_data(work_type_id):
     """
     Zwraca dane do wykresu sezonowości cen (średnia cena w każdym miesiącu).
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -1027,7 +1047,10 @@ def contractor_competitiveness_alternative_data(work_type_id):
     Zwraca dane do alternatywnego wykresu konkurencyjności wykonawców 
     (słupkowy z min, max, średnia zamiast box plot).
     """
-    df = _get_filtered_data_as_df(work_type_id)
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
     if df.empty:
         return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
 
