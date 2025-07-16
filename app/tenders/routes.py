@@ -1004,8 +1004,9 @@ def list_uploaded_files():
     import os
     from flask import current_app
 
-    # Pobieramy ścieżkę do katalogu z konfiguracji aplikacji
-    upload_folder = current_app.config['UPLOAD_FOLDER']
+    # Używamy current_app.instance_path, co jest bardziej niezawodne niż odwołanie do config.
+    # To zawsze wskazuje na folder 'instance'.
+    upload_folder = os.path.join(current_app.instance_path, 'uploads')
     
     # Sprawdzamy, czy katalog w ogóle istnieje
     if not os.path.exists(upload_folder):
@@ -1015,7 +1016,7 @@ def list_uploaded_files():
     try:
         files = os.listdir(upload_folder)
         if not files:
-            return "Katalog jest pusty."
+            return f"Katalog jest pusty: {upload_folder}"
         else:
             # Zwracamy listę plików jako prosty tekst
             return f"Pliki w katalogu {upload_folder}:<br>" + "<br>".join(files)
