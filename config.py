@@ -9,7 +9,11 @@ load_dotenv()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'jakis_domyslny_klucz_na_wypadek_braku_env'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("Brak zmiennej środowiskowej SECRET_KEY. Ustaw ją przed uruchomieniem aplikacji.")
+    if not SECRET_KEY:
+        raise ValueError("Brak zmiennej środowiskowej SECRET_KEY. Ustaw ją przed uruchomieniem aplikacji.")
 
     # --- Konfiguracja bazy danych ---
     _database_url = os.environ.get('DATABASE_URL')

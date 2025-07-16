@@ -14,4 +14,5 @@ if __name__ == '__main__':
     with flask_app.app_context():
         # Registers all models with SQLAlchemy
         import app.models
-    flask_app.run(host='0.0.0.0', port=8080, debug=True)
+    is_debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    flask_app.run(host='0.0.0.0', port=8080, debug=is_debug_mode)
