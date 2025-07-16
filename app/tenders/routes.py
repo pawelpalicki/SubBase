@@ -132,37 +132,6 @@ def extract_data(tender_id):
             db.session.rollback()
             flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
 
-<<<<<<< HEAD
-    # --- Logika wczytywania i przetwarzania pliku ---
-    file_content = None
-    if not tender.storage_path:
-        flash("Brak pliku do przetworzenia.", "warning")
-    else:
-        # 1. Sprawdź, czy plik istnieje w cache
-        if os.path.exists(cached_file_path):
-            try:
-                with open(cached_file_path, 'rb') as f:
-                    file_content = io.BytesIO(f.read())
-                # flash("Plik wczytany z lokalnego cache.", "info")
-            except Exception as e:
-                flash(f"Błąd wczytywania pliku z cache: {e}", "danger")
-
-        # 2. Jeśli nie ma w cache, pobierz z GCS i zapisz w cache
-        if not file_content:
-            try:
-                storage_service = get_storage_service()
-                file_stream = storage_service.download(tender.storage_path)
-                file_data = file_stream.read()
-                
-                # Zapisz w cache
-                with open(cached_file_path, 'wb') as f:
-                    f.write(file_data)
-                
-                file_content = io.BytesIO(file_data)
-                # flash("Plik pobrany z Google Cloud Storage i zapisany w cache.", "info")
-            except Exception as e:
-                flash(f"Nie udało się pobrać pliku z GCS: {e}", "danger")
-=======
     if request.method == 'GET':
         file_content = None
         if not tender.storage_path:
@@ -197,7 +166,6 @@ def extract_data(tender_id):
                 except Exception as e:
                     flash(f"Nie udało się wczytać pliku z GCS: {e}", "danger")
             # --- KONIEC NOWEJ LOGIKI ---
->>>>>>> origin/debug-render-deployment
 
     # 3. Przetwarzaj zawartość pliku (jeśli został wczytany)
     if file_content:
