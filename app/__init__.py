@@ -49,6 +49,14 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     app.permanent_session_lifetime = config_class.PERMANENT_SESSION_LIFETIME
 
+    # --- NOWA, NIEZAWODNA LOGIKA TWORZENIA KATALOGU ---
+    # Gwarantuje, że katalog /instance/uploads istnieje przy każdym starcie aplikacji.
+    # To jest kluczowe dla efemerycznych systemów plików jak na Render.
+    import os
+    uploads_folder = os.path.join(app.instance_path, 'uploads')
+    os.makedirs(uploads_folder, exist_ok=True)
+    # --- KONIEC NOWEJ LOGIKI ---
+
     app.jinja_env.filters['fix_url'] = fix_url_filter
     db.init_app(app) # Inicjalizacja SQLAlchemy
 

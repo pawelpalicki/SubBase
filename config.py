@@ -74,7 +74,5 @@ else:
     print("KONFIGURACJA: Brak skonfigurowanych danych logowania Google Cloud. Operacje na GCS będą niedostępne.")
 
     # --- Lokalny fallback ---
+    # Katalog 'uploads' jest teraz tworzony w app/__init__.py
     UPLOAD_FOLDER = os.path.join(basedir, 'instance', 'uploads')
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-        print(f"KONFIGURACJA: Utworzono katalog na pliki: {UPLOAD_FOLDER}")
