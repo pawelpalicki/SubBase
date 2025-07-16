@@ -99,19 +99,26 @@ def get_storage_service():
     if _storage_service_instance is None:
         gcs_bucket = current_app.config.get('GCS_BUCKET_NAME')
         
-        # Sprawdzamy, czy mamy obiekt poświadczeń lub plik konfiguracyjny
-        creds_object = current_app.config.get('GOOGLE_CREDS_OBJECT')
-        creds_file = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-
-        if gcs_bucket and GCS_AVAILABLE and (creds_object or creds_file):
-            _storage_service_instance = GcsStorageService(gcs_bucket, credentials=creds_object)
-            current_app.logger.info("Użyto serwisu przechowywania: Google Cloud Storage")
+        # Uproszczona i bardziej niezawodna logika:
+        # Jeśli nazwa bucketu GCS jest zdefiniowana i biblioteka jest dostępna,
+        # ZAWSZE próbuj użyć Google Cloud Storage.
+        if gcs_bucket and GCS_AVAILABLE:
+            try:
+                # Próba inicjalizacji. To tutaj biblioteka Google sama szuka
+                # danych logowania (zmiennych, ADC, itp.)
+                creds_object = current_app.config.get('GOOGLE_CREDS_OBJECT') # Dla kompatybilności z Replit
+                _storage_service_instance = GcsStorageService(gcs_bucket, credentials=creds_object)
+                current_app.logger.info("KONFIGURACJA: Inicjalizuję serwis: Google Cloud Storage.")
+            except Exception as e:
+                # Jeśli inicjalizacja GCS się nie powiedzie z jakiegokolwiek powodu
+                # (np. brak uprawnień, błąd sieci), przełącz się na tryb lokalny.
+                current_app.logger.error(f"BŁĄD: Inicjalizacja GCS nie powiodła się ({e}). Przełączam na tryb lokalny.")
+                upload_folder = current_app.config['UPLOAD_FOLDER']
+                _storage_service_instance = LocalStorageService(upload_folder)
         else:
+            # Jeśli bucket nie jest zdefiniowany, od razu użyj trybu lokalnego.
             upload_folder = current_app.config['UPLOAD_FOLDER']
             _storage_service_instance = LocalStorageService(upload_folder)
-            if not (gcs_bucket and GCS_AVAILABLE):
-                 current_app.logger.info(f"Użyto serwisu przechowywania: Lokalny folder ({upload_folder}) - GCS nie skonfigurowany lub biblioteka niedostępna.")
-            else:
-                 current_app.logger.warning(f"Użyto serwisu przechowywania: Lokalny folder ({upload_folder}) - GCS skonfigurowany, ale brak poświadczeń (GOOGLE_CREDS_OBJECT lub GOOGLE_APPLICATION_CREDENTIALS).")
+            current_app.logger.info(f"KONFIGURACJA: Inicjalizuję serwis: Lokalny folder ({upload_folder}). GCS nie skonfigurowany.")
 
     return _storage_service_instance

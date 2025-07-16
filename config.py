@@ -32,46 +32,37 @@ class Config:
     # --- Konfiguracja przechowywania plików ---
     GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME')
 
-    # --- Dynamiczna konfiguracja Google Credentials (z obsługą Render.com) ---
-# Definiujemy ścieżkę, gdzie Render umieszcza sekretny plik
-RENDER_GCS_SECRET_FILE = '/etc/secrets/gcs_credentials.json'
+    # --- Ulepszona, uniwersalna konfiguracja Google Credentials ---
+    # Definiujemy ścieżkę, gdzie Render umieszcza sekretny plik
+    RENDER_GCS_SECRET_FILE = '/etc/secrets/gcs_credentials.json'
 
-# Zmienne, których używa Twój kod
-google_creds_json_str = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-google_creds_file_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-GOOGLE_CREDS_OBJECT = None # Ta zmienna może być potrzebna w Twoim kodzie
+    # Zmienne, których używa Twój kod
+    google_creds_json_str = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    google_creds_file_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
-# Logika priorytetowa:
-# 1. Sprawdź środowisko Render
-# 2. Sprawdź metodę z Replit (JSON w zmiennej)
-# 3. Sprawdź metodę standardową (ścieżka w zmiennej)
+    # Logika priorytetowa:
+    # 1. Sprawdź środowisko Render (najbardziej specyficzne)
+    if os.path.exists(RENDER_GCS_SECRET_FILE):
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = RENDER_GCS_SECRET_FILE
+        print(f"KONFIGURACJA: Wykryto środowisko Render. Użyto danych logowania z pliku: {RENDER_GCS_SECRET_FILE}")
 
-if os.path.exists(RENDER_GCS_SECRET_FILE):
-    # JESTEŚMY NA RENDER
-    # Ustawiamy standardową zmienną Google, aby wskazywała na plik.
-    # Biblioteka Google sama go odnajdzie.
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = RENDER_GCS_SECRET_FILE
-    print(f"KONFIGURACJA: Wykryto środowisko Render. Użyto danych logowania z pliku: {RENDER_GCS_SECRET_FILE}")
+    # 2. Sprawdź, czy jest jawnie zdefiniowana ścieżka do pliku (dla lokalnego developmentu)
+    elif google_creds_file_path:
+        print(f"KONFIGURACJA: Użyto danych logowania Google Cloud z pliku: {google_creds_file_path}")
 
-elif google_creds_json_str:
-    # JESTEŚMY NA REPLIT (lub podobnym środowisku)
-    # To jest Twoja dotychczasowa logika dla Replit.
-    try:
-        GOOGLE_CREDS_OBJECT = json.loads(google_creds_json_str)
-        print("KONFIGURACJA: Pomyślnie wczytano dane logowania Google Cloud ze zmiennej środowiskowej (w pamięci).")
-    except json.JSONDecodeError:
-        print("BŁĄD KONFIGURACJI: Nie udało się sparsować JSON z GOOGLE_APPLICATION_CREDENTIALS_JSON.")
-        # Warto tutaj też ustawić GOOGLE_CREDS_OBJECT na None, żeby uniknąć problemów
-        GOOGLE_CREDS_OBJECT = None
+    # 3. Sprawdź, czy dane są w zmiennej (dla Replit)
+    elif google_creds_json_str:
+        try:
+            # Ta metoda nie jest zalecana, ale zostawiamy ją dla kompatybilności
+            json.loads(google_creds_json_str)
+            print("KONFIGURACJA: Pomyślnie wczytano dane logowania Google Cloud ze zmiennej środowiskowej (w pamięci).")
+        except json.JSONDecodeError:
+            print("BŁĄD KONFIGURACJI: Nie udało się sparsować JSON z GOOGLE_APPLICATION_CREDENTIALS_JSON.")
 
-elif google_creds_file_path:
-    # JESTEŠMY LOKALNIE (lub w innym standardowym środowisku)
-    # To jest Twoja dotychczasowa logika dla pliku.
-    print(f"KONFIGURACJA: Użyto danych logowania Google Cloud z pliku: {google_creds_file_path}")
-
-else:
-    # BRAK KONFIGURACJI
-    print("KONFIGURACJA: Brak skonfigurowanych danych logowania Google Cloud. Operacje na GCS będą niedostępne.")
+    # 4. Jeśli żadna z powyższych metod nie zadziałała...
+    else:
+        # ...nie rób nic i zaufaj, że biblioteka Google sama znajdzie dane (np. w Google Cloud IDE).
+        print("KONFIGURACJA: Nie znaleziono jawnej konfiguracji GCS. Aplikacja spróbuje użyć Application Default Credentials (ADC).")
 
     # --- Lokalny fallback ---
     # Katalog 'uploads' jest teraz tworzony w app/__init__.py
