@@ -664,17 +664,20 @@ def analysis_dashboard():
         included_ids = request.form.getlist('include', type=int)
         date_from_str = request.form.get('date_from')
         date_to_str = request.form.get('date_to')
+        status_filter = request.form.getlist('status_filter')
     else: # GET request
         selected_work_type_id = request.args.get('work_type_id', type=int)
         included_ids = request.args.getlist('include', type=int)
         date_from_str = request.args.get('date_from')
         date_to_str = request.args.get('date_to')
+        status_filter = request.args.getlist('status_filter') # Poprawka: odczyt z GET
 
     work_types = WorkType.query.order_by(WorkType.name).all()
-    """
-    Wyświetla pulpit analityczny do interaktywnej analizy cen jednostkowych.
-    """
-    
+    all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
+
+    # Domyślnie zaznacz wszystkie statusy, jeśli żaden nie został wybrany (tylko przy pierwszym ładowaniu)
+    if not any([selected_work_type_id, date_from_str, date_to_str, status_filter]):
+        status_filter = all_statuses
     
     # Dodaj parametr paginacji
     page = request.args.get('page', 1, type=int)
@@ -721,7 +724,8 @@ def analysis_dashboard():
                 Tender.nazwa_oferty,
                 Tender.id.label('tender_id'),
                 Project.skrot.label('project_skrot'),
-                UnitPrice.uwagi
+                UnitPrice.uwagi,
+                Tender.status
             )
             .join(Tender, UnitPrice.id_oferty == Tender.id)
             .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
@@ -733,6 +737,8 @@ def analysis_dashboard():
             base_query_source = base_query_source.filter(Tender.data_otrzymania >= date_from)
         if date_to:
             base_query_source = base_query_source.filter(Tender.data_otrzymania <= date_to)
+        if status_filter:
+            base_query_source = base_query_source.filter(Tender.status.in_(status_filter))
 
         # Zastępujemy .all() paginacją
         source_data_pagination = base_query_source.order_by(Tender.data_otrzymania.desc()).paginate(page=page, per_page=per_page, error_out=False)
@@ -752,6 +758,8 @@ def analysis_dashboard():
                 base_query_stats = base_query_stats.filter(Tender.data_otrzymania >= date_from)
             if date_to:
                 base_query_stats = base_query_stats.filter(Tender.data_otrzymania <= date_to)
+            if status_filter:
+                base_query_stats = base_query_stats.filter(Tender.status.in_(status_filter))
 
             prices = base_query_stats.all()
             price_values = [float(p[0]) for p in prices]
@@ -775,9 +783,11 @@ def analysis_dashboard():
                            date_from=date_from_str,
                            date_to=date_to_str,
                            min_tender_date=min_tender_date.strftime('%Y-%m-%d') if min_tender_date else '',
-                           max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '')
+                           max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '',
+                           all_statuses=all_statuses,
+                           selected_statuses=status_filter)
 
-def _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str):
+def _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter):
     """
     Funkcja pomocnicza do pobierania i filtrowania danych cenowych jako DataFrame Pandas.
     """
@@ -814,6 +824,8 @@ def _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_
         query = query.filter(Tender.data_otrzymania >= date_from)
     if date_to:
         query = query.filter(Tender.data_otrzymania <= date_to)
+    if status_filter:
+        query = query.filter(Tender.status.in_(status_filter))
     
     # Wczytanie danych do DataFrame
     df = pd.read_sql(query.statement, db.get_engine())
@@ -842,7 +854,8 @@ def price_evolution_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -863,7 +876,8 @@ def price_by_contractor_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -883,7 +897,8 @@ def price_distribution_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -916,7 +931,8 @@ def price_trends_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty or len(df) < 2:
         return jsonify({'labels': [], 'datasets': []})
 
@@ -949,7 +965,8 @@ def price_seasonality_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty:
         return jsonify({'labels': [], 'values': []})
 
@@ -966,80 +983,6 @@ def price_seasonality_data(work_type_id):
     values = [value if not np.isnan(value) else None for value in seasonality.values]
 
     return jsonify({'labels': labels, 'values': values})
-
-# @tenders_bp.route('/api/contractor_competitiveness/<int:work_type_id>')
-# @login_required
-# def contractor_competitiveness_data(work_type_id):
-#     """
-#     Zwraca dane do wykresu pudełkowego (box plot) konkurencyjności wykonawców.
-#     """
-#     df = _get_filtered_data_as_df(work_type_id)
-#     if df.empty:
-#         return jsonify({'labels': [], 'datasets': []})
-
-#     # Grupuj po wykonawcy i oblicz statystyki dla box plot
-#     grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].apply(list)
-    
-#     # Filtruj wykonawców z małą liczbą ofert, aby wykres był czytelny
-#     grouped = grouped[grouped.apply(len) >= 2]
-    
-#     if grouped.empty:
-#         return jsonify({'labels': [], 'datasets': []})
-
-#     # Sortuj wg mediany ceny
-#     sorted_labels = grouped.apply(np.median).sort_values().index
-    
-#     # Przygotuj dane w formacie dla chartjs-chart-box-and-violin-plot
-#     # WAŻNE: Dane dla każdego wykonawcy muszą być posortowane rosnąco
-#     boxplot_data = [sorted(grouped[label]) for label in sorted_labels]
-
-#     return jsonify({
-#         'labels': sorted_labels.tolist(),
-#         'datasets': [{
-#             'label': 'Rozkład cen',
-#             'data': boxplot_data
-#         }]
-#     })
-
-# @tenders_bp.route('/api/contractor_stats/<int:work_type_id>')
-# @login_required
-# def contractor_stats_data(work_type_id):
-#     """
-#     Zwraca dane do prostego wykresu konkurencyjności wykonawców 
-#     z dodatkowymi statystykami w tooltipie.
-#     """
-#     df = _get_filtered_data_as_df(work_type_id)
-#     if df.empty:
-#         return jsonify({'labels': [], 'avg_values': [], 'stats': []})
-
-#     # Grupuj po wykonawcy i oblicz statystyki
-#     grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].agg(['mean', 'min', 'max', 'count'])
-    
-#     # Filtruj wykonawców z małą liczbą ofert
-#     grouped = grouped[grouped['count'] >= 2]
-    
-#     if grouped.empty:
-#         return jsonify({'labels': [], 'avg_values': [], 'stats': []})
-
-#     # Sortuj wg średniej ceny
-#     grouped = grouped.sort_values('mean')
-    
-#     # Przygotuj dane
-#     stats = []
-#     for _, row in grouped.iterrows():
-#         stats.append({
-#             'avg': float(row['mean']),
-#             'min': float(row['min']),
-#             'max': float(row['max']),
-#             'count': int(row['count'])
-#         })
-    
-#     return jsonify({
-#         'labels': grouped.index.tolist(),
-#         'avg_values': grouped['mean'].round(2).tolist(),
-#         'stats': stats
-#     })
-
 @tenders_bp.route('/api/contractor_competitiveness_alternative/<int:work_type_id>')
 @login_required
 def contractor_competitiveness_alternative_data(work_type_id):
@@ -1050,7 +993,8 @@ def contractor_competitiveness_alternative_data(work_type_id):
     included_ids = request.args.getlist('include', type=int)
     date_from_str = request.args.get('date_from')
     date_to_str = request.args.get('date_to')
-    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str)
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
     if df.empty:
         return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
 
@@ -1072,29 +1016,3 @@ def contractor_competitiveness_alternative_data(work_type_id):
         'min_values': grouped['min'].round(2).tolist(),
         'max_values': grouped['max'].round(2).tolist()
     })
-
-# WAŻNE: To jest endpoint tylko do debugowania! Pamiętaj, aby go usunąć po zakończeniu testów.
-@tenders_bp.route('/debug/list_files')
-def list_uploaded_files():
-    # Importujemy 'os' i 'current_app' jeśli nie ma ich w zasięgu
-    import os
-    from flask import current_app
-
-    # Używamy current_app.instance_path, co jest bardziej niezawodne niż odwołanie do config.
-    # To zawsze wskazuje na folder 'instance'.
-    upload_folder = os.path.join(current_app.instance_path, 'uploads')
-    
-    # Sprawdzamy, czy katalog w ogóle istnieje
-    if not os.path.exists(upload_folder):
-        return f"Katalog docelowy nie istnieje: {upload_folder}"
-
-    # Listujemy pliki w tym katalogu
-    try:
-        files = os.listdir(upload_folder)
-        if not files:
-            return f"Katalog jest pusty: {upload_folder}"
-        else:
-            # Zwracamy listę plików jako prosty tekst
-            return f"Pliki w katalogu {upload_folder}:<br>" + "<br>".join(files)
-    except Exception as e:
-        return f"Wystąpił błąd podczas listowania plików: {e}"
