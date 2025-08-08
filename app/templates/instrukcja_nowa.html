@@ -4,138 +4,227 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h1>Instrukcja Obsługi Aplikacji SubBase</h1>
-        </div>
-        <div class="card-body">
-            <p class="lead">Niniejsza instrukcja opisuje kluczowe funkcje i sposób korzystania z aplikacji SubBase, która wspomaga zarządzanie bazą firm, ofertami przetargowymi oraz analizą cen jednostkowych.</p>
+    <h1 class="mb-4">Instrukcja Obsługi Aplikacji</h1>
+    <p class="lead">Niniejsza instrukcja opisuje szczegółowo wszystkie funkcje i sposób korzystania z aplikacji do zarządzania bazą firm, ofertami i analizami cenowymi.</p>
 
-            <h2 class="mt-4">Spis Treści</h2>
-            <div class="list-group">
-                <a href="#logowanie" class="list-group-item list-group-item-action">1. Logowanie i Nawigacja</a>
-                <a href="#baza-firm" class="list-group-item list-group-item-action">2. Baza Firm</a>
-                <a href="#zarzadzanie-ofertami" class="list-group-item list-group-item-action">3. Zarządzanie Ofertami (Tenders)</a>
-                <a href="#ceny-jednostkowe" class="list-group-item list-group-item-action">4. Ceny Jednostkowe</a>
-                <a href="#dane-slownikowe" class="list-group-item list-group-item-action">5. Zarządzanie Danymi Słownikowymi</a>
-                <a href="#pozostale" class="list-group-item list-group-item-action">6. Pozostałe Funkcje</a>
+    <h2>Spis Treści</h2>
+    <ol>
+        <li><a href="#logowanie">Logowanie i Zmiana Motywu</a></li>
+        <li><a href="#nawigacja">Nawigacja i Pulpit (Strona Główna)</a></li>
+        <li><a href="#modul-firm">Moduł Firm</a>
+            <ul>
+                <li><a href="#lista-firm">Lista Firm i Filtrowanie</a></li>
+                <li><a href="#szczegoly-firmy">Szczegóły Firmy</a></li>
+                <li><a href="#dodawanie-edycja-firmy">Dodawanie i Edycja Firmy</a></li>
+                <li><a href="#eksport-firm">Eksport Listy Firm</a></li>
+            </ul>
+        </li>
+        <li><a href="#modul-ofert">Moduł Ofert</a>
+            <ul>
+                <li><a href="#lista-ofert">Lista Ofert</a></li>
+                <li><a href="#dodawanie-edycja-oferty">Dodawanie i Edycja Oferty</a></li>
+                <li><a href="#szczegoly-oferty">Szczegóły Oferty i Pozycje Cenowe</a></li>
+            </ul>
+        </li>
+        <li><a href="#modul-analiz">Moduł Analiz</a>
+            <ul>
+                <li><a href="#analiza-cen">Porównanie Cen Jednostkowych</a></li>
+                <li><a href="#pulpit-analityczny">Pulpit Analityczny</a></li>
+                <li><a href="#wszystkie-ceny">Wszystkie Ceny Jednostkowe</a></li>
+            </ul>
+        </li>
+        <li><a href="#slowniki">Zarządzanie Słownikami (Ustawienia)</a></li>
+    </ol>
+
+    <hr class="my-4">
+
+    <section id="logowanie" class="mb-5">
+        <h2>1. Logowanie i Zmiana Motywu</h2>
+        <p><strong>Logowanie:</strong> Aby uzyskać dostęp do funkcji aplikacji, użytkownik musi się zalogować. Formularz logowania dostępny jest pod przyciskiem <strong>"Zaloguj"</strong> w prawym górnym rogu ekranu. Należy podać nazwę użytkownika i hasło.</p>
+        <p><strong>Wylogowywanie:</strong> Aby się wylogować, należy kliknąć przycisk <strong>"Wyloguj (nazwa użytkownika)"</strong> znajdujący się w tym samym miejscu.</p>
+        <p><strong>Zmiana Motywu:</strong> Obok przycisku logowania znajduje się przełącznik (ikona słońca/księżyca), który pozwala na zmianę motywu graficznego interfejsu (jasny/ciemny). Wybór jest zapamiętywany w przeglądarce i zostanie automatycznie zastosowany przy kolejnych wizytach.</p>
+    </section>
+
+    <hr class="my-4">
+
+    <section id="nawigacja" class="mb-5">
+        <h2>2. Nawigacja i Pulpit (Strona Główna)</h2>
+        <p>Po zalogowaniu użytkownik trafia na <strong>Pulpit</strong>, który zawiera karty z szybkimi linkami do głównych modułów aplikacji:</p>
+        <ul>
+            <li><strong>Zarządzanie Firmami:</strong> Przenosi do interfejsu zarządzania firmami, gdzie można przeglądać, filtrować i dodawać nowe firmy.</li>
+            <li><strong>Zarządzanie Ofertami:</strong> Przenosi do modułu ofertowego, służącego do archiwizacji i analizy ofert.</li>
+            <li><strong>Analizy i Raporty:</strong> Przenosi bezpośrednio do pulpitu analitycznego, gdzie można wizualizować trendy cenowe.</li>
+        </ul>
+        <p>Główna nawigacja aplikacji znajduje się na górnym pasku i jest podzielona na rozwijane menu, zapewniając łatwy dostęp do wszystkich funkcji:</p>
+        <ul>
+            <li><strong>Strona główna (ikona domu):</strong> Zawsze przenosi z powrotem do Pulpitu.</li>
+            <li><strong>Firmy:</strong>
+                <ul>
+                    <li><strong>Lista Firm:</strong> Główny widok modułu firm.</li>
+                    <li><strong>Dodaj nową firmę:</strong> Otwiera formularz dodawania nowej firmy.</li>
+                    <li><strong>Osoby:</strong> Dostęp do globalnej listy wszystkich osób kontaktowych.</li>
+                    <li><strong>Oceny:</strong> Dostęp do globalnej listy wszystkich ocen współpracy.</li>
+                </ul>
+            </li>
+            <li><strong>Oferty:</strong>
+                 <ul>
+                    <li><strong>Lista Ofert:</strong> Główny widok modułu ofert.</li>
+                    <li><strong>Dodaj nową ofertę:</strong> Otwiera formularz dodawania nowej oferty.</li>
+                </ul>
+            </li>
+            <li><strong>Analizy:</strong>
+                <ul>
+                    <li><strong>Porównanie cen jednostkowych:</strong> Narzędzie do dynamicznego porównywania cen tych samych robót w różnych ofertach.</li>
+                    <li><strong>Wszystkie ceny jednostkowe:</strong> Globalna, przeszukiwalna lista wszystkich pozycji cenowych z wszystkich ofert.</li>
+                    <li><strong>Pulpit Analityczny:</strong> Wizualizacja danych cenowych w formie wykresów.</li>
+                </ul>
+            </li>
+            <li><strong>Ustawienia (ikona koła zębatego):</strong> Centralne miejsce do zarządzania słownikami aplikacji (patrz rozdział 6).</li>
+        </ul>
+    </section>
+
+    <hr class="my-4">
+
+    <section id="modul-firm" class="mb-5">
+        <h2>3. Moduł Firm</h2>
+        <h3 id="lista-firm">3.1. Lista Firm i Filtrowanie</h3>
+        <p>Interfejs listy firm (dostępny z menu <strong>"Firmy" -> "Lista Firm"</strong>) jest podzielony na dwie kolumny, co zapewnia wygodę pracy:</p>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Lewa kolumna (Filtrowanie):</strong>
+                <p>Zawiera panel z filtrami, który jest zawsze widoczny na większych ekranach. Można tu precyzyjnie zawęzić listę firm, korzystając z:</p>
+                <ul>
+                    <li><strong>Wyszukiwania tekstowego:</strong> Bardzo potężne narzędzie, które przeszukuje niemal wszystkie informacje powiązane z firmą: nazwę, stronę WWW, uwagi, dane adresowe, e-maile, telefony, imiona i nazwiska osób kontaktowych, a nawet treść komentarzy w ocenach.</li>
+                    <li><strong>Specjalności:</strong> Lista wielokrotnego wyboru.</li>
+                    <li><strong>Województwo i Powiat:</strong> Filtry zależne - po wybraniu województwa, lista powiatów jest automatycznie aktualizowana. System inteligentnie pokazuje firmy działające w danym powiecie, całym województwie oraz te o zasięgu ogólnokrajowym.</li>
+                    <li><strong>Typ firmy:</strong> Lista jednokrotnego wyboru.</li>
+                </ul>
+                <p>Po ustawieniu kryteriów należy użyć przycisku <strong>"Filtruj"</strong>. Przycisk <strong>"Resetuj"</strong> czyści wszystkie filtry. Na urządzeniach mobilnych panel filtrów jest domyślnie ukryty i można go otworzyć przyciskiem "Filtry".</p>
             </div>
-
-            <hr class="my-4">
-
-            <section id="logowanie" class="mb-4">
-                <h2>1. Logowanie i Nawigacja</h2>
-                <p>Aby uzyskać dostęp do funkcji aplikacji, użytkownik musi się zalogować. Po zalogowaniu, główne menu nawigacyjne (na górze strony) zapewnia dostęp do wszystkich modułów:</p>
-                <ul>
-                    <li><strong>Baza Firm:</strong> Główny moduł do zarządzania kontrahentami.</li>
-                    <li><strong>Oferty:</strong> Moduł do ewidencji i zarządzania otrzymanymi ofertami.</li>
-                    <li><strong>Ceny Jednostkowe:</strong> Narzędzia do analizy i przeglądania cen z ofert.</li>
-                    <li><strong>Dodaj (+):</strong> Rozwijane menu z szybkimi linkami do dodawania nowych firm, ofert, projektów itp.</li>
-                    <li><strong>Ustawienia:</strong> Dostęp do zarządzania danymi słownikowymi (np. specjalnościami, kategoriami, typami).</li>
-                    <li><strong>Przycisk zmiany motywu (ikona słońca/księżyca):</strong> Pozwala przełączyć interfejs między jasnym a ciemnym motywem.</li>
-                    <li><strong>Wyloguj:</strong> Kończy sesję użytkownika.</li>
-                </ul>
-            </section>
-
-            <hr class="my-4">
-
-            <section id="baza-firm" class="mb-4">
-                <h2>2. Baza Firm</h2>
-                <p>Centralny moduł aplikacji, służący do gromadzenia informacji o firmach i kontrahentach.</p>
-                
-                <h3 class="mt-3">2.1. Przeglądanie i Filtrowanie</h3>
-                <p>Główny widok modułu to lista firm, którą można dynamicznie filtrować i przeszukiwać. Dostępne opcje:</p>
-                <ul>
-                    <li><strong>Wyszukiwanie tekstowe:</strong> Przeszukuje większość pól powiązanych z firmą (nazwę, dane kontaktowe, specjalności, uwagi itp.).</li>
-                    <li><strong>Filtry:</strong> Pozwalają zawęzić listę firm według specjalności, obszaru działania (województwa, powiaty) oraz typu firmy.</li>
-                    <li><strong>Resetowanie:</strong> Przycisk "Resetuj" czyści wszystkie aktywne filtry.</li>
-                </ul>
-
-                <h3 class="mt-3">2.2. Dodawanie i Edycja Firmy</h3>
-                <p>Formularz dodawania/edycji firmy jest podzielony na zakładki, co ułatwia wprowadzanie danych:</p>
-                <ul>
-                    <li><strong>Dane podstawowe:</strong> Nazwa firmy, typ, strona WWW, uwagi.</li>
-                    <li><strong>Kontakt:</strong> Możliwość dodania wielu adresów, telefonów i e-maili wraz z ich typami.</li>
-                    <li><strong>Specjalizacje i Rynek:</strong> Wybór specjalności oraz określenie obszaru działania (cały kraj, województwa, powiaty).</li>
-                    <li><strong>Osoby kontaktowe:</strong> Ewidencja osób powiązanych z firmą.</li>
-                    <li><strong>Oceny:</strong> Rejestr ocen współpracy z daną firmą.</li>
-                </ul>
-                <p>Podczas dodawania/edycji można również tworzyć nowe typy (np. typ adresu, specjalność) bezpośrednio z formularza za pomocą przycisku "Dodaj" obok odpowiedniego pola.</p>
-
-                <h3 class="mt-3">2.3. Szczegóły i Usuwanie</h3>
-                <p>Kliknięcie na firmę na liście rozwija panel ze szczegółowymi informacjami. Z poziomu formularza edycji można trwale usunąć firmę wraz ze wszystkimi powiązanymi danymi.</p>
-            </section>
-
-            <hr class="my-4">
-
-            <section id="zarzadzanie-ofertami" class="mb-4">
-                <h2>3. Zarządzanie Ofertami (Tenders)</h2>
-                <p>Moduł ten służy do ewidencjonowania i śledzenia ofert otrzymywanych od firm.</p>
-                
-                <h3 class="mt-3">3.1. Lista Ofert</h3>
-                <p>Główny widok modułu prezentuje listę wszystkich zarejestrowanych ofert. Listę można filtrować po statusie, firmie oraz projekcie.</p>
-
-                <h3 class="mt-3">3.2. Dodawanie i Edycja Oferty</h3>
-                <p>Formularz oferty pozwala na zapisanie kluczowych informacji:</p>
-                <ul>
-                    <li><strong>Nazwa oferty i data otrzymania.</strong></li>
-                    <li><strong>Status oferty</strong> (np. Nowa, Analizowana, Odrzucona).</li>
-                    <li><strong>Powiązanie z firmą:</strong> Wybór firmy z bazy, która złożyła ofertę.</li>
-                    <li><strong>Powiązanie z projektem:</strong> Opcjonalny wybór projektu, którego dotyczy oferta.</li>
-                    <li><strong>Załącznik:</strong> Możliwość wgrania oryginalnego pliku oferty (np. PDF, XLSX), który będzie przechowywany w systemie.</li>
-                </ul>
-
-                <h3 class="mt-3">3.3. Szczegóły Oferty</h3>
-                <p>Widok szczegółów oferty prezentuje wszystkie zapisane dane oraz listę cen jednostkowych powiązanych z tą ofertą.</p>
-            </section>
-
-            <hr class="my-4">
-
-            <section id="ceny-jednostkowe" class="mb-4">
-                <h2>4. Ceny Jednostkowe</h2>
-                <p>Moduł ten jest kluczowy dla analizy kosztorysów i porównywania stawek między ofertami.</p>
-
-                <h3 class="mt-3">4.1. Przeglądanie i Analiza</h3>
-                <p>Główny widok to lista wszystkich cen jednostkowych w bazie. Można ją przeszukiwać i filtrować, np. po rodzaju roboty, kategorii czy projekcie, aby porównać ceny z różnych ofert.</p>
-                <p>Dostępny jest również widok "Analiza Cen", który pozwala na bardziej zaawansowane porównania.</p>
-
-                <h3 class="mt-3">4.2. Dodawanie Cen</h3>
-                <p>Ceny jednostkowe można dodawać bezpośrednio z widoku szczegółów konkretnej oferty. Formularz dodawania ceny wymaga podania:</p>
-                <ul>
-                    <li><strong>Rodzaju roboty</strong> (wybór ze słownika).</li>
-                    <li><strong>Kategorii</strong> (wybór ze słownika, często powiązany z rodzajem roboty).</li>
-                    <li><strong>Jednostki miary</strong> (np. m², szt., mb).</li>
-                    <li><strong>Ceny jednostkowej netto.</strong></li>
-                    <li><strong>Uwag.</strong></li>
-                </ul>
-                <p>Nowe rodzaje robót i kategorie można dodawać "w locie" z poziomu formularza.</p>
-            </section>
-
-            <hr class="my-4">
-
-            <section id="dane-slownikowe" class="mb-4">
-                <h2>5. Zarządzanie Danymi Słownikowymi</h2>
-                <p>W menu "Ustawienia" znajduje się dostęp do zarządzania tzw. danymi słownikowymi, które zasilają pola wyboru w całej aplikacji. Umożliwia to utrzymanie porządku i spójności danych. Zarządzać można następującymi elementami:</p>
-                <ul>
-                    <li><strong>Projekty:</strong> Definiowanie projektów, do których przypisywane są oferty.</li>
-                    <li><strong>Specjalności:</strong> Lista specjalności dla firm.</li>
-                    <li><strong>Typy:</strong> Typy firm, adresów, e-maili i telefonów.</li>
-                    <li><strong>Kategorie i Rodzaje Robót:</strong> Słowniki używane w module Cen Jednostkowych.</li>
-                    <li><strong>Osoby i Oceny:</strong> Centralne listy osób kontaktowych i ocen, które można również edytować z poziomu konkretnej firmy.</li>
-                </ul>
-            </section>
-
-            <hr class="my-4">
-
-            <section id="pozostale" class="mb-4">
-                <h2>6. Pozostałe Funkcje</h2>
-                <h3 class="mt-3">6.1. Eksport Danych</h3>
-                <p>W menu nawigacyjnym Bazy Firm znajduje się przycisk "Eksportuj", który generuje stronę HTML z aktualnie przefiltrowaną listą firm. Strona ta jest gotowa do wydruku lub zapisu w formacie PDF z poziomu przeglądarki.</p>
-                
-                <h3 class="mt-3">6.2. Resetowanie Liczników Bazy Danych</h3>
-                <p>Po intensywnym testowaniu i usuwaniu danych, numery ID w tabelach mogą stać się nieciągłe. Dostępny jest specjalny skrypt (`reset_sequences.py`), który administrator może uruchomić, aby zresetować liczniki ID. Dzięki temu nowe rekordy będą tworzone z kolejnymi numerami po najwyższym istniejącym ID.</p>
-            </section>
+            <div class="col-md-6">
+                <strong>Prawa kolumna (Lista firm):</strong>
+                <p>Wyświetla tabelę z przefiltrowaną listą firm. Tabela pokazuje ID i nazwę firmy.</p>
+            </div>
         </div>
-    </div>
+
+        <h3 id="szczegoly-firmy" class="mt-4">3.2. Szczegóły Firmy</h3>
+        <p>Kliknięcie na dowolny wiersz z firmą na liście powoduje płynne rozwinięcie panelu ze szczegółowymi informacjami o tej firmie, bez przeładowywania strony. Panel ten zawiera wszystkie kluczowe dane w przejrzystych sekcjach:</p>
+        <ul>
+            <li>Dane ogólne (nazwa, typ, strona, uwagi).</li>
+            <li>Średnia ocen.</li>
+            <li>Obszar działania i specjalności.</li>
+            <li>Dane kontaktowe (adresy, e-maile, telefony).</li>
+            <li>Osoby kontaktowe.</li>
+            <li>Historia ocen współpracy.</li>
+        </ul>
+        <p>W panelu szczegółów znajduje się również przycisk <strong>"Edytuj"</strong>, który przenosi do pełnego formularza edycji danej firmy.</p>
+
+        <h3 id="dodawanie-edycja-firmy" class="mt-4">3.3. Dodawanie i Edycja Firmy</h3>
+        <p>Formularz dodawania nowej firmy (dostępny z menu "Firmy" -> "Dodaj nową firmę") oraz formularz edycji to jeden, długi widok, podzielony na logiczne sekcje w formie kart. Taka budowa ułatwia wprowadzanie dużej ilości danych.</p>
+        <ul>
+            <li><strong>Dane podstawowe:</strong> Nazwa firmy (wymagane), typ, strona WWW, uwagi.</li>
+            <li><strong>Adresy, E-maile, Telefony:</strong> W każdej z tych sekcji można dodać wiele pozycji za pomocą przycisku <strong>"Dodaj kolejny..."</strong>. Dla każdej pozycji można wybrać typ z listy (np. adres główny, telefon służbowy). Obok listy wyboru typu znajduje się przycisk <strong>"+"</strong>, który otwiera okno modalne pozwalające na szybkie dodanie nowej wartości do słownika (np. nowego typu adresu) bez opuszczania formularza firmy.</li>
+            <li><strong>Specjalizacje i Rynek:</strong>
+                <ul>
+                    <li><strong>Specjalności:</strong> Pole wielokrotnego wyboru z wyszukiwarką.</li>
+                    <li><strong>Obszar działania:</strong> Logika trzystopniowa: można wybrać "Cały kraj", "Wybrane województwa" (pojawia się pole wielokrotnego wyboru województw) lub "Wybrane powiaty" (pojawiają się pola wyboru województw i powiatów).</li>
+                </ul>
+            </li>
+            <li><strong>Osoby kontaktowe i Oceny współpracy:</strong> Działają analogicznie do sekcji kontaktowych, pozwalając na dodawanie wielu osób i ocen za pomocą dedykowanych przycisków.</li>
+        </ul>
+        <p>Po wypełnieniu danych należy zapisać formularz przyciskiem <strong>"Zapisz firmę"</strong> na dole strony. Przycisk <strong>"Usuń firmę"</strong> (wymagający potwierdzenia) również znajduje się na samym dole formularza edycji.</p>
+
+        <h3 id="eksport-firm" class="mt-4">3.4. Eksport Listy Firm</h3>
+        <p>Na stronie z listą firm, w nagłówku prawej kolumny, znajduje się przycisk <strong>"Eksportuj widoczne"</strong>. Jego kliknięcie generuje nową stronę HTML z tabelą zawierającą szczegółowe dane wszystkich firm z aktualnie widocznej, przefiltrowanej listy. Stronę tę można łatwo wydrukować lub zapisać do pliku PDF z poziomu przeglądarki.</p>
+    </section>
+
+    <hr class="my-4">
+
+    <section id="modul-ofert" class="mb-5">
+        <h2>4. Moduł Ofert</h2>
+        <p>Moduł ten służy do archiwizowania dokumentów ofertowych i zbierania danych o cenach jednostkowych na potrzeby przyszłych analiz.</p>
+        
+        <h3 id="lista-ofert">4.1. Lista Ofert</h3>
+        <p>Dostępna z menu <strong>"Oferty" -> "Lista Ofert"</strong>. Prezentuje tabelę z zarejestrowanymi ofertami. Kluczowe kolumny to:</p>
+        <ul>
+            <li><strong>Nazwa, Projekt, Data Złożenia, Status:</strong> Podstawowe informacje identyfikujące ofertę.</li>
+            <li><strong>Akcje:</strong> Zawiera przycisk <strong>Pobierz</strong> (ikona strzałki w dół), który pozwala na pobranie na dysk oryginalnego pliku załączonego do oferty.</li>
+        </ul>
+
+        <h3 id="dodawanie-edycja-oferty" class="mt-4">4.2. Dodawanie i Edycja Oferty</h3>
+        <p>Formularz dodawania nowej oferty (lub edycji istniejącej) zawiera następujące pola:</p>
+        <ul>
+            <li><strong>Nazwa oferty:</strong> Własny identyfikator oferty.</li>
+            <li><strong>Projekt:</strong> Możliwość przypisania oferty do projektu.</li>
+            <li><strong>Data złożenia i Status.</strong></li>
+            <li><strong>Plik oferty:</strong> Kluczowe pole umożliwiające załączenie oryginalnego dokumentu (np. w formacie PDF).</li>
+        </ul>
+
+        <h3 id="szczegoly-oferty" class="mt-4">4.3. Szczegóły Oferty i Wprowadzanie Cen Jednostkowych</h3>
+        <p>Po przejściu do szczegółów konkretnej oferty, interfejs dzieli się na dwa panele, co stanowi o jego głównej funkcjonalności:</p>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Panel Lewy (Podgląd Oferty):</strong>
+                <p>W tym panelu wyświetlany jest podgląd załączonego pliku oferty. Umożliwia to wygodne przeglądanie oryginalnego dokumentu bez potrzeby otwierania go w osobnym programie.</p>
+            </div>
+            <div class="col-md-6">
+                <strong>Panel Prawy (Pozycje Cenowe):</strong>
+                <p>Ten panel służy do wprowadzania poszczególnych pozycji cenowych z dokumentu oglądanego po lewej stronie. Dla każdej pozycji należy podać:</p>
+                <ul>
+                    <li>Rodzaj roboty (ze słownika)</li>
+                    <li>Kategorię (ze słownika)</li>
+                    <li>Cenę jednostkową</li>
+                    <li>Jednostkę miary</li>
+                    <li>Uwagi (opcjonalnie)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info mt-4" role="alert">
+            <h4 class="alert-heading">Kluczowa funkcjonalność</h4>
+            <p>Głównym celem tego widoku jest umożliwienie użytkownikowi jednoczesnego podglądu oryginalnej oferty (po lewej) i wprowadzania na tej podstawie cen jednostkowych (po prawej). Aplikacja nie obsługuje 'ilości' ani nie oblicza automatycznie wartości oferty. Służy do precyzyjnego zbierania danych o cenach jednostkowych w celu ich późniejszej analizy.</p>
+        </div>
+    </section>
+
+    <hr class="my-4">
+
+    <section id="modul-analiz" class="mb-5">
+        <h2>5. Moduł Analiz</h2>
+        <p>Narzędzia analityczne pozwalają na głębsze zrozumienie danych cenowych zgromadzonych w module ofert.</p>
+        <h3 id="analiza-cen">5.1. Porównanie Cen Jednostkowych</h3>
+        <p>To narzędzie (<strong>"Analizy" -> "Porównanie cen jednostkowych"</strong>) pozwala na dynamiczne porównywanie cen jednostkowych dla tych samych rodzajów robót pomiędzy różnymi ofertami. Użytkownik może wybrać z listy jeden lub więcej interesujących go rodzajów robót, a system wyświetli tabelę porównawczą, pokazując ceny z różnych ofert. Ułatwia to identyfikację najkorzystniejszych propozycji i analizę rozbieżności cenowych.</p>
+
+        <h3 id="pulpit-analityczny" class="mt-4">5.2. Pulpit Analityczny</h3>
+        <p>Dostępny z Pulpitu lub menu <strong>"Analizy" -> "Pulpit Analityczny"</strong>, ten widok prezentuje zagregowane dane w formie interaktywnych wykresów. Umożliwia analizę trendów cenowych dla wybranych rodzajów robót w czasie. Po wybraniu rodzaju roboty, wykresy pokazują, jak zmieniały się ceny minimalne, maksymalne i średnie w poszczególnych okresach (np. kwartałach), co pozwala na ocenę dynamiki rynku i prognozowanie kosztów.</p>
+        
+        <h3 id="wszystkie-ceny" class="mt-4">5.3. Wszystkie Ceny Jednostkowe</h3>
+        <p>Jest to globalna, przeszukiwalna i filtrowalna lista wszystkich pozycji cenowych wprowadzonych do systemu (<strong>"Analizy" -> "Wszystkie ceny jednostkowe"</strong>). Pozwala na szybkie znalezienie konkretnej ceny lub przejrzenie wszystkich wpisów dla danego rodzaju roboty lub projektu.</p>
+    </section>
+
+    <hr class="my-4">
+
+    <section id="slowniki" class="mb-5">
+        <h2>6. Zarządzanie Słownikami (Ustawienia)</h2>
+        <p>W menu <strong>"Ustawienia"</strong> (ikona koła zębatego) znajduje się dostęp do zarządzania wszystkimi słownikami w aplikacji. Utrzymanie porządku w słownikach jest kluczowe dla spójności danych. Są one podzielone na dwie grupy:</p>
+        <ul>
+            <li><strong>Słowniki Firm:</strong>
+                <ul>
+                    <li>Specjalności</li>
+                    <li>Typy firm</li>
+                    <li>Typy adresów</li>
+                    <li>Typy telefonów</li>
+                    <li>Typy e-maili</li>
+                </ul>
+            </li>
+            <li><strong>Słowniki Ofert:</strong>
+                <ul>
+                    <li>Projekty</li>
+                    <li>Kategorie cen</li>
+                    <li>Rodzaje robót</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Każda strona zarządzania słownikiem pozwala na dodawanie, edycję i usuwanie pozycji. Usunięcie pozycji jest możliwe tylko wtedy, gdy nie jest ona używana w żadnym miejscu w aplikacji, co chroni integralność danych.</p>
+    </section>
+
 </div>
 {% endblock %}

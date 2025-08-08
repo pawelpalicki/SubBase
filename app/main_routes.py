@@ -220,7 +220,7 @@ def list_companies():
 
 @main.route('/instrukcja')
 def instrukcja():
-    return render_template('instrukcja.html')
+    return render_template('instrukcja_nowa.html')
 
 @main.route('/company/<int:company_id>')
 def company_details(company_id):
