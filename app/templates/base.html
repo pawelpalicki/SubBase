@@ -47,8 +47,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_persons') }}">Osoby</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_ratings') }}">Oceny</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.export_companies_html') }}{% if request.query_string %}?{{ request.query_string.decode('utf-8') }}{% endif %}" target="_blank">Eksportuj widok</a></li>
+                            
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

@@ -3,10 +3,7 @@
     "python.pythonPath": "./venv/Scripts/python.exe",
     "python.defaultInterpreterPath": "./venv/Scripts/python.exe",
     "files.associations": {
-        "*.html": "jinja-html"
-    },
-    "emmet.includeLanguages": {
-        "jinja-html": "html"
+        "*.html": "html"
     },
     "javascript.validate.enable": false
 }

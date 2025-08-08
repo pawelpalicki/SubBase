@@ -95,6 +95,7 @@
                         <button class="btn btn-primary d-lg-none" id="mobile-filter-toggle">
                             <i class="bi bi-funnel"></i> Filtry
                         </button>
+                        <a href="{{ url_for('main.export_companies_html') }}{% if request.query_string %}?{{ request.query_string.decode('utf-8') }}{% endif %}" class="btn btn-info" target="_blank">Eksportuj widoczne</a>
                         <a href="{{ url_for('main.new_company') }}" class="btn btn-success d-md-none btn-md">
                             <i class="bi bi-plus-circle"></i> Dodaj firmę
                         </a>

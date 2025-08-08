@@ -31,9 +31,13 @@
     --dark-secondary-color: #868e96;
     --dark-secondary-hover-color: #adb5bd;
     --dark-success-color: #40c057;
+    --dark-success-hover-color: #69db7c;
     --dark-danger-color: #fa5252;
+    --dark-danger-hover-color: #ff8787;
     --dark-warning-color: #fab005;
+    --dark-warning-hover-color: #fcc419;
     --dark-info-color: #3bc9db;
+    --dark-info-hover-color: #66d9e8;
     --dark-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     --dark-select2-bg: #333333;
     --dark-select2-border: #555555;
@@ -241,9 +245,19 @@ html[data-theme="dark"] .btn-success {
     border-color: var(--dark-success-color);
     color: #000;
 }
+html[data-theme="dark"] .btn-success:hover {
+    background-color: var(--dark-success-hover-color);
+    border-color: var(--dark-success-hover-color);
+    color: #000;
+}
 html[data-theme="dark"] .btn-danger {
     background-color: var(--dark-danger-color);
     border-color: var(--dark-danger-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-danger:hover {
+    background-color: var(--dark-danger-hover-color);
+    border-color: var(--dark-danger-hover-color);
     color: #000;
 }
 html[data-theme="dark"] .btn-warning {
@@ -251,9 +265,19 @@ html[data-theme="dark"] .btn-warning {
     border-color: var(--dark-warning-color);
     color: #000;
 }
+html[data-theme="dark"] .btn-warning:hover {
+    background-color: var(--dark-warning-hover-color);
+    border-color: var(--dark-warning-hover-color);
+    color: #000;
+}
 html[data-theme="dark"] .btn-info {
     background-color: var(--dark-info-color);
     border-color: var(--dark-info-color);
+    color: #000;
+}
+html[data-theme="dark"] .btn-info:hover {
+    background-color: var(--dark-info-hover-color);
+    border-color: var(--dark-info-hover-color);
     color: #000;
 }
 
