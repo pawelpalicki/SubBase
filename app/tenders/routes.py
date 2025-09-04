@@ -491,6 +491,10 @@ def unit_prices_analysis():
         joinedload(Tender.project)
     ).order_by(Tender.data_otrzymania.desc())
 
+    # Poprawka: jeśli kategoria jest wybrana, filtruj oferty, które mają ceny w tej kategorii
+    if category_filter:
+        base_tenders_query = base_tenders_query.join(UnitPrice).filter(UnitPrice.id_kategorii == category_filter).distinct()
+
     if status_filter:
         base_tenders_query = base_tenders_query.filter(Tender.status == status_filter)
     if date_from_filter:
