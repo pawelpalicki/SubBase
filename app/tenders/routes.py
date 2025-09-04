@@ -457,6 +457,15 @@ def unit_prices_analysis():
     date_from_filter = request.args.get('date_from', '')
     date_to_filter = request.args.get('date_to', '')
 
+    # Pobieranie i walidacja nowego parametru limitu
+    ALLOWED_LIMITS = [10, 20, 50, 100]
+    try:
+        limit_filter = int(request.args.get('limit', 10))
+        if limit_filter not in ALLOWED_LIMITS:
+            limit_filter = 10
+    except (ValueError, TypeError):
+        limit_filter = 10
+
     # Pobierz zakres dat dla walidacji i ustawień datapickera
     min_date, max_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
 
@@ -509,9 +518,9 @@ def unit_prices_analysis():
             tenders_truncated = True
             flash(f'Wybrano więcej niż {MAX_TENDER_LIMIT} ofert. Wyświetlono tylko {MAX_TENDER_LIMIT} najnowszych z wybranych.', 'info')
     else:
-        all_tenders = base_tenders_query.limit(DEFAULT_TENDER_LIMIT).all()
-        if not any([status_filter, date_from_filter, date_to_filter, tender_ids_filter]):
-             flash(f'Domyślnie wyświetlono {DEFAULT_TENDER_LIMIT} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
+        all_tenders = base_tenders_query.limit(limit_filter).all()
+        if not any([status_filter, date_from_filter, date_to_filter, tender_ids_filter, category_filter]):
+             flash(f'Domyślnie wyświetlono {limit_filter} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
 
     formatted_tender_headers = {}
     SHORTEN_COMPANY_NAME_THRESHOLD = 5 
@@ -574,7 +583,8 @@ def unit_prices_analysis():
         selected_date_to=date_to_filter,
         min_date=min_date.strftime('%Y-%m-%d') if min_date else '',
         max_date=max_date.strftime('%Y-%m-%d') if max_date else '',
-        title='Porównanie cen jednostkowych'
+        title='Porównanie cen jednostkowych',
+        selected_limit=limit_filter
     )
 
 @tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')

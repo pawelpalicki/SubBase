@@ -42,7 +42,16 @@
                         <label for="date_to" class="form-label">Data oferty do</label>
                         <input type="date" class="form-control" id="filter_date_to" name="date_to" value="{{ selected_date_to or '' }}" min="{{ min_date }}" max="{{ max_date }}">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-2 mb-3">
+                        <label for="limit" class="form-label">Limit ofert</label>
+                        <select class="form-control" id="filter_limit" name="limit">
+                            <option value="10" {% if selected_limit == 10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if selected_limit == 20 %}selected{% endif %}>20</option>
+                            <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
                         <label for="tenders" class="form-label">Konkretne oferty (opcjonalnie)</label>
                         <select class="form-control select2-enable" id="filter_tenders" name="tenders" multiple="multiple">
                             {% for tender_item in all_available_tenders %}
