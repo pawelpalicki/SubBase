@@ -153,7 +153,7 @@
                 <h2>{{ company.nazwa_firmy }}</h2>
                 <p><strong>ID:</strong> {{ company.id_firmy }}</p>
                 {% if company.strona_www %}
-                    <p><strong>Strona WWW:</strong> <a href="{{ company.strona_www }}" target="_blank">{{ company.strona_www }}</a></p>
+                    <p><strong>Strona WWW:</strong> <a href="{{ company.strona_www | fix_url }}" target="_blank">{{ company.strona_www }}</a></p>
                 {% endif %}
                  {% if company.uwagi %}
                     <p><strong>Uwagi:</strong> {{ company.uwagi }}</p>
