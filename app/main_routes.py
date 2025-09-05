@@ -1532,10 +1532,39 @@ def export_companies_html():
                 organized_related_data[item.id_firmy][data_type].append(item)
 
 
+    # Dynamic title generation
+    title_parts = []
+    if search:
+        title_parts.append(f"Wyniki wyszukiwania dla: '{search}'")
+
+    if specialties:
+        specialty_names = [s.specjalnosc for s in Specjalnosci.query.filter(Specjalnosci.id_specjalnosci.in_(specialties)).all()]
+        title_parts.append(f"Specjalności: {', '.join(specialty_names)}")
+
+    if powiat:
+        powiat_data = Powiaty.query.filter_by(id_powiaty=powiat).first()
+        if powiat_data:
+            title_parts.append(f"Powiat: {powiat_data.powiat}")
+
+    elif wojewodztwo:
+        wojewodztwo_data = Wojewodztwa.query.filter_by(id_wojewodztwa=wojewodztwo).first()
+        if wojewodztwo_data:
+            title_parts.append(f"Województwo: {wojewodztwo_data.wojewodztwo}")
+
+    if company_types:
+        type_names = [t.typ_firmy for t in FirmyTyp.query.filter(FirmyTyp.id_firmy_typ.in_(company_types)).all()]
+        title_parts.append(f"Typy firm: {', '.join(type_names)}")
+
+    if title_parts:
+        title = "Lista firm dla filtrów: " + "; ".join(title_parts)
+    else:
+        title = "Lista wszystkich wyeksportowanych firm"
+
     # Renderuj szablon HTML do wydruku
     return render_template('export_companies_html.html',
                            companies=filtered_companies,
-                           related_data=organized_related_data) # Przekaż zorganizowane dane
+                           related_data=organized_related_data,
+                           title=title) # Przekaż zorganizowane dane
 
 def normalize_text(text):
     if text is None:
