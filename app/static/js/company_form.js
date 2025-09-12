@@ -479,32 +479,23 @@ $(document).ready(function() {
     }
 
     // --- Company Name Check Logic ---
-    console.log("Initializing company name check logic...");
 
     const checkBtn = document.getElementById('check-company-btn');
     const companyNameInput = document.getElementById('nazwa_firmy');
     const checkModalEl = document.getElementById('companyCheckModal');
     const checkModalBody = document.getElementById('companyCheckModalBody');
-
-    console.log("Check button found:", checkBtn);
-    console.log("Company name input found:", companyNameInput);
-    console.log("Modal element found:", checkModalEl);
     
     // Ensure elements exist before adding listeners
     if (checkBtn && companyNameInput && checkModalEl && checkModalBody) {
-        console.log("All elements found, attaching event listener.");
         const companyCheckModal = new bootstrap.Modal(checkModalEl);
 
         checkBtn.addEventListener('click', function() {
-            console.log("Check button clicked!");
             const companyName = companyNameInput.value.trim();
 
             if (companyName.length < 2) {
                 alert('Wprowadź co najmniej 2 znaki, aby sprawdzić nazwę firmy.');
                 return;
             }
-
-            console.log(`Fetching for company name: ${companyName}`);
 
             // Show loading state in modal
             checkModalBody.innerHTML = `
@@ -545,8 +536,6 @@ $(document).ready(function() {
                     checkModalBody.innerHTML = `<p class="text-danger">Wystąpił błąd: ${error.message}</p>`;
                 });
         });
-    } else {
-        console.error("One or more elements for the company check feature were not found in the DOM.");
     }
     // --- End of Company Name Check Logic ---
 });
