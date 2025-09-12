@@ -477,4 +477,65 @@ $(document).ready(function() {
     if (initialSelectedArea === 'powiaty') {
         loadPowiaty();
     }
+
+    // --- Company Name Check Logic ---
+
+    const checkBtn = document.getElementById('check-company-btn');
+    const companyNameInput = document.getElementById('nazwa_firmy');
+    const checkModalEl = document.getElementById('companyCheckModal');
+    const checkModalBody = document.getElementById('companyCheckModalBody');
+    
+    // Ensure elements exist before adding listeners
+    if (checkBtn && companyNameInput && checkModalEl && checkModalBody) {
+        const companyCheckModal = new bootstrap.Modal(checkModalEl);
+
+        checkBtn.addEventListener('click', function() {
+            const companyName = companyNameInput.value.trim();
+
+            if (companyName.length < 2) {
+                alert('Wprowadź co najmniej 2 znaki, aby sprawdzić nazwę firmy.');
+                return;
+            }
+
+            // Show loading state in modal
+            checkModalBody.innerHTML = `
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Ładowanie...</span>
+                    </div>
+                </div>
+            `;
+            companyCheckModal.show();
+
+            // Fetch for similar companies
+            fetch(`/api/check-company-name?name=${encodeURIComponent(companyName)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Błąd sieci lub serwera.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        let resultsHtml = '<p>Znaleziono następujące podobne firmy. Kliknij na nazwę, aby przejść do jej szczegółów.</p>';
+                        resultsHtml += '<ul class="list-group">';
+                        data.forEach(company => {
+                            resultsHtml += `
+                                <li class="list-group-item">
+                                    <a href="/company/${company.id}" target="_blank">${company.name}</a>
+                                </li>`;
+                        });
+                        resultsHtml += '</ul>';
+                        checkModalBody.innerHTML = resultsHtml;
+                    } else {
+                        checkModalBody.innerHTML = '<p class="text-success">Nie znaleziono podobnych firm w bazie danych.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd podczas sprawdzania nazwy firmy:', error);
+                    checkModalBody.innerHTML = `<p class="text-danger">Wystąpił błąd: ${error.message}</p>`;
+                });
+        });
+    }
+    // --- End of Company Name Check Logic ---
 });

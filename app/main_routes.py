@@ -9,6 +9,36 @@ from sqlalchemy.exc import SQLAlchemyError
 
 main = Blueprint('main', __name__)
 
+def normalize_text(text):
+    if text is None:
+        return ""
+    text = str(text)
+    normalized = unidecode(text).lower()
+    # Usuwa wszystko co nie jest literą, cyfrą lub spacją
+    return ''.join(c for c in normalized if c.isalnum() or c.isspace())
+
+@main.route('/api/check-company-name')
+def check_company_name():
+    name = request.args.get('name', '')
+    if not name or len(name) < 2:
+        return jsonify([])
+
+    # Normalizacja z usunięciem spacji do porównania
+    normalized_search = ''.join(normalize_text(name).split())
+
+    # Ta implementacja iteruje po wszystkich firmach w Pythonie, co może być niewydajne
+    # przy dużej bazie danych. Jest to jednak spójne z istniejącą logiką wyszukiwania w aplikacji.
+    all_companies = Firmy.query.limit(5000).all() # Ograniczenie na wszelki wypadek
+    matching_companies = []
+    for company in all_companies:
+        # Normalizujemy nazwę firmy z bazy danych w ten sam sposób
+        normalized_company_name = ''.join(normalize_text(company.nazwa_firmy).split())
+        
+        if normalized_search in normalized_company_name:
+            matching_companies.append({'id': company.id_firmy, 'name': company.nazwa_firmy})
+    
+    return jsonify(matching_companies)
+
 # --- GLOBALNA AUTORYZACJA DLA BLUEPRINTU 'main' ---
 @main.before_request
 def require_login_for_main_blueprint():
@@ -1566,12 +1596,7 @@ def export_companies_html():
                            related_data=organized_related_data,
                            title=title) # Przekaż zorganizowane dane
 
-def normalize_text(text):
-    if text is None:
-        return ""
-    text = str(text)
-    normalized = unidecode(text).lower()
-    return ''.join(c for c in normalized if c.isalnum() or c.isspace())
+
 
 # Routes for Categories
 @main.route('/categories')
