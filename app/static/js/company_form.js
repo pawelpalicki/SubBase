@@ -489,6 +489,19 @@ $(document).ready(function() {
     if (checkBtn && companyNameInput && checkModalEl && checkModalBody) {
         const companyCheckModal = new bootstrap.Modal(checkModalEl);
 
+        // Handle focus management to prevent accessibility warnings
+        checkModalEl.addEventListener('hide.bs.modal', function (event) {
+            // When the modal is closing, blur any active element to move focus away
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+        });
+
+        // Optional: Return focus to the trigger button after the modal is fully hidden
+        checkModalEl.addEventListener('hidden.bs.modal', function (event) {
+            checkBtn.focus();
+        });
+
         checkBtn.addEventListener('click', function() {
             const companyName = companyNameInput.value.trim();
 
