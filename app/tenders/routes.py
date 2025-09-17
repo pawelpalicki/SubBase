@@ -444,32 +444,28 @@ def list_all_unit_prices():
         title='Wszystkie pozycje cenowe'
     )
 
-@tenders_bp.route('/unit_prices/analysis')
-@login_required
-def unit_prices_analysis():
+def _get_unit_price_analysis_data(args):
+    """Funkcja pomocnicza do pobierania i przetwarzania danych dla analizy cen."""
     DEFAULT_TENDER_LIMIT = 10
     MAX_TENDER_LIMIT = 20
 
     # Pobieranie parametrów filtrowania
-    category_filter = request.args.get('category', type=int)
-    tender_ids_filter = request.args.getlist('tenders', type=int)
-    status_filter = request.args.get('status', '')
-    date_from_filter = request.args.get('date_from', '')
-    date_to_filter = request.args.get('date_to', '')
+    category_filter = args.get('category', type=int)
+    tender_ids_filter = args.getlist('tenders', type=int)
+    status_filter = args.get('status', '')
+    date_from_filter = args.get('date_from', '')
+    date_to_filter = args.get('date_to', '')
 
-    # Pobieranie i walidacja nowego parametru limitu
     ALLOWED_LIMITS = [10, 20, 50, 100]
     try:
-        limit_filter = int(request.args.get('limit', 10))
+        limit_filter = int(args.get('limit', 10))
         if limit_filter not in ALLOWED_LIMITS:
             limit_filter = 10
     except (ValueError, TypeError):
         limit_filter = 10
 
-    # Pobierz zakres dat dla walidacji i ustawień datapickera
     min_date, max_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
 
-    # Walidacja dat po stronie serwera
     if date_from_filter:
         try:
             from_date = datetime.strptime(date_from_filter, '%Y-%m-%d').date()
@@ -477,7 +473,7 @@ def unit_prices_analysis():
                 flash(f"Data 'od' ({date_from_filter}) jest wcześniejsza niż najstarsza oferta ({min_date}). Filtr daty 'od' został zignorowany.", "warning")
                 date_from_filter = ''
         except ValueError:
-            date_from_filter = '' # Ignoruj niepoprawny format
+            date_from_filter = ''
     
     if date_to_filter:
         try:
@@ -486,7 +482,7 @@ def unit_prices_analysis():
                 flash(f"Data 'do' ({date_to_filter}) jest późniejsza niż najnowsza oferta ({max_date}). Filtr daty 'do' został zignorowany.", "warning")
                 date_to_filter = ''
         except ValueError:
-            date_to_filter = '' # Ignoruj niepoprawny format
+            date_to_filter = ''
 
     work_types_query = WorkType.query.order_by(WorkType.name)
     if category_filter:
@@ -500,7 +496,6 @@ def unit_prices_analysis():
         joinedload(Tender.project)
     ).order_by(Tender.data_otrzymania.desc())
 
-    # Poprawka: jeśli kategoria jest wybrana, filtruj oferty, które mają ceny w tej kategorii
     if category_filter:
         base_tenders_query = base_tenders_query.join(UnitPrice).filter(UnitPrice.id_kategorii == category_filter).distinct()
 
@@ -563,7 +558,6 @@ def unit_prices_analysis():
 
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
     
-    # Zoptymalizowane zapytanie do pobierania ofert do filtra
     all_available_tenders = Tender.query.options(
         joinedload(Tender.firma),
         joinedload(Tender.project)
@@ -571,26 +565,45 @@ def unit_prices_analysis():
     
     all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
 
+    return {
+        'all_work_types': all_work_types,
+        'all_tenders': all_tenders,
+        'prices_table': prices_table,
+        'categories': categories,
+        'all_available_tenders': all_available_tenders,
+        'selected_category': category_filter,
+        'selected_tenders': tender_ids_filter,
+        'formatted_tender_headers': formatted_tender_headers,
+        'tenders_truncated': tenders_truncated,
+        'all_statuses': all_statuses,
+        'selected_status': status_filter,
+        'selected_date_from': date_from_filter,
+        'selected_date_to': date_to_filter,
+        'min_date': min_date.strftime('%Y-%m-%d') if min_date else '',
+        'max_date': max_date.strftime('%Y-%m-%d') if max_date else '',
+        'selected_limit': limit_filter
+    }
+
+@tenders_bp.route('/unit_prices/analysis')
+@login_required
+def unit_prices_analysis():
+    context = _get_unit_price_analysis_data(request.args)
     return render_template(
         'unit_prices_analysis.html',
-        all_work_types=all_work_types,
-        all_tenders=all_tenders,
-        prices_table=prices_table,
-        categories=categories,
-        all_available_tenders=all_available_tenders,
-        selected_category=category_filter,
-        selected_tenders=tender_ids_filter,
-        formatted_tender_headers=formatted_tender_headers,
-        tenders_truncated=tenders_truncated,
-        all_statuses=all_statuses,
-        selected_status=status_filter,
-        selected_date_from=date_from_filter,
-        selected_date_to=date_to_filter,
-        min_date=min_date.strftime('%Y-%m-%d') if min_date else '',
-        max_date=max_date.strftime('%Y-%m-%d') if max_date else '',
         title='Porównanie cen jednostkowych',
-        selected_limit=limit_filter
+        **context
     )
+
+@tenders_bp.route('/unit_prices/analysis/print')
+@login_required
+def unit_prices_analysis_print():
+    context = _get_unit_price_analysis_data(request.args)
+    return render_template(
+        'unit_prices_analysis_print.html',
+        title='Porównanie cen jednostkowych - Druk',
+        **context
+    )
+
 
 @tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')
 @login_required

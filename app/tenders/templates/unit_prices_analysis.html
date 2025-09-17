@@ -69,7 +69,8 @@
                 <div class="row">
                     <div class="col-md-12 mb-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary me-2">Filtruj</button>
-                        <a href="{{ url_for('tenders.unit_prices_analysis') }}" class="btn btn-secondary">Resetuj</a>
+                        <a href="{{ url_for('tenders.unit_prices_analysis') }}" class="btn btn-secondary me-2">Resetuj</a>
+                        <a href="#" id="print-analysis-btn" class="btn btn-info">Drukuj</a>
                     </div>
                 </div>
             </form>
@@ -95,11 +96,12 @@
             </thead>
             <tbody>
                 {% for work_type in all_work_types %}
+                {% if work_type.id in prices_table %}
                 <tr>
                     <td data-label="Nazwa roboty">{{ work_type.name }}</td>
                     {% for tender in all_tenders %}
                     <td data-label="{{ formatted_tender_headers[tender.id] }}" class="text-right">
-                        {% if prices_table[work_type.id] and prices_table[work_type.id][tender.id] %}
+                        {% if tender.id in prices_table[work_type.id] %}
                             {% set price_data = prices_table[work_type.id][tender.id] %}
                             {% for price_entry in price_data %}
                             {{ "{:,.2f}".format(price_entry.cena).replace(",", " ") }}   
@@ -116,6 +118,7 @@
                     </td> 
                     {% endfor %} 
                 </tr> 
+                {% endif %}
                 {% endfor %} 
             </tbody>            
         </table>
@@ -133,6 +136,14 @@
         $('.select2-enable').select2({
             placeholder: "-- Wybierz --",
             allowClear: true // Allow clearing selection for filters
+        });
+
+        // Print button handler
+        $('#print-analysis-btn').on('click', function(e) {
+            e.preventDefault();
+            const params = new URLSearchParams(window.location.search);
+            const printUrl = '{{ url_for("tenders.unit_prices_analysis_print") }}?' + params.toString();
+            window.open(printUrl, '_blank');
         });
 
         // Enable table sorting

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.5; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        h1 { font-size: 1.5rem; }
+        .price-comment { font-size: 0.8em; color: #6c757d; display: block; margin-top: 4px; }
+        .text-right { text-align: right; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 5px 0; }
+
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+            @page { size: A4 landscape; margin: 1cm; }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="no-print">Podgląd wydruku</h1>
+    <p class="no-print">Ta strona jest zoptymalizowana do druku. Użyj funkcji drukowania przeglądarki (Ctrl+P), aby wydrukować. Zalecany układ: poziomy (landscape).</p>
+    <hr class="no-print">
+
+    <h3>{{ title }}</h3>
+
+    {% if all_work_types %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa roboty</th>
+                {% for tender_id, header_label in formatted_tender_headers.items() %}
+                <th>{{ header_label }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for work_type in all_work_types %}
+                {% if work_type.id in prices_table %}
+                <tr>
+                    <td data-label="Nazwa roboty">{{ work_type.name }}</td>
+                    {% for tender in all_tenders %}
+                    <td data-label="{{ formatted_tender_headers[tender.id] }}" class="text-right">
+                        {% if tender.id in prices_table[work_type.id] %}
+                            {% set price_data = prices_table[work_type.id][tender.id] %}
+                            {% for price_entry in price_data %}
+                                {{ "{:,.2f}".format(price_entry.cena).replace(",", " ") }}
+                                {% if price_entry.uwagi %}
+                                    <span class="price-comment">{{ price_entry.uwagi }}</span>
+                                {% endif %}
+                                {% if not loop.last %}<hr>{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Brak danych do wyświetlenia dla wybranych filtrów.</p>
+    {% endif %}
+
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
