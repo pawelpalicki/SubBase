@@ -55,8 +55,12 @@
                         <label for="tenders" class="form-label">Konkretne oferty (opcjonalnie)</label>
                         <select class="form-control select2-enable" id="filter_tenders" name="tenders" multiple="multiple">
                             {% for tender_item in all_available_tenders %}
-                            <option value="{{ tender_item.id }}" {% if tender_item.id in selected_tenders %}selected{% endif %}>
-                                             {{ tender_item.nazwa_oferty }} ({{ tender_item.data_otrzymania.strftime('%Y-%m-%d') }}) - {{ tender_item.firma.nazwa_firmy }}
+                            <option value="{{ tender_item.id }}" 
+                                    {% if tender_item.id in selected_tenders %}selected{% endif %}
+                                    title="{{ tender_item.nazwa_oferty }} ({{ tender_item.firma.nazwa_firmy if tender_item.firma else 'Brak firmy' }})">
+                                {% set project_skrot = tender_item.project.skrot if tender_item.project and tender_item.project.skrot else 'B/P' %}
+                                {% set firma_nazwa = (tender_item.firma.nazwa_firmy[:10] + '...' if tender_item.firma.nazwa_firmy|length > 10 else tender_item.firma.nazwa_firmy) if tender_item.firma else 'B/F' %}
+                                {{ project_skrot }} / {{ firma_nazwa }} / {{ tender_item.data_otrzymania.strftime('%y-%m-%d') }}
                             </option>
                             {% endfor %}
                         </select>

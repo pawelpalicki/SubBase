@@ -562,7 +562,12 @@ def unit_prices_analysis():
         })
 
     categories = Category.query.order_by(Category.nazwa_kategorii).all()
-    all_available_tenders = Tender.query.order_by(Tender.nazwa_oferty).all()
+    
+    # Zoptymalizowane zapytanie do pobierania ofert do filtra
+    all_available_tenders = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc()).all()
     
     all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
 
