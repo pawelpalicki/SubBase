@@ -644,7 +644,7 @@ def new_global_unit_price():
                 id_work_type=work_type_id,
                 nazwa_roboty=work_type.name if work_type else None,
                 jednostka_miary=form.jednostka_miary.data,
-                cena_jednostkowa=form.cena_jednostkowa.data,
+                cena_jednostkowa=form.cena_jednostkowa.data.replace(',', '.'),
                 id_oferty=form.id_oferty.data,
                 id_kategorii=category_id,
                 uwagi=form.uwagi.data
@@ -669,7 +669,7 @@ def edit_unit_price(price_id):
         work_type = WorkType.query.get(price.id_work_type)
         price.nazwa_roboty = work_type.name if work_type else None
         price.jednostka_miary = form.jednostka_miary.data
-        price.cena_jednostkowa = form.cena_jednostkowa.data
+        price.cena_jednostkowa = form.cena_jednostkowa.data.replace(',', '.')
         price.id_kategorii = work_type.id_kategorii if work_type else None
         price.uwagi = form.uwagi.data
         db.session.commit()
