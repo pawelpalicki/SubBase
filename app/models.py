@@ -151,6 +151,7 @@ class Tender(db.Model):
     file_type = db.Column(db.String(100))
     id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), nullable=False)
     id_projektu = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True)
+    extracted_content = db.Column(db.Text, nullable=True) # Dodane pole
     unit_prices = db.relationship('UnitPrice', backref='tender', lazy='dynamic')
 
 class WorkType(db.Model):
