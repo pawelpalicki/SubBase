@@ -43,40 +43,48 @@
     <div class="split-container">
         <div id="split-left" class="split">
             <div class="card h-100">
-                <div class="card-header">
-                    Wyodrębniony tekst
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span id="view-title">Wyodrębniony tekst</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" id="btn-extracted" class="btn btn-primary active">Ekstrakt</button>
+                        <button type="button" id="btn-original" class="btn btn-secondary">Oryginał</button>
+                    </div>
                 </div>
                 <div class="card-body">
-                    
-                    {% if is_image_file %}
-                        <img src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" class="img-fluid" alt="Podgląd obrazu">
-                    {% elif display_original_pdf %}
-                        <iframe src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" style="width:100%; height:100%;" frameborder="0"></iframe>
-                    {% elif table_data %}
-                        <h5>Wykryte tabele:</h5>
-                        <div class="table-responsive mb-3">
-                            <table class="table table-bordered table-sm table-hover">
-                                <tbody>
-                                    {% for row in table_data %}
-                                    <tr>
-                                        {% for cell in row %}
-                                        <td>{{ cell }}</td>
+                    <div id="extracted-view">
+                        {% if table_data %}
+                            <h5>Wykryte tabele:</h5>
+                            <div class="table-responsive mb-3">
+                                <table class="table table-bordered table-sm table-hover">
+                                    <tbody>
+                                        {% for row in table_data %}
+                                        <tr>
+                                            {% for cell in row %}
+                                            <td>{{ cell }}</td>
+                                            {% endfor %}
+                                        </tr>
                                         {% endfor %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
-                    {% if extracted_text and extracted_text.strip() %}
-                        <h5>Pozostały tekst:</h5>
-                        <div class="pre-container">
-                            <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() }}</pre>
-                        </div>
-                    {% endif %}
-                    {% if not is_image_file and not display_original_pdf and not table_data and not (extracted_text and extracted_text.strip()) %}
-                        <p class="text-muted">Brak danych do wyświetlenia. Plik może być pusty lub jego zawartość nie mogła zostać odczytana.</p>
-                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                        {% if extracted_text and extracted_text.strip() %}
+                            <h5>Pozostały tekst:</h5>
+                            <div class="pre-container">
+                                <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() }}</pre>
+                            </div>
+                        {% endif %}
+                        {% if not table_data and not (extracted_text and extracted_text.strip()) %}
+                            <p class="text-muted">Brak danych do wyświetlenia. Plik może być pusty, jego zawartość nie mogła zostać odczytana lub jest to plik, którego podgląd jest możliwy tylko w trybie "Oryginał".</p>
+                        {% endif %}
+                    </div>
+                    <div id="original-view" class="d-none h-100">
+                        {% if is_image_file %}
+                            <img src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" class="img-fluid" alt="Podgląd obrazu">
+                        {% else %}
+                            <iframe id="original-file-iframe" src="" data-src="{{ url_for('tenders.display_file', tender_id=tender.id) }}" style="width:100%; height:100%;" frameborder="0"></iframe>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -198,6 +206,41 @@
     });
 
     $(document).ready(function() {
+        // View switcher logic
+        const btnExtracted = $('#btn-extracted');
+        const btnOriginal = $('#btn-original');
+        const extractedView = $('#extracted-view');
+        const originalView = $('#original-view');
+        const viewTitle = $('#view-title');
+        const iframe = $('#original-file-iframe');
+        let iframeLoaded = false;
+
+        btnExtracted.on('click', function() {
+            if (!$(this).hasClass('active')) {
+                $(this).addClass('active btn-primary').removeClass('btn-secondary');
+                btnOriginal.removeClass('active btn-primary').addClass('btn-secondary');
+                extractedView.removeClass('d-none');
+                originalView.addClass('d-none');
+                viewTitle.text('Wyodrębniony tekst');
+            }
+        });
+
+        btnOriginal.on('click', function() {
+            if (!$(this).hasClass('active')) {
+                $(this).addClass('active btn-primary').removeClass('btn-secondary');
+                btnExtracted.removeClass('active btn-primary').addClass('btn-secondary');
+                originalView.removeClass('d-none');
+                extractedView.addClass('d-none');
+                viewTitle.text('Oryginalny plik');
+
+                if (!iframeLoaded) {
+                    iframe.attr('src', iframe.data('src'));
+                    iframeLoaded = true;
+                }
+            }
+        });
+
+        // Existing logic for category field
         const workTypeSelect = $('#id_work_type_select');
         const categorySelect = $('#id_kategorii_select');
 
@@ -205,40 +248,34 @@
             if (workTypeId && workTypeId !== 0) {
                 $.getJSON(`/api/work_type_category/${workTypeId}`, function(data) {
                     if (data.id) {
-                        // Ustawienie wartości i tekstu dla Select2
                         const newOption = new Option(data.name, data.id, true, true);
                         categorySelect.empty().append(newOption).trigger('change');
-                        categorySelect.prop('disabled', true); // Zablokuj pole
+                        categorySelect.prop('disabled', true);
                     } else {
                         categorySelect.empty().append(new Option('Brak kategorii', 0, true, true)).trigger('change');
-                        categorySelect.prop('disabled', true); // Zablokuj pole
+                        categorySelect.prop('disabled', true);
                     }
                 }).fail(function() {
                     categorySelect.empty().append(new Option('Błąd ładowania kategorii', 0, true, true)).trigger('change');
-                    categorySelect.prop('disabled', true); // Zablokuj pole
+                    categorySelect.prop('disabled', true);
                 });
             } else {
-                // Jeśli nie wybrano rodzaju roboty, odblokuj i wyczyść kategorię
                 categorySelect.empty().append(new Option('--- Brak kategorii ---', 0, true, true)).trigger('change');
-                categorySelect.prop('disabled', false); // Odblokuj pole
+                categorySelect.prop('disabled', false);
             }
         }
 
-        // Obsługa zmiany wyboru rodzaju roboty
         workTypeSelect.on('change', function() {
             updateCategoryField($(this).val());
         });
 
-        // Inicjalizacja przy ładowaniu strony (jeśli edytujemy istniejącą pozycję)
         if (workTypeSelect.val() && workTypeSelect.val() !== "0") {
             updateCategoryField(workTypeSelect.val());
         } else {
-            // Domyślnie zablokuj pole kategorii, jeśli nie wybrano rodzaju roboty
             categorySelect.prop('disabled', true);
         }
     });
 
-    // Listen for custom event to update Select2 fields
     $(document).on('itemAddedToSelect2', function(e, data) {
         if (data.updateTargetSelector === '#id_work_type_select') {
             var selectField = $(data.updateTargetSelector);
@@ -246,7 +283,7 @@
                 setTimeout(function() {
                     var newOption = new Option(data.name, data.id, true, true);
                     selectField.append(newOption).val(data.id).trigger('change');
-                }, 50); // Small delay
+                }, 50);
             }
         } else if (data.updateTargetSelector === '#id_kategorii_select') {
             var selectField = $(data.updateTargetSelector);
@@ -254,7 +291,7 @@
                 setTimeout(function() {
                     var newOption = new Option(data.name, data.id, true, true);
                     selectField.append(newOption).val(data.id).trigger('change');
-                }, 50); // Small delay
+                }, 50);
             }
         }
     });

@@ -101,7 +101,6 @@ def extract_data(tender_id):
     extracted_text = ""
     table_data = []
     is_image_file = False
-    display_original_pdf = False
 
     # Ścieżka do cache'u
     cache_dir = os.path.join(current_app.instance_path, 'cache')
@@ -197,9 +196,6 @@ def extract_data(tender_id):
                         extracted_text = "".join([page.get_text("text", sort=True) for page in doc])
                         if extracted_text.strip():
                             pdf_extracted_successfully = True
-                
-                if not pdf_extracted_successfully:
-                    display_original_pdf = True
 
             elif filename_lower.endswith('.xlsx'):
                 # ... (logika przetwarzania XLSX - bez zmian)
@@ -234,8 +230,7 @@ def extract_data(tender_id):
                            categories=Category.query.order_by(Category.nazwa_kategorii).all(), 
                            unit_prices=tender.unit_prices.all(), 
                            title="Ekstrakcja danych z oferty",
-                           is_image_file=is_image_file,
-                           display_original_pdf=display_original_pdf)
+                           is_image_file=is_image_file)
 
 @tenders_bp.route('/<int:tender_id>/edit', methods=['GET', 'POST'])
 @login_required
