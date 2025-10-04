@@ -22,6 +22,50 @@ from google.cloud import vision
 
 tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_prefix='/tenders')
 
+def format_table_as_aligned_text(table):
+    """Formatuje tabelę jako wyrównany tekst z paddingiem"""
+    if not table or len(table) == 0:
+        return ""
+    
+    # Oblicz maksymalną szerokość każdej kolumny
+    num_cols = max(len(row) for row in table)
+    col_widths = []
+    
+    for col_idx in range(num_cols):
+        max_width = 0
+        for row in table:
+            if col_idx < len(row):
+                cell_value = str(row[col_idx] if row[col_idx] is not None else "")
+                max_width = max(max_width, len(cell_value))
+        col_widths.append(max_width + 2)  # +2 dla marginesu
+    
+    lines = []
+    
+    # Separator górny
+    lines.append("+" + "+".join(["-" * width for width in col_widths]) + "+")
+    
+    # Nagłówek (pierwszy wiersz)
+    if table:
+        header_cells = []
+        for i in range(num_cols):
+            cell = str(table[0][i] if i < len(table[0]) and table[0][i] is not None else "")
+            header_cells.append(cell.ljust(col_widths[i]))
+        lines.append("|" + "|".join(header_cells) + "|")
+        lines.append("+" + "+".join(["=" * width for width in col_widths]) + "+")
+    
+    # Dane (pozostałe wiersze)
+    for row in table[1:]:
+        row_cells = []
+        for i in range(num_cols):
+            cell = str(row[i] if i < len(row) and row[i] is not None else "")
+            row_cells.append(cell.ljust(col_widths[i]))
+        lines.append("|" + "|".join(row_cells) + "|")
+    
+    # Separator dolny
+    lines.append("+" + "+".join(["-" * width for width in col_widths]) + "+")
+    
+    return "\n".join(lines)
+    
 def extract_and_save_text(tender):
     if not tender.storage_path:
         current_app.logger.info(f"Tender {tender.id} has no file to process.")
@@ -43,17 +87,22 @@ def extract_and_save_text(tender):
             current_app.logger.info(f"Attempting extraction with pdfplumber for tender {tender.id}.")
             try:
                 with pdfplumber.open(file_content) as pdf:
-                    text = "".join([page.extract_text() or "" for page in pdf.pages])
-                    if text.strip():
-                        extracted_text += text
-                        text_found = True
-                        current_app.logger.info(f"pdfplumber extracted text for tender {tender.id}.")
-                    
-                    for page in pdf.pages:
+                    for page_num, page in enumerate(pdf.pages, 1):
+                        # Tekst
+                        text = page.extract_text() or ""
+                        if text.strip():
+                            extracted_text += f"\n--- Strona {page_num} (tekst) ---\n{text}"
+                            text_found = True
+                        
+                        # Tabele
                         tables = page.extract_tables()
                         if tables:
-                            table_data.extend(tables)
-                            current_app.logger.info(f"pdfplumber extracted tables for tender {tender.id}.")
+                            for table_num, table in enumerate(tables, 1):
+                                extracted_text += f"\n\n--- Strona {page_num}, Tabela {table_num} ---\n"
+                                extracted_text += format_table_as_aligned_text(table)
+                            text_found = True
+                            current_app.logger.info(f"pdfplumber extracted {len(tables)} table(s) from page {page_num} for tender {tender.id}.")
+                            
             except Exception as e:
                 current_app.logger.error(f"Error with pdfplumber for tender {tender.id}: {e}")
 
@@ -113,22 +162,38 @@ def extract_and_save_text(tender):
         elif filename_lower.endswith('.xlsx'):
             current_app.logger.info(f"Extracting from XLSX for tender {tender.id}.")
             workbook = openpyxl.load_workbook(file_content, data_only=True)
-            for sheet in workbook.worksheets:
+            for sheet_num, sheet in enumerate(workbook.worksheets, 1):
+                extracted_text += f"\n\n{'='*60}\n"
+                extracted_text += f"ARKUSZ: {sheet.title}\n"
+                extracted_text += f"{'='*60}\n\n"
+                
+                sheet_data = []
                 for row in sheet.iter_rows():
-                    row_data = [str(cell.value) if cell.value is not None else "" for cell in row]
-                    if any(row_data):
-                        table_data.append(row_data)
+                    row_data = [cell.value if cell.value is not None else "" for cell in row]
+                    if any(str(val).strip() for val in row_data):  # Pomiń całkowicie puste wiersze
+                        sheet_data.append(row_data)
+                
+                if sheet_data:
+                    extracted_text += format_table_as_aligned_text(sheet_data)
 
         elif filename_lower.endswith('.xls'):
             current_app.logger.info(f"Extracting from XLS for tender {tender.id}.")
             workbook = xlrd.open_workbook(file_contents=file_content.read())
-            for sheet in workbook.sheets():
+            for sheet_idx, sheet in enumerate(workbook.sheets()):
+                extracted_text += f"\n\n{'='*60}\n"
+                extracted_text += f"ARKUSZ: {sheet.name}\n"
+                extracted_text += f"{'='*60}\n\n"
+                
+                sheet_data = []
                 for row_idx in range(sheet.nrows):
-                    table_data.append([sheet.cell_value(row_idx, col_idx) for col_idx in range(sheet.ncols)])
+                    row_data = [sheet.cell_value(row_idx, col_idx) for col_idx in range(sheet.ncols)]
+                    if any(str(val).strip() for val in row_data):
+                        sheet_data.append(row_data)
+                
+                if sheet_data:
+                    extracted_text += format_table_as_aligned_text(sheet_data)
 
         full_text = extracted_text
-        if table_data:
-            full_text += "\n\n" + "\n".join(["\t".join(map(str, row)) for row in table_data])
 
         if not full_text.strip():
             flash('Nie udało się wyekstrahować żadnej treści z pliku.', 'warning')
@@ -145,7 +210,7 @@ def extract_and_save_text(tender):
         current_app.logger.error(traceback.format_exc())
         flash('Wystąpił błąd podczas ekstrakcji i zapisywania treści oferty.', 'danger')
 
-        
+
 @tenders_bp.route('/')
 @login_required
 def list_tenders():

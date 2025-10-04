@@ -71,7 +71,7 @@
                         {% if extracted_text and extracted_text.strip() %}
                             <h5>Pozostały tekst:</h5>
                             <div class="pre-container">
-                                <pre style="white-space: pre-wrap; word-break: break-word;">{{ extracted_text.strip() }}</pre>
+                                <pre style="font-family: 'Courier New', monospace; font-size: 0.85rem; white-space: pre; background-color: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">{{ extracted_text.strip() }}</pre>
                             </div>
                         {% endif %}
                         {% if not table_data and not (extracted_text and extracted_text.strip()) %}
