@@ -73,7 +73,7 @@ def extract_and_save_text(tender):
             if not text_found and not table_data:
                 current_app.logger.info(f"No text found with pdfplumber or fitz, trying Google Vision API for tender {tender.id}.")
                 try:
-                    client = vision.vision.ImageAnnotatorClient.from_service_account_file(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+                    client = vision.ImageAnnotatorClient.from_service_account_file(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
                     file_content.seek(0)
                     content = file_content.read()
                     image = vision.Image(content=content)
