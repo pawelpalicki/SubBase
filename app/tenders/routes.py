@@ -43,7 +43,7 @@ def extract_and_save_text(tender):
             current_app.logger.info(f"Attempting extraction with pdfplumber for tender {tender.id}.")
             try:
                 with pdfplumber.open(file_content) as pdf:
-                    text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                    text = "".join([page.extract_text() or "" for page in pdf.pages])
                     if text.strip():
                         extracted_text += text
                         text_found = True
@@ -73,14 +73,39 @@ def extract_and_save_text(tender):
             if not text_found and not table_data:
                 current_app.logger.info(f"No text found with pdfplumber or fitz, trying Google Vision API for tender {tender.id}.")
                 try:
-                    client = vision.ImageAnnotatorClient.from_service_account_file(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+                    # Konwersja PDF na obrazy przy użyciu fitz (PyMuPDF)
                     file_content.seek(0)
-                    content = file_content.read()
-                    image = vision.Image(content=content)
-                    response = client.document_text_detection(image=image)
-                    if response.full_text_annotation:
-                        extracted_text += response.full_text_annotation.text
-                        current_app.logger.info(f"Google Vision API extracted text for tender {tender.id}.")
+                    doc = fitz.open(stream=file_content, filetype="pdf")
+                    
+                    client = vision.ImageAnnotatorClient.from_service_account_file(
+                        os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+                    )
+                    
+                    # Przetwarzaj każdą stronę
+                    for page_num in range(len(doc)):
+                        page = doc[page_num]
+                        
+                        # Konwertuj stronę na obraz (PNG)
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom dla lepszej jakości
+                        img_data = pix.tobytes("png")
+                        
+                        # Wyślij do Vision API
+                        image = vision.Image(content=img_data)
+                        response = client.document_text_detection(image=image)
+                        
+                        if response.error.message:
+                            raise Exception(f'Vision API error: {response.error.message}')
+                        
+                        if response.full_text_annotation:
+                            extracted_text += f"\n--- Strona {page_num + 1} ---\n"
+                            extracted_text += response.full_text_annotation.text
+                            current_app.logger.info(f"Google Vision API extracted text from page {page_num + 1} for tender {tender.id}.")
+                    
+                    doc.close()
+                    
+                    if extracted_text.strip():
+                        text_found = True
+                        
                 except Exception as e:
                     current_app.logger.error(f"Error with Google Vision API for tender {tender.id}: {e}")
                     flash(f'Nie udało się przetworzyć skanu za pomocą OCR: {e}', 'warning')
@@ -117,8 +142,10 @@ def extract_and_save_text(tender):
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Failed to extract and save text for tender {tender.id}: {e}")
+        current_app.logger.error(traceback.format_exc())
         flash('Wystąpił błąd podczas ekstrakcji i zapisywania treści oferty.', 'danger')
 
+        
 @tenders_bp.route('/')
 @login_required
 def list_tenders():
