@@ -335,4 +335,679 @@ def new_tender():
             
     return render_template('tender_form.html', form=form, title='Nowa Oferta')
 
-# ... (reszta bez zmian)
+@tenders_bp.route('/unit_prices')
+@login_required
+def list_all_unit_prices():
+    PER_PAGE = 15 # Liczba elementów na stronę
+
+    nazwa_roboty_filter = request.args.get('nazwa_roboty', type=int)
+    kategoria_filter = request.args.get('kategoria', type=int)
+    id_oferty_filter = request.args.get('id_oferty', type=int)
+    id_firmy_filter = request.args.get('id_firmy', type=int)
+    id_projektu_filter = request.args.get('id_projektu', type=int)
+    page = request.args.get('page', 1, type=int) # Pobierz numer strony
+
+    query = UnitPrice.query.join(WorkType).join(Tender).join(Firmy)
+
+    if nazwa_roboty_filter:
+        query = query.filter(UnitPrice.id_work_type == nazwa_roboty_filter)
+    if kategoria_filter:
+        query = query.filter(UnitPrice.id_kategorii == kategoria_filter)
+    if id_oferty_filter:
+        query = query.filter(UnitPrice.id_oferty == id_oferty_filter)
+    if id_firmy_filter:
+        query = query.filter(Tender.id_firmy == id_firmy_filter)
+    if id_projektu_filter:
+        query = query.filter(Tender.id_projektu == id_projektu_filter)
+
+    # Paginacja
+    pagination = query.order_by(UnitPrice.id.desc()).paginate(page=page, per_page=PER_PAGE, error_out=False)
+    unit_prices = pagination.items # Elementy dla bieżącej strony
+
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    
+    # Zoptymalizowane zapytanie do pobierania ofert do filtra
+    all_tenders_for_filter = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc()).all()
+
+    # Formatowanie ofert dla listy rozwijanej filtra
+    formatted_tenders_for_filter = []
+    for t in all_tenders_for_filter:
+        company_name = t.firma.nazwa_firmy if t.firma else "Brak firmy"
+        if len(company_name) > 10:
+            company_name = company_name[:10] + "..."
+
+        project_info = "Brak projektu"
+        if t.project:
+            project_info = t.project.skrot if t.project.skrot else t.project.nazwa_projektu
+
+        label = f"{t.nazwa_oferty} ({t.status}) - {company_name} ({project_info})"
+        formatted_tenders_for_filter.append((t.id, label))
+
+    firmy = Firmy.query.order_by(Firmy.nazwa_firmy).all()
+    projects = Project.query.order_by(Project.nazwa_projektu).all()
+
+    return render_template(
+        'unit_prices_list.html',
+        unit_prices=unit_prices,
+        work_types=work_types,
+        categories=categories,
+        tenders=formatted_tenders_for_filter, # Przekazujemy sformatowane oferty
+        firmy=firmy,
+        projects=projects,
+        selected_nazwa_roboty=nazwa_roboty_filter,
+        selected_kategoria=kategoria_filter,
+        selected_id_oferty=id_oferty_filter,
+        selected_id_firmy=id_firmy_filter,
+        selected_id_projektu=id_projektu_filter,
+        pagination=pagination, # Przekazujemy obiekt paginacji
+        title='Wszystkie pozycje cenowe'
+    )
+
+def _get_unit_price_analysis_data(args):
+    """Funkcja pomocnicza do pobierania i przetwarzania danych dla analizy cen."""
+    DEFAULT_TENDER_LIMIT = 10
+    MAX_TENDER_LIMIT = 20
+
+    # Pobieranie parametrów filtrowania
+    category_filter = args.get('category', type=int)
+    tender_ids_filter = args.getlist('tenders', type=int)
+    status_filter = args.get('status', '')
+    date_from_filter = args.get('date_from', '')
+    date_to_filter = args.get('date_to', '')
+
+    ALLOWED_LIMITS = [10, 20, 50, 100]
+    try:
+        limit_filter = int(args.get('limit', 10))
+        if limit_filter not in ALLOWED_LIMITS:
+            limit_filter = 10
+    except (ValueError, TypeError):
+        limit_filter = 10
+
+    min_date, max_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
+
+    if date_from_filter:
+        try:
+            from_date = datetime.strptime(date_from_filter, '%Y-%m-%d').date()
+            if min_date and from_date < min_date:
+                flash(f"Data 'od' ({date_from_filter}) jest wcześniejsza niż najstarsza oferta ({min_date}). Filtr daty 'od' został zignorowany.", "warning")
+                date_from_filter = ''
+        except ValueError:
+            date_from_filter = ''
+    
+    if date_to_filter:
+        try:
+            to_date = datetime.strptime(date_to_filter, '%Y-%m-%d').date()
+            if max_date and to_date > max_date:
+                flash(f"Data 'do' ({date_to_filter}) jest późniejsza niż najnowsza oferta ({max_date}). Filtr daty 'do' został zignorowany.", "warning")
+                date_to_filter = ''
+        except ValueError:
+            date_to_filter = ''
+
+    work_types_query = WorkType.query.order_by(WorkType.name)
+    if category_filter:
+        work_types_query = work_types_query.filter(WorkType.id_kategorii == category_filter)
+    all_work_types = work_types_query.all()
+
+    tenders_truncated = False
+    
+    base_tenders_query = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc())
+
+    if category_filter:
+        base_tenders_query = base_tenders_query.join(UnitPrice).filter(UnitPrice.id_kategorii == category_filter).distinct()
+
+    if status_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.status == status_filter)
+    if date_from_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.data_otrzymania >= date_from_filter)
+    if date_to_filter:
+        base_tenders_query = base_tenders_query.filter(Tender.data_otrzymania <= date_to_filter)
+
+    if tender_ids_filter:
+        all_tenders = base_tenders_query.filter(Tender.id.in_(tender_ids_filter)).all()
+        if len(all_tenders) > MAX_TENDER_LIMIT:
+            all_tenders = all_tenders[:MAX_TENDER_LIMIT]
+            tenders_truncated = True
+            flash(f'Wybrano więcej niż {MAX_TENDER_LIMIT} ofert. Wyświetlono tylko {MAX_TENDER_LIMIT} najnowszych z wybranych.', 'info')
+    else:
+        all_tenders = base_tenders_query.limit(limit_filter).all()
+        if not any([status_filter, date_from_filter, date_to_filter, tender_ids_filter, category_filter]):
+             flash(f'Domyślnie wyświetlono {limit_filter} najnowszych ofert. Użyj filtrów, aby wybrać inne.', 'info')
+
+    formatted_tender_headers = {}
+    SHORTEN_COMPANY_NAME_THRESHOLD = 5 
+
+    for tender in all_tenders:
+        company_name = tender.firma.nazwa_firmy if tender.firma else "Brak firmy"
+        
+        if len(all_tenders) > SHORTEN_COMPANY_NAME_THRESHOLD and len(company_name) > 10:
+            company_name = company_name[:10] + "..."
+
+        project_info = "Brak projektu"
+        if tender.project:
+            project_info = tender.project.skrot if tender.project.skrot else tender.project.nazwa_projektu
+
+        header_label = f"{company_name} ({project_info})"
+        formatted_tender_headers[tender.id] = header_label
+
+    unit_prices_query = UnitPrice.query.join(WorkType).join(Tender)
+    if category_filter:
+        unit_prices_query = unit_prices_query.filter(UnitPrice.id_kategorii == category_filter)
+    
+    if all_tenders:
+        unit_prices_query = unit_prices_query.filter(UnitPrice.id_oferty.in_([t.id for t in all_tenders]))
+    else:
+        unit_prices_query = unit_prices_query.filter(False)
+
+    all_unit_prices = unit_prices_query.all()
+
+    prices_table = {}
+    for up in all_unit_prices:
+        if up.id_work_type not in prices_table:
+            prices_table[up.id_work_type] = {}
+        if up.id_oferty not in prices_table[up.id_work_type]:
+            prices_table[up.id_work_type][up.id_oferty] = []
+
+        prices_table[up.id_work_type][up.id_oferty].append({
+            'cena': up.cena_jednostkowa,
+            'uwagi': up.uwagi or ""
+        })
+
+    categories = Category.query.order_by(Category.nazwa_kategorii).all()
+    
+    all_available_tenders = Tender.query.options(
+        joinedload(Tender.firma),
+        joinedload(Tender.project)
+    ).order_by(Tender.data_otrzymania.desc()).all()
+    
+    all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
+
+    return {
+        'all_work_types': all_work_types,
+        'all_tenders': all_tenders,
+        'prices_table': prices_table,
+        'categories': categories,
+        'all_available_tenders': all_available_tenders,
+        'selected_category': category_filter,
+        'selected_tenders': tender_ids_filter,
+        'formatted_tender_headers': formatted_tender_headers,
+        'tenders_truncated': tenders_truncated,
+        'all_statuses': all_statuses,
+        'selected_status': status_filter,
+        'selected_date_from': date_from_filter,
+        'selected_date_to': date_to_filter,
+        'min_date': min_date.strftime('%Y-%m-%d') if min_date else '',
+        'max_date': max_date.strftime('%Y-%m-%d') if max_date else '',
+        'selected_limit': limit_filter
+    }
+
+@tenders_bp.route('/unit_prices/analysis')
+@login_required
+def unit_prices_analysis():
+    context = _get_unit_price_analysis_data(request.args)
+    return render_template(
+        'unit_prices_analysis.html',
+        title='Porównanie cen jednostkowych',
+        **context
+    )
+
+@tenders_bp.route('/unit_prices/analysis/print')
+@login_required
+def unit_prices_analysis_print():
+    context = _get_unit_price_analysis_data(request.args)
+    return render_template(
+        'unit_prices_analysis_print.html',
+        title='Porównanie cen jednostkowych - Druk',
+        **context
+    )
+
+
+@tenders_bp.route('/unit_prices/analysis/time_series/<int:work_type_id>')
+@login_required
+def unit_prices_time_series_data(work_type_id):
+    time_series_data = db.session.query(
+        func.to_char(Tender.data_otrzymania, 'YYYY-MM'),
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).join(Tender).filter(UnitPrice.id_work_type == work_type_id).group_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).order_by(func.to_char(Tender.data_otrzymania, 'YYYY-MM')).all()
+
+    labels = [row[0] for row in time_series_data]
+    data = [float(row[1]) for row in time_series_data]
+
+    return jsonify({'labels': labels, 'data': data})
+
+@tenders_bp.route('/unit_prices/analysis/by_contractor/<int:work_type_id>')
+@login_required
+def unit_prices_by_contractor_data(work_type_id):
+    contractor_data = db.session.query(
+        Firmy.nazwa_firmy,
+        func.avg(UnitPrice.cena_jednostkowa)
+    ).select_from(UnitPrice).join(Tender).join(Firmy).filter(UnitPrice.id_work_type == work_type_id).group_by(Firmy.nazwa_firmy).order_by(Firmy.nazwa_firmy).all()
+
+    labels = [row[0] for row in contractor_data]
+    data = [float(row[1]) for row in contractor_data]
+
+    return jsonify({'labels': labels, 'data': data})
+
+@tenders_bp.route('/unit_prices/new_global', methods=['GET', 'POST'])
+@login_required
+def new_global_unit_price():
+    form = UnitPriceForm()
+    if form.validate_on_submit():
+        try:
+            work_type_id = form.id_work_type.data
+            work_type = WorkType.query.get(work_type_id)
+            category_id = work_type.id_kategorii if work_type else None
+            new_unit_price = UnitPrice(
+                id_work_type=work_type_id,
+                nazwa_roboty=work_type.name if work_type else None,
+                jednostka_miary=form.jednostka_miary.data,
+                cena_jednostkowa=form.cena_jednostkowa.data.replace(',', '.'),
+                id_oferty=form.id_oferty.data,
+                id_kategorii=category_id,
+                uwagi=form.uwagi.data
+            )
+            db.session.add(new_unit_price)
+            db.session.commit()
+            flash('Pozycja cenowa została dodana pomyślnie!', 'success')
+            return redirect(url_for('tenders.list_all_unit_prices'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Wystąpił błąd podczas dodawania pozycji cenowej: {e}', 'danger')
+
+    return render_template('unit_price_form.html', form=form, title='Dodaj nową pozycję cenową', show_tender_select=True, category_field_always_disabled_unless_auto_filled=True)
+
+@tenders_bp.route('/unit_price/<int:price_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_unit_price(price_id):
+    price = UnitPrice.query.get_or_404(price_id)
+    form = UnitPriceForm(obj=price)
+    if form.validate_on_submit():
+        price.id_work_type = form.id_work_type.data
+        work_type = WorkType.query.get(price.id_work_type)
+        price.nazwa_roboty = work_type.name if work_type else None
+        price.jednostka_miary = form.jednostka_miary.data
+        price.cena_jednostkowa = form.cena_jednostkowa.data.replace(',', '.')
+        price.id_kategorii = work_type.id_kategorii if work_type else None
+        price.uwagi = form.uwagi.data
+        db.session.commit()
+        flash('Pozycja cenowa została zaktualizowana.', 'success')
+        return redirect(url_for('tenders.tender_details', tender_id=price.id_oferty))
+
+    return render_template('unit_price_form.html', form=form, title='Edycja pozycji cenowej', tender_id=price.id_oferty, category_field_always_disabled_unless_auto_filled=True)
+
+@tenders_bp.route('/unit_price/<int:price_id>/delete', methods=['POST'])
+@login_required
+def delete_unit_price(price_id):
+    price = UnitPrice.query.get_or_404(price_id)
+    tender_id = price.id_oferty
+    db.session.delete(price)
+    db.session.commit()
+    flash('Pozycja cenowa została usunięta.', 'success')
+    return redirect(url_for('tenders.tender_details', tender_id=tender_id))
+
+@tenders_bp.route('/analysis_dashboard', methods=['GET', 'POST'])
+@login_required
+def analysis_dashboard():
+    if request.method == 'POST':
+        selected_work_type_id = request.form.get('work_type_id', type=int)
+        included_ids = request.form.getlist('include', type=int)
+        date_from_str = request.form.get('date_from')
+        date_to_str = request.form.get('date_to')
+        status_filter = request.form.getlist('status_filter')
+    else: # GET request
+        selected_work_type_id = request.args.get('work_type_id', type=int)
+        included_ids = request.args.getlist('include', type=int)
+        date_from_str = request.args.get('date_from')
+        date_to_str = request.args.get('date_to')
+        status_filter = request.args.getlist('status_filter') # Poprawka: odczyt z GET
+
+    work_types = WorkType.query.order_by(WorkType.name).all()
+    all_statuses = [s[0] for s in db.session.query(Tender.status).distinct().order_by(Tender.status).all()]
+
+    # Domyślnie zaznacz wszystkie statusy, jeśli żaden nie został wybrany (tylko przy pierwszym ładowaniu)
+    if not any([selected_work_type_id, date_from_str, date_to_str, status_filter]):
+        status_filter = all_statuses
+    
+    # Dodaj parametr paginacji
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Liczba rekordów na stronę
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Nieprawidłowy format daty 'od'. Użyj formatu RRRR-MM-DD.", "warning")
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Nieprawidłowy format daty 'do'. Użyj formatu RRRR-MM-DD.", "warning")
+
+    # Pobierz zakres dat dla walidacji i ustawień datapickera
+    min_tender_date, max_tender_date = db.session.query(func.min(Tender.data_otrzymania), func.max(Tender.data_otrzymania)).one()
+
+    # Walidacja dat po stronie serwera
+    if date_from and min_tender_date and date_from < min_tender_date:
+        flash(f"Data 'od' ({date_from_str}) jest wcześniejsza niż najstarsza oferta ({min_tender_date}). Filtr daty 'od' został zignorowany.", "warning")
+        date_from = None
+        date_from_str = ''
+    
+    if date_to and max_tender_date and date_to > max_tender_date:
+        flash(f"Data 'do' ({date_to_str}) jest późniejsza niż najnowsza oferta ({max_tender_date}). Filtr daty 'do' został zignorowany.", "warning")
+        date_to = None
+        date_to_str = ''
+
+    stats = {}
+    source_data_pagination = None  # Zmieniamy na obiekt paginacji
+    if selected_work_type_id:
+        # Pobierz wszystkie pozycje dla wybranego work_type_id (do wyświetlenia w tabeli)
+        base_query_source = (
+            db.session.query(
+                UnitPrice.id,
+                UnitPrice.cena_jednostkowa,
+                UnitPrice.jednostka_miary,
+                Tender.data_otrzymania,
+                Firmy.nazwa_firmy,
+                Tender.nazwa_oferty,
+                Tender.id.label('tender_id'),
+                Project.skrot.label('project_skrot'),
+                UnitPrice.uwagi,
+                Tender.status
+            )
+            .join(Tender, UnitPrice.id_oferty == Tender.id)
+            .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
+            .outerjoin(Project, Tender.id_projektu == Project.id)
+            .filter(UnitPrice.id_work_type == selected_work_type_id)
+        )
+
+        if date_from:
+            base_query_source = base_query_source.filter(Tender.data_otrzymania >= date_from)
+        if date_to:
+            base_query_source = base_query_source.filter(Tender.data_otrzymania <= date_to)
+        if status_filter:
+            base_query_source = base_query_source.filter(Tender.status.in_(status_filter))
+
+        # Zastępujemy .all() paginacją
+        source_data_pagination = base_query_source.order_by(Tender.data_otrzymania.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        
+        # Jeśli nie ma included_ids, domyślnie zaznacz pozycje bez uwag
+        if not included_ids and source_data_pagination.items:
+            included_ids = [row.id for row in source_data_pagination.items if not row.uwagi]
+        
+        # Oblicz statystyki na podstawie wybranych pozycji
+        if included_ids:
+            base_query_stats = (db.session.query(UnitPrice.cena_jednostkowa)
+                                .join(Tender, UnitPrice.id_oferty == Tender.id)
+                                .filter(UnitPrice.id_work_type == selected_work_type_id)
+                                .filter(UnitPrice.id.in_(included_ids)))
+
+            if date_from:
+                base_query_stats = base_query_stats.filter(Tender.data_otrzymania >= date_from)
+            if date_to:
+                base_query_stats = base_query_stats.filter(Tender.data_otrzymania <= date_to)
+            if status_filter:
+                base_query_stats = base_query_stats.filter(Tender.status.in_(status_filter))
+
+            prices = base_query_stats.all()
+            price_values = [float(p[0]) for p in prices]
+            
+            if price_values:
+                stats = {
+                    'min_price': min(price_values),
+                    'max_price': max(price_values),
+                    'avg_price': sum(price_values) / len(price_values),
+                    'median_price': median(price_values),
+                    'offer_count': len(price_values)
+                }
+
+    return render_template('analysis_dashboard.html', 
+                           title='Pulpit Analityczny Cen',
+                           work_types=work_types,
+                           selected_work_type_id=selected_work_type_id,
+                           stats=stats,
+                           source_data=source_data_pagination,  # Teraz przekazujemy obiekt paginacji
+                           included_ids=included_ids,
+                           date_from=date_from_str,
+                           date_to=date_to_str,
+                           min_tender_date=min_tender_date.strftime('%Y-%m-%d') if min_tender_date else '',
+                           max_tender_date=max_tender_date.strftime('%Y-%m-%d') if max_tender_date else '',
+                           all_statuses=all_statuses,
+                           selected_statuses=status_filter)
+
+def _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter):
+    """
+    Funkcja pomocnicza do pobierania i filtrowania danych cenowych jako DataFrame Pandas.
+    """
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    # Podstawowe zapytanie
+    query = (
+        db.session.query(
+            UnitPrice.cena_jednostkowa,
+            Tender.data_otrzymania,
+            Firmy.nazwa_firmy,
+            UnitPrice.id,
+            UnitPrice.uwagi
+        )
+        .join(Tender, UnitPrice.id_oferty == Tender.id)
+        .join(Firmy, Tender.id_firmy == Firmy.id_firmy)
+        .filter(UnitPrice.id_work_type == work_type_id)
+    )
+
+    # Filtrowanie po dacie
+    if date_from:
+        query = query.filter(Tender.data_otrzymania >= date_from)
+    if date_to:
+        query = query.filter(Tender.data_otrzymania <= date_to)
+    if status_filter:
+        query = query.filter(Tender.status.in_(status_filter))
+    
+    # Wczytanie danych do DataFrame
+    df = pd.read_sql(query.statement, db.get_engine())
+    if df.empty:
+        return pd.DataFrame()
+
+    # Konwersja typów
+    df['cena_jednostkowa'] = pd.to_numeric(df['cena_jednostkowa'])
+    df['data_otrzymania'] = pd.to_datetime(df['data_otrzymania'])
+
+    # Filtrowanie po ID (jeśli podane)
+    if not included_ids:
+        # Domyślnie użyj pozycji bez uwag
+        df_filtered = df[df['uwagi'].isnull() | (df['uwagi'] == '')].copy()
+    else:
+        df_filtered = df[df['id'].isin(included_ids)].copy()
+
+    return df_filtered
+
+@tenders_bp.route('/api/price_evolution/<int:work_type_id>')
+@login_required
+def price_evolution_data(work_type_id):
+    """
+    Zwraca dane do wykresu ewolucji ceny w czasie dla danego rodzaju roboty.
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    df.set_index('data_otrzymania', inplace=True)
+    monthly_avg = df.resample('ME')['cena_jednostkowa'].mean().dropna()
+    
+    labels = monthly_avg.index.strftime('%Y-%m').tolist()
+    values = monthly_avg.values.tolist()
+    
+    return jsonify({'labels': labels, 'values': values})
+
+@tenders_bp.route('/api/price_by_contractor/<int:work_type_id>')
+@login_required
+def price_by_contractor_data(work_type_id):
+    """
+    Zwraca dane do wykresu porównania cen wg wykonawcy dla danego rodzaju roboty.
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    avg_by_contractor = df.groupby('nazwa_firmy')['cena_jednostkowa'].mean().sort_values(ascending=False)
+    
+    labels = avg_by_contractor.index.tolist()
+    values = avg_by_contractor.values.tolist()
+
+    return jsonify({'labels': labels, 'values': values})
+
+@tenders_bp.route('/api/price_distribution/<int:work_type_id>')
+@login_required
+def price_distribution_data(work_type_id):
+    """
+    Zwraca dane do wykresu rozkładu cen (histogramu) dla danego rodzaju roboty.
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    prices = df['cena_jednostkowa'].dropna().tolist()
+    if not prices:
+        return jsonify({'labels': [], 'values': []})
+
+    min_price = min(prices)
+    max_price = max(prices)
+    num_bins = 7
+
+    if min_price == max_price:
+        return jsonify({'labels': [f'{min_price:.2f} zł'], 'values': [len(prices)]})
+
+    # Użyj pd.cut do stworzenia przedziałów
+    bins = pd.cut(prices, bins=num_bins)
+    bin_counts = bins.value_counts().sort_index()
+
+    labels = [str(interval) for interval in bin_counts.index]
+    values = bin_counts.values.tolist()
+
+    return jsonify({'labels': labels, 'values': values})
+
+@tenders_bp.route('/api/price_trends/<int:work_type_id>')
+@login_required
+def price_trends_data(work_type_id):
+    """
+    Zwraca dane do wykresu trendu cenowego wraz z linią trendu.
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty or len(df) < 2:
+        return jsonify({'labels': [], 'datasets': []})
+
+    df = df.sort_values('data_otrzymania')
+    
+    # Konwertuj daty na wartości numeryczne (liczba dni od daty minimalnej)
+    x_numeric = (df['data_otrzymania'] - df['data_otrzymania'].min()).dt.days
+    y = df['cena_jednostkowa']
+
+    # Oblicz linię trendu (regresja liniowa)
+    coeffs = np.polyfit(x_numeric, y, 1)
+    trend_line = np.poly1d(coeffs)
+    
+    # Przygotuj dane do wykresu
+    scatter_data = [{'x': row['data_otrzymania'].strftime('%Y-%m-%d'), 'y': row['cena_jednostkowa']} for index, row in df.iterrows()]
+    trend_data = [{'x': df['data_otrzymania'].min().strftime('%Y-%m-%d'), 'y': trend_line(x_numeric.min())},
+                  {'x': df['data_otrzymania'].max().strftime('%Y-%m-%d'), 'y': trend_line(x_numeric.max())}]
+
+    return jsonify({
+        'scatter_data': scatter_data,
+        'trend_data': trend_data
+    })
+
+@tenders_bp.route('/api/price_seasonality/<int:work_type_id>')
+@login_required
+def price_seasonality_data(work_type_id):
+    """
+    Zwraca dane do wykresu sezonowości cen (średnia cena w każdym miesiącu).
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty:
+        return jsonify({'labels': [], 'values': []})
+
+    df['month'] = df['data_otrzymania'].dt.month
+    seasonality = df.groupby('month')['cena_jednostkowa'].mean()
+    
+    # Upewnij się, że mamy wszystkie 12 miesięcy
+    seasonality = seasonality.reindex(range(1, 13))
+
+    month_names = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień']
+    
+    labels = [month_names[i-1] for i in seasonality.index]
+    # Zamień NaN na None (który jest konwertowany na null w JSON)
+    values = [value if not np.isnan(value) else None for value in seasonality.values]
+
+    return jsonify({'labels': labels, 'values': values})
+@tenders_bp.route('/api/contractor_competitiveness_alternative/<int:work_type_id>')
+@login_required
+def contractor_competitiveness_alternative_data(work_type_id):
+    """
+    Zwraca dane do alternatywnego wykresu konkurencyjności wykonawców 
+    (słupkowy z min, max, średnia zamiast box plot).
+    """
+    included_ids = request.args.getlist('include', type=int)
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    status_filter = request.args.getlist('status_filter')
+    df = _get_filtered_data_as_df(work_type_id, included_ids, date_from_str, date_to_str, status_filter)
+    if df.empty:
+        return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
+
+    # Grupuj po wykonawcy i oblicz statystyki
+    grouped = df.groupby('nazwa_firmy')['cena_jednostkowa'].agg(['mean', 'min', 'max', 'count'])
+    
+    # Filtruj wykonawców z małą liczbą ofert
+    grouped = grouped[grouped['count'] >= 2]
+    
+    if grouped.empty:
+        return jsonify({'labels': [], 'avg_values': [], 'min_values': [], 'max_values': []})
+
+    # Sortuj wg średniej ceny
+    grouped = grouped.sort_values('mean')
+    
+    return jsonify({
+        'labels': grouped.index.tolist(),
+        'avg_values': grouped['mean'].round(2).tolist(),
+        'min_values': grouped['min'].round(2).tolist(),
+        'max_values': grouped['max'].round(2).tolist()
+    })
