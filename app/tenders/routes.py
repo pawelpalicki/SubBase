@@ -24,9 +24,11 @@ tenders_bp = Blueprint('tenders', __name__, template_folder='templates', url_pre
 
 def extract_and_save_text(tender):
     if not tender.storage_path:
+        current_app.logger.info(f"Tender {tender.id} has no file to process.")
         return
 
     try:
+        current_app.logger.info(f"Starting text extraction for tender {tender.id}.")
         storage_service = get_storage_service()
         file_stream = storage_service.download(tender.storage_path)
         file_content = io.BytesIO(file_stream.read())
@@ -38,22 +40,25 @@ def extract_and_save_text(tender):
 
         if filename_lower.endswith('.pdf'):
             text_found = False
+            current_app.logger.info(f"Attempting extraction with pdfplumber for tender {tender.id}.")
             try:
                 with pdfplumber.open(file_content) as pdf:
                     text = "".join([page.extract_text() for page in pdf.pages if page.extract_text()])
                     if text.strip():
                         extracted_text += text
                         text_found = True
+                        current_app.logger.info(f"pdfplumber extracted text for tender {tender.id}.")
                     
                     for page in pdf.pages:
                         tables = page.extract_tables()
                         if tables:
-                            for table in tables:
-                                table_data.extend(table)
+                            table_data.extend(tables)
+                            current_app.logger.info(f"pdfplumber extracted tables for tender {tender.id}.")
             except Exception as e:
                 current_app.logger.error(f"Error with pdfplumber for tender {tender.id}: {e}")
 
             if not text_found and not table_data:
+                current_app.logger.info(f"pdfplumber found no text or tables, trying fitz for tender {tender.id}.")
                 try:
                     file_content.seek(0)
                     with fitz.open(stream=file_content, filetype="pdf") as doc:
@@ -61,10 +66,12 @@ def extract_and_save_text(tender):
                         if text.strip():
                             extracted_text += text
                             text_found = True
+                            current_app.logger.info(f"fitz extracted text for tender {tender.id}.")
                 except Exception as e:
                     current_app.logger.error(f"Error with fitz for tender {tender.id}: {e}")
 
             if not text_found and not table_data:
+                current_app.logger.info(f"No text found with pdfplumber or fitz, trying Google Vision API for tender {tender.id}.")
                 try:
                     client = vision.ImageAnnotatorClient()
                     file_content.seek(0)
@@ -73,11 +80,13 @@ def extract_and_save_text(tender):
                     response = client.document_text_detection(image=image)
                     if response.full_text_annotation:
                         extracted_text += response.full_text_annotation.text
+                        current_app.logger.info(f"Google Vision API extracted text for tender {tender.id}.")
                 except Exception as e:
                     current_app.logger.error(f"Error with Google Vision API for tender {tender.id}: {e}")
                     flash(f'Nie udało się przetworzyć skanu za pomocą OCR: {e}', 'warning')
 
         elif filename_lower.endswith('.xlsx'):
+            current_app.logger.info(f"Extracting from XLSX for tender {tender.id}.")
             workbook = openpyxl.load_workbook(file_content, data_only=True)
             for sheet in workbook.worksheets:
                 for row in sheet.iter_rows():
@@ -86,6 +95,7 @@ def extract_and_save_text(tender):
                         table_data.append(row_data)
 
         elif filename_lower.endswith('.xls'):
+            current_app.logger.info(f"Extracting from XLS for tender {tender.id}.")
             workbook = xlrd.open_workbook(file_contents=file_content.read())
             for sheet in workbook.sheets():
                 for row_idx in range(sheet.nrows):
@@ -95,9 +105,14 @@ def extract_and_save_text(tender):
         if table_data:
             full_text += "\n\n" + "\n".join(["\t".join(map(str, row)) for row in table_data])
 
+        if not full_text.strip():
+            flash('Nie udało się wyekstrahować żadnej treści z pliku.', 'warning')
+        else:
+            flash('Treść oferty została wyekstrahowana i zapisana.', 'info')
+
         tender.extracted_content = full_text.strip()
         db.session.commit()
-        flash('Treść oferty została wyekstrahowana i zapisana.', 'info')
+        current_app.logger.info(f"Finished text extraction for tender {tender.id}. Content length: {len(tender.extracted_content)}.")
 
     except Exception as e:
         db.session.rollback()
@@ -377,7 +392,7 @@ def list_all_unit_prices():
     formatted_tenders_for_filter = []
     for t in all_tenders_for_filter:
         company_name = t.firma.nazwa_firmy if t.firma else "Brak firmy"
-        if len(company_name) > 10:
+        if len(all_tenders) > 10 and len(company_name) > 10:
             company_name = company_name[:10] + "..."
 
         project_info = "Brak projektu"
