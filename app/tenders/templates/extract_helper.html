@@ -25,6 +25,17 @@
         width: 100%;
         overflow: auto;
     }
+    .extracted-text-pre {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        white-space: pre;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border: 1px solid var(--bs-border-color);
+    }
     .gutter {
         background-color: #eee;
         background-repeat: no-repeat;
@@ -71,7 +82,7 @@
                         {% if extracted_text and extracted_text.strip() %}
                             <h5>Pozostały tekst:</h5>
                             <div class="pre-container">
-                                <pre style="font-family: 'Courier New', monospace; font-size: 0.85rem; white-space: pre; background-color: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">{{ extracted_text.strip() }}</pre>
+                                <pre class="extracted-text-pre">{{ extracted_text.strip() }}</pre>
                             </div>
                         {% endif %}
                         {% if not table_data and not (extracted_text and extracted_text.strip()) %}
