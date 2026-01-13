@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for, ses
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
 from config import Config
-from flask_login import LoginManager, UserMixin # Importy dla Flask-Login
+from flask_login import LoginManager, UserMixin, current_user # Importy dla Flask-Login
 from werkzeug.security import generate_password_hash, check_password_hash # Do haszowania haseł i weryfikacji
 from datetime import timedelta # Do ustawiania czasu życia sesji
 
@@ -67,6 +67,10 @@ def create_app(config_class=Config):
     login_manager.login_message = "Musisz się zalogować, aby uzyskać dostęp do tej strony."
     login_manager.login_message_category = "warning"
     login_manager.session_protection = "strong"
+
+    @app.before_request
+    def log_request_info():
+        app.logger.info(f'Method: {request.method} Path: {request.path} User: {current_user}')
 
     # Obsługa błędów bazy danych (zakładam, że już ją masz)
     @app.errorhandler(OperationalError)

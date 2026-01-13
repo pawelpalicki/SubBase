@@ -283,7 +283,7 @@ def display_file(tender_id):
         return redirect(url_for('tenders.tender_details', tender_id=tender.id))
 
 
-@tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST'])
+@tenders_bp.route('/<int:tender_id>/extract_data', methods=['GET', 'POST', 'HEAD'])
 @login_required
 def extract_data(tender_id):
     tender = Tender.query.get_or_404(tender_id)
