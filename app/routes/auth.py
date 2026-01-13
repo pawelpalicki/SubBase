@@ -12,6 +12,10 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
 
+    # Jeśli to żądanie HEAD i użytkownik nie jest zalogowany, zwróć pustą odpowiedź 200 OK
+    if request.method == 'HEAD':
+        return '', 200
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
