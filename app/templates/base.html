@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,7 @@
     <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
     <script>
         // Natychmiastowe zastosowanie motywu z localStorage, aby uniknąć migotania
-        (function() {
+        (function () {
             const theme = localStorage.getItem('theme');
             if (theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -22,86 +23,122 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.2.0/build/Chart.BoxPlot.min.js"></script>
-    
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.2.0/build/Chart.BoxPlot.min.js"></script>
+
 </head>
+
 <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top custom-navbar-style">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
                 <i class="bi bi-house-door-fill me-2"></i>Strona główna
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <!-- Główne moduły aplikacji -->
-                <ul class="navbar-nav me-auto mb-2 mb-md-0"> 
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="companiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="companiesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-building me-1"></i>Firmy
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="companiesDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('main.list_companies') }}">Lista Firm</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.new_company') }}">Dodaj nową firmę</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.new_company') }}">Dodaj nową firmę</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_persons') }}">Osoby</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.list_ratings') }}">Oceny</a></li>
-                            
+
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="tendersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="tendersDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-file-earmark-text me-1"></i>Oferty
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="tendersDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('tenders.list_tenders') }}">Lista Ofert</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tenders.new_tender') }}">Dodaj nową ofertę</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenders.list_tenders') }}">Lista Ofert</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenders.new_tender') }}">Dodaj nową
+                                    ofertę</a></li>
                         </ul>
                     </li>
-                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="analysisDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="analysisDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-graph-up me-1"></i>Analizy
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="analysisDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('tenders.unit_prices_analysis') }}">Porównanie cen jednostkowych</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tenders.list_all_unit_prices') }}">Wszystkie ceny jednostkowe</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tenders.analysis_dashboard') }}">Pulpit Analityczny</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenders.unit_prices_analysis') }}">Porównanie
+                                    cen jednostkowych</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenders.list_all_unit_prices') }}">Wszystkie
+                                    ceny jednostkowe</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenders.analysis_dashboard') }}">Pulpit
+                                    Analityczny</a></li>
                         </ul>
                     </li>
                 </ul>
 
                 <!-- Przyciski akcji i menu użytkownika -->
                 <ul class="navbar-nav ms-auto align-items-center">
-                     <!-- Ustawienia i słowniki (dla admina) -->
+                    <!-- Ustawienia i słowniki (dla admina) -->
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-gear-fill me-1"></i>Ustawienia
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
-                            <li><h6 class="dropdown-header">Słowniki Firm</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_specialties') }}"><i class="bi bi-wrench-adjustable-circle me-2"></i>Specjalności</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_company_types') }}"><i class="bi bi-building me-2"></i>Typy firm</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_address_types') }}"><i class="bi bi-geo-alt me-2"></i>Typy adresów</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_phone_types') }}"><i class="bi bi-telephone me-2"></i>Typy telefonów</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_email_types') }}"><i class="bi bi-envelope me-2"></i>Typy e-maili</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Słowniki Ofert</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_projects') }}"><i class="bi bi-folder me-2"></i>Projekty</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_categories') }}"><i class="bi bi-tags me-2"></i>Kategorie cen</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.list_work_types') }}"><i class="bi bi-tools me-2"></i>Rodzaje robót</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.instrukcja') }}"><i class="bi bi-info-circle me-2"></i>Instrukcja</a></li>
+                            <li>
+                                <h6 class="dropdown-header">Słowniki Firm</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_specialties') }}"><i
+                                        class="bi bi-wrench-adjustable-circle me-2"></i>Specjalności</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_company_types') }}"><i
+                                        class="bi bi-building me-2"></i>Typy firm</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_address_types') }}"><i
+                                        class="bi bi-geo-alt me-2"></i>Typy adresów</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_phone_types') }}"><i
+                                        class="bi bi-telephone me-2"></i>Typy telefonów</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_email_types') }}"><i
+                                        class="bi bi-envelope me-2"></i>Typy e-maili</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">Słowniki Ofert</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_projects') }}"><i
+                                        class="bi bi-folder me-2"></i>Projekty</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_categories') }}"><i
+                                        class="bi bi-tags me-2"></i>Kategorie cen</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.list_work_types') }}"><i
+                                        class="bi bi-tools me-2"></i>Rodzaje robót</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.instruction') }}"><i
+                                        class="bi bi-info-circle me-2"></i>Instrukcja</a></li>
                         </ul>
                     </li>
                     {% endif %}
 
                     <!-- Przełącznik motywu -->
-                     <li class="nav-item ms-md-2">
-                        <button id="theme-toggle" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Przełącz motyw">
+                    <li class="nav-item ms-md-2">
+                        <button id="theme-toggle" class="btn btn-outline-secondary btn-sm" type="button"
+                            aria-label="Przełącz motyw">
                             <i class="bi bi-moon-stars-fill" id="theme-toggle-icon-moon"></i>
                             <i class="bi bi-sun-fill" id="theme-toggle-icon-sun" style="display: none;"></i>
                         </button>
@@ -128,14 +165,14 @@
 
     <div class="container-fluid fixed-top-alerts">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show m-2" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show m-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
@@ -156,100 +193,100 @@
     </script>
     {% block scripts %}
     <script>
-    $(document).ready(function() {
-        var formState = {}; // Store form state from the first modal
+        $(document).ready(function () {
+            var formState = {}; // Store form state from the first modal
 
-        // --- Nested Modal Logic ---
-        $(document).on('click', '.js-open-secondary-modal', function() {
-            var button = $(this);
-            var secondaryUrl = button.data('url');
-            secondaryUrl = secondaryUrl + (secondaryUrl.includes('?') ? '&' : '?') + '_partial=true';
-            var secondaryTitle = button.data('title');
-            var mainModal = $('#mainModal');
-            var secondaryModal = $('#secondaryModal');
+            // --- Nested Modal Logic ---
+            $(document).on('click', '.js-open-secondary-modal', function () {
+                var button = $(this);
+                var secondaryUrl = button.data('url');
+                secondaryUrl = secondaryUrl + (secondaryUrl.includes('?') ? '&' : '?') + '_partial=true';
+                var secondaryTitle = button.data('title');
+                var mainModal = $('#mainModal');
+                var secondaryModal = $('#secondaryModal');
 
-            secondaryModal.data('triggerElement', button);
-            formState.name = mainModal.find('input[name="name"]').val();
-            formState.mainUrl = mainModal.data('url'); 
-            console.log('formState.mainUrl when opening secondary modal:', formState.mainUrl);
+                secondaryModal.data('triggerElement', button);
+                formState.name = mainModal.find('input[name="name"]').val();
+                formState.mainUrl = mainModal.data('url');
+                console.log('formState.mainUrl when opening secondary modal:', formState.mainUrl);
 
-            secondaryModal.find('.modal-title').text(secondaryTitle);
-            secondaryModal.find('.modal-body').load(secondaryUrl, function() {
-                mainModal.modal('hide');
-                secondaryModal.modal('show');
+                secondaryModal.find('.modal-title').text(secondaryTitle);
+                secondaryModal.find('.modal-body').load(secondaryUrl, function () {
+                    mainModal.modal('hide');
+                    secondaryModal.modal('show');
+                    if (window.Select2Config) {
+                        secondaryModal.find('.select2-enable').each(function () {
+                            window.Select2Config.initWithPlaceholder(this, $(this).data('placeholder') || 'Wybierz...');
+                        });
+                    }
+                });
+            });
+
+            $('#secondaryModal').on('submit', 'form', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            var mainModal = $('#mainModal');
+                            var secondaryModal = $('#secondaryModal');
+
+                            var mainUrl = formState.mainUrl;
+                            if (!mainUrl) {
+                                console.error('Could not find the original URL for the main modal.');
+                                return;
+                            }
+
+                            var newUrl = new URL(mainUrl, window.location.origin);
+                            newUrl.searchParams.set('_partial', 'true');
+                            if (response.id) {
+                                newUrl.searchParams.set('category_id', response.id);
+                            }
+                            if (formState.name) {
+                                newUrl.searchParams.set('work_type_name', formState.name);
+                            }
+                            console.log('Attempting to load mainModal with URL:', newUrl.href);
+                            mainModal.find('.modal-body').load(newUrl.href, function () {
+                                secondaryModal.modal('hide');
+                                // Store the category_id directly on mainModal for later use
+                                mainModal.data('selectedCategoryId', response.id);
+                            });
+                        } else {
+                            $('#secondaryModal .modal-body').html(response.form_html || '<p>Wystąpił błąd.</p>');
+                        }
+                    }
+                });
+            });
+
+            // --- FIX: Use 'hide.bs.modal' to manage focus BEFORE the modal is hidden ---
+            $('#secondaryModal').on('hide.bs.modal', function () {
+                if (document.activeElement) {
+                    $(document.activeElement).blur();
+                }
+                $('body').focus();
+            });
+
+            $('#secondaryModal').on('hidden.bs.modal', function () {
+                var mainModal = $('#mainModal');
+                if (!mainModal.hasClass('show')) {
+                    mainModal.modal('show');
+                }
+            });
+
+            $('#mainModal').on('shown.bs.modal', function () {
                 if (window.Select2Config) {
-                    secondaryModal.find('.select2-enable').each(function() {
-                        window.Select2Config.initWithPlaceholder(this, $(this).data('placeholder') || 'Wybierz...');
+                    $(this).find('select.select2-enable').each(function () {
+                        if (!$(this).data('select2')) {
+                            window.Select2Config.initWithPlaceholder(this, $(this).data('placeholder') || 'Wybierz...');
+                        }
                     });
                 }
             });
+
         });
-
-        $('#secondaryModal').on('submit', 'form', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            $.ajax({
-                type: 'POST',
-                url: form.attr('action'),
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        var mainModal = $('#mainModal');
-                        var secondaryModal = $('#secondaryModal');
-                        
-                        var mainUrl = formState.mainUrl;
-                        if (!mainUrl) {
-                            console.error('Could not find the original URL for the main modal.');
-                            return;
-                        }
-
-                        var newUrl = new URL(mainUrl, window.location.origin);
-                        newUrl.searchParams.set('_partial', 'true');
-                        if (response.id) {
-                           newUrl.searchParams.set('category_id', response.id);
-                        }
-                        if (formState.name) {
-                           newUrl.searchParams.set('work_type_name', formState.name);
-                        }
-                        console.log('Attempting to load mainModal with URL:', newUrl.href);
-                        mainModal.find('.modal-body').load(newUrl.href, function() {
-                            secondaryModal.modal('hide');
-                            // Store the category_id directly on mainModal for later use
-                            mainModal.data('selectedCategoryId', response.id);
-                        });
-                    } else {
-                        $('#secondaryModal .modal-body').html(response.form_html || '<p>Wystąpił błąd.</p>');
-                    }
-                }
-            });
-        });
-
-        // --- FIX: Use 'hide.bs.modal' to manage focus BEFORE the modal is hidden ---
-        $('#secondaryModal').on('hide.bs.modal', function () {
-            if (document.activeElement) {
-                $(document.activeElement).blur();
-            }
-            $('body').focus();
-        });
-
-        $('#secondaryModal').on('hidden.bs.modal', function () {
-            var mainModal = $('#mainModal');
-            if (!mainModal.hasClass('show')) {
-                 mainModal.modal('show');
-            }
-        });
-
-        $('#mainModal').on('shown.bs.modal', function () {
-            if (window.Select2Config) {
-                $(this).find('select.select2-enable').each(function() {
-                    if (!$(this).data('select2')) { 
-                        window.Select2Config.initWithPlaceholder(this, $(this).data('placeholder') || 'Wybierz...');
-                    }
-                });
-            }
-        });
-
-    });
     </script>
     {% endblock %}
 
@@ -279,5 +316,7 @@
         </div>
     </div>
 </body>
+
 </html>
+
 </html>

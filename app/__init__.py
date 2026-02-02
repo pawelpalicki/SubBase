@@ -76,17 +76,15 @@ def create_app(config_class=Config):
         return render_template('database_error.html'), 500
 
     # Rejestracja blueprintów
-    # Zgodnie z Twoim potwierdzeniem: Twój główny blueprint 'main' jest w app/routs.py
-    from .main_routes import main # <--- Ten import jest PRAWIDŁOWY dla app/routs.py
-    app.register_blueprint(main)
+    from app.routes import main as main_blueprint
+    app.register_blueprint(main_blueprint)
 
     # Rejestracja nowego blueprintu dla autoryzacji (logowanie/wylogowanie)
-    # Ten blueprint będzie w nowym katalogu app/routes/
-    from app.routes import auth
-    app.register_blueprint(auth)
+    from app.routes.auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint)
 
     # Rejestracja blueprintu dla ofert
-    from app.tenders.routes import tenders_bp
-    app.register_blueprint(tenders_bp)
+    from app.routes import tenders as tenders_module
+    app.register_blueprint(tenders_module.tenders_bp)
 
     return app

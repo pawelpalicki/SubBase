@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     var mainModal = $('#mainModal');
 
     mainModal.on('show.bs.modal', function (event) {
@@ -40,35 +40,35 @@ $(document).ready(function() {
 
         // Use the determined URL for loading content
         if (url) {
-            $.get(url, function(data) {
+            $.get(url, function (data) {
                 modal.find('.modal-body').html(data);
                 if (window.Select2Config) {
-                modal.find('select.select2-enable').each(function() {
-                    var $this = $(this);
-                    // Destroy existing Select2 instance if it exists
-                    if ($this.data('select2')) {
-                        $this.select2('destroy');
-                    }
-                    // Initialize with dynamic dropdownParent
-                    window.Select2Config.initWithPlaceholder(this, $this.data('placeholder') || 'Wybierz...', true, modal.find('.modal-body'));
-                });
+                    modal.find('select.select2-enable').each(function () {
+                        var $this = $(this);
+                        // Destroy existing Select2 instance if it exists
+                        if ($this.data('select2')) {
+                            $this.select2('destroy');
+                        }
+                        // Initialize with dynamic dropdownParent
+                        window.Select2Config.initWithPlaceholder(this, $this.data('placeholder') || 'Wybierz...', true, modal.find('.modal-body'));
+                    });
 
-                // --- FIX: Set selected category if category_id is in URL --- 
-                var categoryIdFromUrl = new URLSearchParams(url).get('category_id');
-                var selectedCategoryId = modal.data('selectedCategoryId') || categoryIdFromUrl;
-                
-                if (selectedCategoryId) {
-                    var categorySelect = modal.find('#work_type_category_select_modal');
-                    console.log('categorySelect length:', categorySelect.length);
-                    if (categorySelect.length) {
-                        setTimeout(function() {
-                            categorySelect.val(selectedCategoryId).trigger('change');
-                            
-                        }, 50); // Small delay to ensure Select2 is ready
+                    // --- FIX: Set selected category if category_id is in URL --- 
+                    var categoryIdFromUrl = new URLSearchParams(url).get('category_id');
+                    var selectedCategoryId = modal.data('selectedCategoryId') || categoryIdFromUrl;
+
+                    if (selectedCategoryId) {
+                        var categorySelect = modal.find('#work_type_category_select_modal');
+                        console.log('categorySelect length:', categorySelect.length);
+                        if (categorySelect.length) {
+                            setTimeout(function () {
+                                categorySelect.val(selectedCategoryId).trigger('change');
+
+                            }, 50); // Small delay to ensure Select2 is ready
+                        }
                     }
                 }
-            }
-            }).fail(function() {
+            }).fail(function () {
                 modal.find('.modal-body').html('<p class="text-danger">Nie udało się załadować formularza.</p>');
             });
         } else {
@@ -76,8 +76,8 @@ $(document).ready(function() {
         }
     });
 
-    mainModal.on('submit', 'form', function(e) {
-        e.preventDefault(); 
+    mainModal.on('submit', 'form', function (e) {
+        e.preventDefault();
 
         var form = $(this);
         var url = form.attr('action');
@@ -94,7 +94,7 @@ $(document).ready(function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response, textStatus, jqXHR) {
+            success: function (response, textStatus, jqXHR) {
                 // Special handling for login form
                 if (url.includes('/login')) {
                     // For login, always reload the page on success (2xx status)
@@ -116,7 +116,7 @@ $(document).ready(function() {
                 } else {
                     // Handle validation errors or other non-successful JSON responses
                     if (response.errors) {
-                        $.each(response.errors, function(field, messages) {
+                        $.each(response.errors, function (field, messages) {
                             var input = form.find('[name="' + field + '"]');
                             input.addClass('is-invalid');
                             var errorContainer = $('<div class="invalid-feedback"></div>');
@@ -129,7 +129,7 @@ $(document).ready(function() {
                     }
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 // Special handling for login form
                 if (url.includes('/login')) {
                     // For login, if an actual HTTP error occurs (e.g., 500), display a generic message.
@@ -145,7 +145,7 @@ $(document).ready(function() {
                 if ((jqXHR.status === 400 || jqXHR.status === 422) && jqXHR.responseJSON) {
                     var errorData = jqXHR.responseJSON;
                     if (errorData && errorData.errors) {
-                        $.each(errorData.errors, function(field, messages) {
+                        $.each(errorData.errors, function (field, messages) {
                             var input = form.find('[name="' + field + '"]');
                             if (input.length) {
                                 input.addClass('is-invalid');
@@ -175,7 +175,7 @@ $(document).ready(function() {
             $(document.activeElement).blur(); // Remove focus from any element inside the modal
         }
         // Optionally, set focus to body or a known element outside the modal
-        $('body').focus(); 
+        $('body').focus();
     });
 
     mainModal.on('hidden.bs.modal', function (e) {
