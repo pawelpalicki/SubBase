@@ -14,83 +14,109 @@ from . import main
 # --- Helper Functions ---
 
 def get_filtered_companies_query():
-    """Wspólna logika filtrowania firm dla listy i eksportu."""
+    """Wspólna logika filtrowania firm dla listy i eksportu.
+    
+    ZOPTYMALIZOWANA WERSJA: Używa zapytań SQL zamiast ładowania wszystkich 
+    rekordów do pamięci. Kompatybilne z SQLite i PostgreSQL.
+    """
+    from sqlalchemy import or_, func
+    
     query = Firmy.query
     
     # Handle search filter
     search = request.args.get('search', '')
     if search:
-        # Normalizacja tekstu wyszukiwania
-        normalized_search = normalize_text(search)
+        # Dla wyszukiwania używamy LIKE z LOWER() dla kompatybilności z SQLite
+        search_pattern = f'%{search.lower()}%'
+        
+        # Zbieramy ID firm z różnych źródeł
         matching_company_ids = set()
-
-        # Wyszukiwanie w tabeli FIRMY
-        firmy_results = Firmy.query.all()
-        for firma in firmy_results:
-            if (normalized_search in normalize_text(firma.nazwa_firmy).lower() or
-                normalized_search in normalize_text(firma.strona_www).lower() or
-                normalized_search in normalize_text(firma.uwagi).lower()):
-                matching_company_ids.add(firma.id_firmy)
-
-        # Helper do przeszukiwania powiązanych tabel
-        def search_related(model, fields, id_field='id_firmy'):
-            results = model.query.all()
-            for item in results:
-                match = False
-                for field in fields:
-                    val = getattr(item, field)
-                    if normalized_search in normalize_text(val).lower():
-                        match = True
-                        break
-                if match:
-                    company_id = getattr(item, id_field)
-                    if company_id:
-                        matching_company_ids.add(company_id)
-
-        search_related(Adresy, ['kod', 'miejscowosc', 'ulica_miejscowosc'])
-        search_related(Email, ['e_mail'])
-        search_related(Telefon, ['telefon'])
-        search_related(Osoby, ['imie', 'nazwisko', 'stanowisko', 'e_mail', 'telefon'])
-        search_related(Oceny, ['osoba_oceniajaca', 'budowa_dzial', 'komentarz'])
-
-        # Specjalności
-        specjalnosci_results = Specjalnosci.query.all()
-        for spec in specjalnosci_results:
-            if normalized_search in normalize_text(spec.specjalnosc).lower():
-                firmy_spec = FirmySpecjalnosci.query.filter_by(id_specjalnosci=spec.id_specjalnosci).all()
-                for fs in firmy_spec:
-                    matching_company_ids.add(fs.id_firmy)
-
-        # Typy firm
-        firmy_typ_results = FirmyTyp.query.all()
-        for typ in firmy_typ_results:
-            if normalized_search in normalize_text(typ.typ_firmy).lower():
-                firmy_by_typ = Firmy.query.filter_by(id_firmy_typ=typ.id_firmy_typ).all()
-                for firma in firmy_by_typ:
-                    matching_company_ids.add(firma.id_firmy)
-
-        # Obszary działania
-        wojewodztwa_results = Wojewodztwa.query.all()
-        for woj in wojewodztwa_results:
-            if normalized_search in normalize_text(woj.wojewodztwo).lower():
-                firmy_woj = FirmyObszarDzialania.query.filter_by(id_wojewodztwa=woj.id_wojewodztwa).all()
-                for fw in firmy_woj:
-                    matching_company_ids.add(fw.id_firmy)
-
-        powiaty_results = Powiaty.query.all()
-        for pow in powiaty_results:
-            if normalized_search in normalize_text(pow.powiat).lower():
-                firmy_pow = FirmyObszarDzialania.query.filter_by(id_powiaty=pow.id_powiaty).all()
-                for fp in firmy_pow:
-                    matching_company_ids.add(fp.id_firmy)
-
-        kraje_results = Kraj.query.all()
-        for kraj in kraje_results:
-            if normalized_search in normalize_text(kraj.kraj).lower():
-                firmy_kraj = FirmyObszarDzialania.query.filter_by(id_kraj=kraj.id_kraj).all()
-                for fk in firmy_kraj:
-                    matching_company_ids.add(fk.id_firmy)
-
+        
+        # 1. Wyszukiwanie w tabeli FIRMY
+        firmy_ids = db.session.query(Firmy.id_firmy).filter(
+            or_(
+                func.lower(Firmy.nazwa_firmy).like(search_pattern),
+                func.lower(Firmy.strona_www).like(search_pattern),
+                func.lower(Firmy.uwagi).like(search_pattern)
+            )
+        ).all()
+        matching_company_ids.update(row[0] for row in firmy_ids)
+        
+        # 2. Wyszukiwanie w ADRESY
+        adresy_ids = db.session.query(Adresy.id_firmy).filter(
+            or_(
+                func.lower(Adresy.kod).like(search_pattern),
+                func.lower(Adresy.miejscowosc).like(search_pattern),
+                func.lower(Adresy.ulica_miejscowosc).like(search_pattern)
+            )
+        ).filter(Adresy.id_firmy.isnot(None)).all()
+        matching_company_ids.update(row[0] for row in adresy_ids)
+        
+        # 3. Wyszukiwanie w EMAIL
+        email_ids = db.session.query(Email.id_firmy).filter(
+            func.lower(Email.e_mail).like(search_pattern)
+        ).filter(Email.id_firmy.isnot(None)).all()
+        matching_company_ids.update(row[0] for row in email_ids)
+        
+        # 4. Wyszukiwanie w TELEFON
+        telefon_ids = db.session.query(Telefon.id_firmy).filter(
+            func.lower(Telefon.telefon).like(search_pattern)
+        ).filter(Telefon.id_firmy.isnot(None)).all()
+        matching_company_ids.update(row[0] for row in telefon_ids)
+        
+        # 5. Wyszukiwanie w OSOBY
+        osoby_ids = db.session.query(Osoby.id_firmy).filter(
+            or_(
+                func.lower(Osoby.imie).like(search_pattern),
+                func.lower(Osoby.nazwisko).like(search_pattern),
+                func.lower(Osoby.stanowisko).like(search_pattern),
+                func.lower(Osoby.e_mail).like(search_pattern),
+                func.lower(Osoby.telefon).like(search_pattern)
+            )
+        ).filter(Osoby.id_firmy.isnot(None)).all()
+        matching_company_ids.update(row[0] for row in osoby_ids)
+        
+        # 6. Wyszukiwanie w OCENY
+        oceny_ids = db.session.query(Oceny.id_firmy).filter(
+            or_(
+                func.lower(Oceny.osoba_oceniajaca).like(search_pattern),
+                func.lower(Oceny.budowa_dzial).like(search_pattern),
+                func.lower(Oceny.komentarz).like(search_pattern)
+            )
+        ).filter(Oceny.id_firmy.isnot(None)).all()
+        matching_company_ids.update(row[0] for row in oceny_ids)
+        
+        # 7. Wyszukiwanie w SPECJALNOSCI (przez join)
+        spec_ids = db.session.query(FirmySpecjalnosci.id_firmy).join(
+            Specjalnosci, FirmySpecjalnosci.id_specjalnosci == Specjalnosci.id_specjalnosci
+        ).filter(func.lower(Specjalnosci.specjalnosc).like(search_pattern)).all()
+        matching_company_ids.update(row[0] for row in spec_ids)
+        
+        # 8. Wyszukiwanie w FIRMY_TYP (przez join)
+        typ_ids = db.session.query(Firmy.id_firmy).join(
+            FirmyTyp, Firmy.id_firmy_typ == FirmyTyp.id_firmy_typ
+        ).filter(func.lower(FirmyTyp.typ_firmy).like(search_pattern)).all()
+        matching_company_ids.update(row[0] for row in typ_ids)
+        
+        # 9. Wyszukiwanie w WOJEWODZTWA (przez join z obszarem działania)
+        woj_ids = db.session.query(FirmyObszarDzialania.id_firmy).join(
+            Wojewodztwa, FirmyObszarDzialania.id_wojewodztwa == Wojewodztwa.id_wojewodztwa
+        ).filter(func.lower(Wojewodztwa.wojewodztwo).like(search_pattern)).all()
+        matching_company_ids.update(row[0] for row in woj_ids)
+        
+        # 10. Wyszukiwanie w POWIATY (przez join z obszarem działania)
+        pow_ids = db.session.query(FirmyObszarDzialania.id_firmy).join(
+            Powiaty, FirmyObszarDzialania.id_powiaty == Powiaty.id_powiaty
+        ).filter(func.lower(Powiaty.powiat).like(search_pattern)).all()
+        matching_company_ids.update(row[0] for row in pow_ids)
+        
+        # 11. Wyszukiwanie w KRAJ (przez join z obszarem działania)
+        kraj_ids = db.session.query(FirmyObszarDzialania.id_firmy).join(
+            Kraj, FirmyObszarDzialania.id_kraj == Kraj.id_kraj
+        ).filter(func.lower(Kraj.kraj).like(search_pattern)).all()
+        matching_company_ids.update(row[0] for row in kraj_ids)
+        
+        # Filtruj po zebranych ID
         if matching_company_ids:
             query = query.filter(Firmy.id_firmy.in_(matching_company_ids))
         else:

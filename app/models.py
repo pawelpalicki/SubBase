@@ -8,15 +8,16 @@ class Firmy(db.Model):
     strona_www = db.Column(db.Text)
     uwagi = db.Column(db.Text)
     
-    adresy = db.relationship('Adresy', backref='firma', lazy='dynamic')
-    emails = db.relationship('Email', backref='firma', lazy='dynamic')
-    telefony = db.relationship('Telefon', backref='firma', lazy='dynamic')
-    osoby = db.relationship('Osoby', backref='firma', lazy='dynamic')
-    oceny = db.relationship('Oceny', backref='firma', lazy='dynamic')
+    # Zmieniono lazy='dynamic' na 'select' dla lepszej wydajności (eliminacja N+1)
+    adresy = db.relationship('Adresy', backref='firma', lazy='select')
+    emails = db.relationship('Email', backref='firma', lazy='select')
+    telefony = db.relationship('Telefon', backref='firma', lazy='select')
+    osoby = db.relationship('Osoby', backref='firma', lazy='select')
+    oceny = db.relationship('Oceny', backref='firma', lazy='select')
     
-    firmy_specjalnosci = db.relationship('FirmySpecjalnosci', backref='firma', lazy='dynamic')
-    firmy_obszar_dzialania = db.relationship('FirmyObszarDzialania', backref='firma', lazy='dynamic')
-    tenders = db.relationship('Tender', backref='firma', lazy='dynamic')
+    firmy_specjalnosci = db.relationship('FirmySpecjalnosci', backref='firma', lazy='select')
+    firmy_obszar_dzialania = db.relationship('FirmyObszarDzialania', backref='firma', lazy='select')
+    tenders = db.relationship('Tender', backref='firma', lazy='select')
 
 class FirmyTyp(db.Model):
     __tablename__ = 'firmy_typ'
@@ -39,7 +40,7 @@ class Adresy(db.Model):
     miejscowosc = db.Column(db.Text)
     ulica_miejscowosc = db.Column(db.Text)
     id_adresy_typ = db.Column(db.Integer, db.ForeignKey('adresy_typ.id_adresy_typ'))
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), index=True)
 
 class EmailTyp(db.Model):
     __tablename__ = 'email_typ'
@@ -53,7 +54,7 @@ class Email(db.Model):
     id_email = db.Column(db.Integer, primary_key=True)
     e_mail = db.Column(db.Text)
     id_email_typ = db.Column(db.Integer, db.ForeignKey('email_typ.id_email_typ'))
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), index=True)
 
 class TelefonTyp(db.Model):
     __tablename__ = 'telefon_typ'
@@ -67,7 +68,7 @@ class Telefon(db.Model):
     id_telefon = db.Column(db.Integer, primary_key=True)
     telefon = db.Column(db.Text)
     id_telefon_typ = db.Column(db.Integer, db.ForeignKey('telefon_typ.id_telefon_typ'))
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), index=True)
 
 class Specjalnosci(db.Model):
     __tablename__ = 'specjalnosci'
@@ -119,7 +120,7 @@ class Osoby(db.Model):
     stanowisko = db.Column(db.Text)
     e_mail = db.Column(db.Text)
     telefon = db.Column(db.Text)
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), index=True)
 
 class Oceny(db.Model):
     __tablename__ = 'oceny'
@@ -129,7 +130,7 @@ class Oceny(db.Model):
     rok_wspolpracy = db.Column(db.Integer)
     ocena = db.Column(db.Integer)
     komentarz = db.Column(db.Text)
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'))
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), index=True)
 
 class Project(db.Model):
     __tablename__ = 'projects'
@@ -149,8 +150,8 @@ class Tender(db.Model):
     original_filename = db.Column(db.String(255))
     storage_path = db.Column(db.String(1024))
     file_type = db.Column(db.String(100))
-    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), nullable=False)
-    id_projektu = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True)
+    id_firmy = db.Column(db.Integer, db.ForeignKey('firmy.id_firmy'), nullable=False, index=True)
+    id_projektu = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True, index=True)
     extracted_content = db.Column(db.Text, nullable=True) # Dodane pole
     unit_prices = db.relationship('UnitPrice', backref='tender', lazy='dynamic')
 
@@ -165,11 +166,11 @@ class WorkType(db.Model):
 class UnitPrice(db.Model):
     __tablename__ = 'unit_prices'
     id = db.Column(db.Integer, primary_key=True)
-    id_work_type = db.Column(db.Integer, db.ForeignKey('work_types.id'), nullable=False)
+    id_work_type = db.Column(db.Integer, db.ForeignKey('work_types.id'), nullable=False, index=True)
     jednostka_miary = db.Column(db.String(50), nullable=False)
     cena_jednostkowa = db.Column(db.Numeric(10, 2), nullable=False)
-    id_oferty = db.Column(db.Integer, db.ForeignKey('tenders.id'), nullable=False)
-    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    id_oferty = db.Column(db.Integer, db.ForeignKey('tenders.id'), nullable=False, index=True)
+    id_kategorii = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False, index=True)
     category = db.relationship('Category', backref='unit_prices')
     uwagi = db.Column(db.Text, nullable=True)
     # Pole nazwa_roboty zostanie usunięte po migracji danych

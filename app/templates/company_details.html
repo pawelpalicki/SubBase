@@ -13,11 +13,11 @@
                 <div class="card-body">
                     <p><strong>Typ firmy:</strong> {{ company.typ_firmy.typ_firmy }}</p>
                     {% if company.strona_www %}
-                        <p><strong>Strona WWW:</strong> 
-                            <a href="{{ company.strona_www | fix_url }}" target="_blank" rel="noopener noreferrer">
-                                {{ company.strona_www }}
-                            </a>
-                        </p>
+                    <p><strong>Strona WWW:</strong>
+                        <a href="{{ company.strona_www | fix_url }}" target="_blank" rel="noopener noreferrer">
+                            {{ company.strona_www }}
+                        </a>
+                    </p>
                     {% endif %}
                     {% if company.uwagi %}
                     <p><strong>Uwagi:</strong> {{ company.uwagi }}</p>
@@ -30,7 +30,7 @@
                     <h5>Adresy</h5>
                 </div>
                 <div class="card-body">
-                    {% if company.adresy.count() > 0 %}
+                    {% if company.adresy %}
                     <ul class="list-group">
                         {% for adres in company.adresy %}
                         <li class="list-group-item">
@@ -50,7 +50,7 @@
                     <h5>Kontakt</h5>
                 </div>
                 <div class="card-body">
-                    {% if company.emails.count() > 0 %}
+                    {% if company.emails %}
                     <h6>E-mail:</h6>
                     <ul class="list-group mb-3">
                         {% for email in company.emails %}
@@ -61,7 +61,7 @@
                     </ul>
                     {% endif %}
 
-                    {% if company.telefony.count() > 0 %}
+                    {% if company.telefony %}
                     <h6>Telefon:</h6>
                     <ul class="list-group">
                         {% for telefon in company.telefony %}
@@ -72,7 +72,7 @@
                     </ul>
                     {% endif %}
 
-                    {% if company.emails.count() == 0 and company.telefony.count() == 0 %}
+                    {% if not company.emails and not company.telefony %}
                     <p class="text-muted">Brak danych kontaktowych</p>
                     {% endif %}
                 </div>
@@ -83,27 +83,28 @@
                     <h5>Oferty</h5>
                 </div>
                 <div class="card-body">
-                    {% if company.tenders.count() > 0 %}
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Nazwa oferty</th>
-                                    <th>Data</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for tender in company.tenders %}
-                                    <tr>
-                                        <td><a href="{{ url_for('tenders.tender_details', tender_id=tender.id) }}">{{ tender.nazwa_oferty }}</a></td>
-                                        <td>{{ tender.data_otrzymania.strftime('%Y-%m-%d') }}</td>
-                                        <td><span class="badge bg-secondary">{{ tender.status }}</span></td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    {% if company.tenders %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Nazwa oferty</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tender in company.tenders %}
+                            <tr>
+                                <td><a href="{{ url_for('tenders.tender_details', tender_id=tender.id) }}">{{
+                                        tender.nazwa_oferty }}</a></td>
+                                <td>{{ tender.data_otrzymania.strftime('%Y-%m-%d') }}</td>
+                                <td><span class="badge bg-secondary">{{ tender.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                     {% else %}
-                        <p class="text-muted">Brak ofert od tej firmy.</p>
+                    <p class="text-muted">Brak ofert od tej firmy.</p>
                     {% endif %}
                 </div>
             </div>
@@ -165,19 +166,20 @@
                     <h5>Osoby kontaktowe</h5>
                 </div>
                 <div class="card-body">
-                    {% if company.osoby.count() > 0 %}
+                    {% if company.osoby %}
                     <div class="accordion" id="osobyAccordion">
                         {% for osoba in company.osoby %}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{ osoba.id_osoby }}">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#collapse{{ osoba.id_osoby }}" aria-expanded="false" 
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ osoba.id_osoby }}" aria-expanded="false"
                                     aria-controls="collapse{{ osoba.id_osoby }}">
-                                {{ osoba.imie }} {{ osoba.nazwisko }}{% if osoba.stanowisko %} - {{ osoba.stanowisko }}{% endif %}
+                                    {{ osoba.imie }} {{ osoba.nazwisko }}{% if osoba.stanowisko %} - {{ osoba.stanowisko
+                                    }}{% endif %}
                                 </button>
                             </h2>
-                            <div id="collapse{{ osoba.id_osoby }}" class="accordion-collapse collapse" 
-                                 aria-labelledby="heading{{ osoba.id_osoby }}" data-bs-parent="#osobyAccordion">
+                            <div id="collapse{{ osoba.id_osoby }}" class="accordion-collapse collapse"
+                                aria-labelledby="heading{{ osoba.id_osoby }}" data-bs-parent="#osobyAccordion">
                                 <div class="accordion-body">
                                     {% if osoba.e_mail %}
                                     <p><strong>E-mail:</strong> {{ osoba.e_mail }}</p>
@@ -202,24 +204,26 @@
                     <span class="badge bg-primary">Średnia: {{ avg_rating }}</span>
                 </div>
                 <div class="card-body">
-                    {% if company.oceny.count() > 0 %}
+                    {% if company.oceny %}
                     <div class="accordion" id="ocenyAccordion">
                         {% for ocena in company.oceny %}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingOcena{{ ocena.oceny_id }}">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                         data-bs-target="#collapseOcena{{ ocena.oceny_id }}" aria-expanded="false" 
-                                         aria-controls="collapseOcena{{ ocena.oceny_id }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOcena{{ ocena.oceny_id }}" aria-expanded="false"
+                                    aria-controls="collapseOcena{{ ocena.oceny_id }}">
                                     <div class="d-flex justify-content-between w-100">
-                                        <span>{{ ocena.osoba_oceniajaca }} - {{ ocena.budowa_dzial }} ({{ ocena.rok_wspolpracy }})</span>
-                                        <span class="badge bg-{{ 'success' if ocena.ocena >= 4 else 'warning' if ocena.ocena >= 3 else 'danger' }}">
+                                        <span>{{ ocena.osoba_oceniajaca }} - {{ ocena.budowa_dzial }} ({{
+                                            ocena.rok_wspolpracy }})</span>
+                                        <span
+                                            class="badge bg-{{ 'success' if ocena.ocena >= 4 else 'warning' if ocena.ocena >= 3 else 'danger' }}">
                                             {{ ocena.ocena }}/5
                                         </span>
                                     </div>
                                 </button>
                             </h2>
-                            <div id="collapseOcena{{ ocena.oceny_id }}" class="accordion-collapse collapse" 
-                                 aria-labelledby="headingOcena{{ ocena.oceny_id }}" data-bs-parent="#ocenyAccordion">
+                            <div id="collapseOcena{{ ocena.oceny_id }}" class="accordion-collapse collapse"
+                                aria-labelledby="headingOcena{{ ocena.oceny_id }}" data-bs-parent="#ocenyAccordion">
                                 <div class="accordion-body">
                                     {{ ocena.komentarz }}
                                 </div>
@@ -236,7 +240,8 @@
     </div>
 
     <div class="mt-3">
-        <a href="{{ url_for('main.edit_company', company_id=company.id_firmy) }}" class="btn btn-warning">Edytuj firmę</a>
+        <a href="{{ url_for('main.edit_company', company_id=company.id_firmy) }}" class="btn btn-warning">Edytuj
+            firmę</a>
         {% if standalone %} {# This is the important change #}
         <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Powrót</a>
         {% endif %} {# End of the conditional block #}

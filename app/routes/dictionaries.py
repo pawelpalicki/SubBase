@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required
 from app import db
-from app.models import FirmyTyp, Specjalnosci, AdresyTyp, EmailTyp, TelefonTyp, Category, WorkType
+from app.models import FirmyTyp, Specjalnosci, AdresyTyp, EmailTyp, TelefonTyp, Category, WorkType, Powiaty
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from . import main
@@ -122,6 +122,13 @@ def add_specjalnosc():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+@main.route('/api/powiaty/<wojewodztwo_id>')
+@login_required
+def get_powiaty_by_wojewodztwo(wojewodztwo_id):
+    """Pobiera listę powiatów dla danego województwa (używane przez filtry na liście firm)."""
+    powiaty = Powiaty.query.filter_by(id_wojewodztwa=wojewodztwo_id).order_by(Powiaty.powiat).all()
+    return jsonify([{'id': p.id_powiaty, 'name': p.powiat} for p in powiaty])
 
 # --- CRUD Views for Dictionaries ---
 
