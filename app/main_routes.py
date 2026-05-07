@@ -233,6 +233,7 @@ def list_companies():
 
 
     companies = query.all()
+    companies = query.order_by(Firmy.id_firmy.asc()).all()
 
     # Get all data needed for filters
     all_specialties = Specjalnosci.query.all()
@@ -1512,6 +1513,7 @@ def export_companies_html():
 
     # EXECUTE THE FINAL FILTERED QUERY
     filtered_companies = query.all()
+    filtered_companies = query.order_by(Firmy.id_firmy.asc()).all()
 
     # --- Fetch ALL related data for the filtered companies ---
     # Potrzebujemy wszystkich szczegółów, tak jak dla PDF.
