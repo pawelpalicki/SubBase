@@ -1,0 +1,128 @@
+id,id_work_type,jednostka_miary,cena_jednostkowa,id_oferty,id_kategorii,uwagi,nazwa_roboty
+69,31,m2,160.0,13,29,,Murowanie ściany z bloczków betonowych
+70,30,m2,100.0,13,29,,Murowanie ściany Silka 24
+71,44,m2,95.0,13,29,,Murowanie ściany Silka 18
+72,45,mb,60.0,13,29,,Nadproża prefabrykowane
+73,37,m2,800.0,13,28,,Schody żelbetowe
+74,21,m3,155.0,14,28,,Podkłady betonowe pod fundamentami
+75,22,m3,360.0,14,28,,Stopy fundamentowe
+76,24,m3,360.0,14,28,,Ławy fundamentowe
+77,25,m2,216.0,14,28,,Podwaliny żelbetowe monolityczne
+78,23,t,2600.0,14,28,Fundamenty,Montaż zbrojenia
+79,23,t,2900.0,14,28,,Montaż zbrojenia
+80,32,m2,12.0,14,30,,Izolacja przeciwwilgociowa
+81,33,m2,35.0,14,30,,Docieplenie podwalin
+82,35,m3,1650.0,14,28,,Podciągi żelbetowe
+83,27,m3,1450.0,14,28,,Trzpienie żelbetowe
+84,28,m3,1450.0,14,28,,Wieńce żelbetowe
+85,36,m2,150.0,14,28,,Strop żelbetowy - filigran
+20,21,m3,130.0,9,28,,Podkłady betonowe pod fundamentami
+21,22,m3,280.0,9,28,,Stopy fundamentowe
+22,23,t,2000.0,9,28,stopy+ławy,Montaż zbrojenia
+23,24,m3,460.0,9,28,,Ławy fundamentowe
+24,25,m2,160.0,9,28,,Podwaliny żelbetowe monolityczne
+25,26,m2,160.0,9,28,,Ściana żelbetowa 
+26,27,m3,1500.0,9,28,,Trzpienie żelbetowe
+27,28,m3,950.0,9,28,,Wieńce żelbetowe
+28,29,m3,1500.0,9,28,,Nadproża żelbetowe monolityczne
+29,23,t,2100.0,9,28,"trzpienie, wieńce, nadproża",Montaż zbrojenia
+30,30,m2,90.0,9,29,,Murowanie ściany Silka 24
+31,31,m2,95.0,9,29,,Murowanie ściany z bloczków betonowych
+32,32,m2,8.0,9,30,,Izolacja przeciwwilgociowa
+33,33,m2,25.0,9,30,,Docieplenie podwalin
+34,34,m2,135.0,9,28,,Strop gęstożebrowy
+35,21,m3,100.28,10,28,,Podkłady betonowe pod fundamentami
+38,25,m2,173.21,10,28,,Podwaliny żelbetowe monolityczne
+39,23,t,2200.0,10,28,,Montaż zbrojenia
+40,35,m3,1458.65,10,28,,Podciągi żelbetowe
+41,27,m3,1458.65,10,28,,Trzpienie żelbetowe
+42,28,m3,1458.65,10,28,,Wieńce żelbetowe
+43,36,m2,127.63,10,28,,Strop żelbetowy - filigran
+44,24,m3,382.89,10,28,,Ławy fundamentowe
+45,37,m2,273.5,10,28,,Schody żelbetowe
+46,38,m3,100.3,10,28,,Podkłady betonowe pod posadzkę
+47,39,m3,100.28,10,28,,Płyty fundamentowe
+48,21,m3,120.0,11,28,,Podkłady betonowe pod fundamentami
+49,22,m3,300.0,11,28,,Stopy fundamentowe
+50,24,m3,300.0,11,28,,Ławy fundamentowe
+51,23,t,2200.0,11,28,,Montaż zbrojenia
+56,39,m3,90.0,11,28,,Płyty fundamentowe
+52,40,m3,850.0,11,28,Bez deskowań,Słupy żelbetowe monolityczne
+57,26,m2,100.0,11,28,Bez deskowań,Ściana żelbetowa 
+55,41,m2,100.0,11,28,Bez deskowań,Strop żelbetowy monolityczny
+54,28,m3,1100.0,11,28,Bez deskowań,Wieńce żelbetowe
+53,27,m3,950.0,11,28,Bez deskowań,Trzpienie żelbetowe
+59,21,m3,180.0,13,28,,Podkłady betonowe pod fundamentami
+60,25,m2,220.0,13,28,,Podwaliny żelbetowe monolityczne
+61,23,t,2300.0,13,28,,Montaż zbrojenia
+62,23,t,2700.0,13,28,stropy,Montaż zbrojenia
+63,35,m3,1800.0,13,28,,Podciągi żelbetowe
+64,27,m3,1800.0,13,28,,Trzpienie żelbetowe
+65,28,m3,1800.0,13,28,,Wieńce żelbetowe
+66,36,m2,140.0,13,28,,Strop żelbetowy - filigran
+67,32,m2,15.0,13,30,,Izolacja przeciwwilgociowa
+68,33,m2,50.0,13,30,,Docieplenie podwalin
+86,31,m2,115.0,14,29,,Murowanie ściany z bloczków betonowych
+87,30,m2,90.0,14,29,,Murowanie ściany Silka 24
+88,44,m2,90.0,14,29,,Murowanie ściany Silka 18
+89,45,mb,80.0,14,29,,Nadproża prefabrykowane
+90,21,m3,125.0,15,28,,Podkłady betonowe pod fundamentami
+91,22,m3,350.0,15,28,,Stopy fundamentowe
+92,24,m3,350.0,15,28,,Ławy fundamentowe
+93,40,m3,820.0,15,28,,Słupy żelbetowe monolityczne
+94,35,m3,1130.0,15,28,,Podciągi żelbetowe
+95,26,m2,150.0,15,28,,Ściana żelbetowa 
+96,36,m2,160.0,15,28,,Strop żelbetowy - filigran
+97,23,t,1900.0,15,28,Fundamenty,Montaż zbrojenia
+98,23,t,2100.0,15,28,,Montaż zbrojenia
+99,21,m3,130.0,18,28,,Podkłady betonowe pod fundamentami
+100,22,m3,350.0,18,28,,Stopy fundamentowe
+101,24,m3,350.0,18,28,,Ławy fundamentowe
+102,40,m3,1200.0,18,28,,Słupy żelbetowe monolityczne
+103,35,m3,1200.0,18,28,,Podciągi żelbetowe
+104,26,m2,168.0,18,28,,Ściana żelbetowa 
+105,36,m2,157.0,18,28,,Strop żelbetowy - filigran
+106,37,m2,820.0,18,28,,Schody żelbetowe
+107,23,t,1850.0,18,28,Fundamenty,Montaż zbrojenia
+108,23,t,2100.0,18,28,,Montaż zbrojenia
+109,47,m2,70.0,18,33,,Montaż płyt kanałowych
+110,21,m3,130.0,16,28,,Podkłady betonowe pod fundamentami
+111,22,m3,300.0,16,28,,Stopy fundamentowe
+112,24,m3,300.0,16,28,,Ławy fundamentowe
+113,40,m3,1200.0,16,28,,Słupy żelbetowe monolityczne
+114,35,m3,1200.0,16,28,,Podciągi żelbetowe
+115,26,m2,160.0,16,28,,Ściana żelbetowa 
+37,24,m3,273.5,10,28,W gruncie,Ławy fundamentowe
+116,36,m2,110.0,16,28,,Strop żelbetowy - filigran
+117,37,m2,860.0,16,28,,Schody żelbetowe
+118,47,m2,32.0,16,33,,Montaż płyt kanałowych
+119,23,t,2000.0,16,28,,Montaż zbrojenia
+120,47,m2,70.0,15,33,,Montaż płyt kanałowych
+121,21,m3,135.0,17,28,,Podkłady betonowe pod fundamentami
+122,22,m3,420.0,17,28,,Stopy fundamentowe
+123,24,m3,420.0,17,28,,Ławy fundamentowe
+124,40,m3,1700.0,17,28,,Słupy żelbetowe monolityczne
+125,35,m3,1800.0,17,28,,Podciągi żelbetowe
+126,26,m2,190.0,17,28,,Ściana żelbetowa 
+127,36,m2,130.0,17,28,,Strop żelbetowy - filigran
+128,47,m2,70.0,17,33,,Montaż płyt kanałowych
+129,23,t,2300.0,17,28,,Montaż zbrojenia
+36,22,m3,273.5,10,28,W gruncie,Stopy fundamentowe
+130,21,m3,135.0,19,28,,Podkłady betonowe pod fundamentami
+131,39,m3,125.0,19,28,,Płyty fundamentowe
+132,22,m3,460.0,19,28,,Stopy fundamentowe
+133,24,m3,520.0,19,28,,Ławy fundamentowe
+134,23,t,2000.0,19,28,Płyta fundamentowa,Montaż zbrojenia
+135,26,m2,160.0,19,28,,Ściana żelbetowa 
+136,23,t,2200.0,19,28,,Montaż zbrojenia
+137,26,m2,200.0,19,28, Deskowanie jednostronne,Ściana żelbetowa 
+138,41,m2,180.0,19,28,,Strop żelbetowy monolityczny
+139,35,m3,1500.0,19,28,,Podciągi żelbetowe
+140,40,m3,1300.0,19,28,,Słupy żelbetowe monolityczne
+141,48,szt,550.0,19,33,,Biegi schodowe prefabrykowane
+142,49,kg,9.65,20,34,Wykonanie prefabrykatu,Konstrukcja stalowa malowana
+143,50,kg,1.85,20,34,R30,Malowanie p.poż konstrukcji nośnej
+144,51,kg,4.95,20,34,R30,Malowanie p.poż konstrukcji drugorzędnej
+145,49,kg,2.75,20,34,Montaż,Konstrukcja stalowa malowana
+146,52,m2,45.0,34,35,,Tynk gipsowy
+147,53,m2,28.0,34,35,,Malowanie 

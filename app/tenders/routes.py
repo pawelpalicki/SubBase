@@ -484,7 +484,7 @@ def list_all_unit_prices():
     formatted_tenders_for_filter = []
     for t in all_tenders_for_filter:
         company_name = t.firma.nazwa_firmy if t.firma else "Brak firmy"
-        if len(all_tenders) > 10 and len(company_name) > 10:
+        if len(company_name) > 10:
             company_name = company_name[:10] + "..."
 
         project_info = "Brak projektu"

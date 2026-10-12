@@ -1,0 +1,1195 @@
+id,nazwa_oferty,data_otrzymania,status,original_filename,storage_path,file_type,id_firmy,id_projektu,extracted_content
+17,Konstrukcja żelbetowa,2024-02-09,Realizacja,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,7,16,
+18,Konstrukcja żelbetowa,2024-02-09,Realizacja,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,6,16,
+13,Konstrukcja,2025-05-26,Realizacja,MEB_Intech_do_protokou.xlsx,MEB_Intech_do_protokou.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,6,13,"============================================================
+ARKUSZ: List1
+============================================================
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+------+----------------+--------------------+--------------------+
+|BUDYNEK MAGAZYNOWY Z CZĘŚCIĄ BIUROWO-SOCJALNĄ, PORTIERNIĄ, POMPOWNIĄ, ZBIORNIKIEM P.POŻ., ZBIORNIKIEM RETENCYJNYM, WIATĄ ŚMIETNIKOWĄ, MUREM OPOROWYM WRAZ Z  INSTALACJĄ FOTOWOLTAICZNĄ I INFRASTRUKTURĄ TECHNICZNĄ ul. Nad Strumykiem, 62-080 Tarnowo Podgórne Towarzystwo Gospodarcze MEBLOPOL Sp. z o.o.  |                                                             |      |                |                    |                    |
++============================================================================================================================================================================================================================================================================================================+=============================================================+======+================+====================+====================+
+|FORMULARZ OFERTOWY                                                                                                                                                                                                                                                                                          |                                                             |      |                |                    |                    |
+|                                                                                                                                                                                                                                                                                                            |                                                             |      |                |Intech - robocizna  |                    |
+|LP                                                                                                                                                                                                                                                                                                          |Opis prac                                                    |j.m.  |ilość szacunek  |c.j.                |Wartość             |
+|4                                                                                                                                                                                                                                                                                                           | FUNDAMENTY HALA                                             |      |                |                    |                    |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |66.75           |180                 |12015               |
+|                                                                                                                                                                                                                                                                                                            |Stopy fundamentowe C30/37 W8 - bez szalunków                 |m3    |119.06          |400                 |47624               |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8 - bez szalunków                  |m3    |74.22           |450                 |33399               |
+|                                                                                                                                                                                                                                                                                                            |Podwaliny żelbetowe gr 18cm C30/37 W8                        |m2    |101.42          |220                 |22312.4             |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie fundamentów                                        |t     |16.057          |2300                |36931.1             |
+|5                                                                                                                                                                                                                                                                                                           |KONSTRUKCJA ZELBETOWA +IZOLACJA FUNDAMENTOW                  |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |330             |15                  |4950                |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna x2 pod ścianami murowanymi              |m2    |115             |50                  |5750                |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |130             |50                  |6500                |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |2.91            |1800                |5238                |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |16.46           |1800                |29628               |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |37.07           |1800                |66726               |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 20 cm C30/37 - filigran                   |m2    |255.75          |140                 |35805               |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 18 cm C30/37 - filigran                   |m2    |110.72          |140                 |15500.8             |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |10.94           |2700                |29538               |
+|8                                                                                                                                                                                                                                                                                                           | ŚCIANY                                                      |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |164.16          |160                 |26265.6             |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |2496.52         |100                 |249652              |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 18 cm                      |m2    |14.48           |95                  |1375.6000000000001  |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |46.2            |60                  |2772                |
+|14                                                                                                                                                                                                                                                                                                          |FUNDAMENTY CZĘŚĆ BIUROWO SOCJALNA                            |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |22.96           |180                 |4132.8              |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |69.42           |480                 |33321.6             |
+|                                                                                                                                                                                                                                                                                                            |Podwaliny żelbetowe gr 24cm C30/37 W8                        |m2    |10.06           |220                 |2213.2000000000003  |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie fundamentów                                        |t     |3.785           |2300                |8705.5              |
+|15                                                                                                                                                                                                                                                                                                          |KONSTRUKCJA ZELBETOWA +IZOLACJA FUNDAMENTOW                  |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |160             |15                  |2400                |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna pod ścianami murowanymi                 |m2    |55.25           |50                  |2762.5              |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |38.65           |50                  |1932.5              |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |12.32           |1800                |22176               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |1.23            |2300                |2829                |
+|16                                                                                                                                                                                                                                                                                                          |BELKI, PODCIĄGI, WIEŃCE, NADPROŻA,SCHODY                     |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |8.91            |1800                |16038               |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |23.06           |1800                |41508               |
+|                                                                                                                                                                                                                                                                                                            |Schody żelbetowe gr 15 cm C30/37                             |m2    |31.03           |800                 |24824               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |5.04            |2400                |12096               |
+|17                                                                                                                                                                                                                                                                                                          | ŚCIANY                                                      |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |78.93           |150                 |11839.500000000002  |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |1445.2          |100                 |144520              |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 12 cm                      |m2    |3.53            |95                  |335.34999999999997  |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |218.4           |60                  |13104               |
+|18                                                                                                                                                                                                                                                                                                          |STROPY                                                       |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 20 cm C30/37 - filigran                   |m2    |1570.85         |140                 |219919              |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |21.2            |2700                |57240               |
+|25                                                                                                                                                                                                                                                                                                          |POSADZKI                                                     |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Posadzka na gruncie PG1                                      |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |524.9           |18                  |9448.199999999999   |
+|29                                                                                                                                                                                                                                                                                                          |PORTIERNIA                                                   |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |KONSTRUKCJA                                                  |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |1.58            |180                 |284.40000000000003  |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |4.22            |500                 |2110                |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.17            |2300                |391                 |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |4.58            |150                 |687                 |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |10              |15                  |150                 |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna pod ścianami murowanymi                 |m2    |6.15            |50                  |307.5               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |10              |50                  |500                 |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |45.16           |100                 |4516                |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |1.65            |1800                |2970                |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |0.34            |1800                |612                 |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 18 cm C30/37 - filigran                   |m2    |17.3            |800                 |13840               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.45            |2700                |1215                |
+|                                                                                                                                                                                                                                                                                                            |Posadzka na gruncie PG1                                      |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |16.65           |18                  |299.7               |
+|30                                                                                                                                                                                                                                                                                                          |MURY OPOROWE                                                 |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |7.04            |180                 |1267.2              |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |23.47           |500                 |11735               |
+|                                                                                                                                                                                                                                                                                                            |Ściany żelbetowe gr. 20cm  C30/37 W8                         |m2    |73.68           |240                 |17683.2             |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |3.79            |2300                |8717                |
+|32                                                                                                                                                                                                                                                                                                          |WIATA ŚMIETNIKOWA                                            |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |STOPY FUNDAMENTOWE                                           |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Wykonanie 10 stóp 40x40x80 cm C30/37 W8                      |      |                |800                 |0                   |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie ww. stóp fundamentowych 70 kg/m3.                  |      |                |2.3                 |0                   |
+|36                                                                                                                                                                                                                                                                                                          |ZBIORNIK RETENCYJNY                                          |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |26.06           |180                 |4690.8              |
+|                                                                                                                                                                                                                                                                                                            |Płyty fundamentowe C30/37 W8                                 |m3    |68.18           |250                 |17045               |
+|                                                                                                                                                                                                                                                                                                            |Sciany żelbetowe gr 20cm C30/37 W8                           |m2    |245.25          |240                 |58860               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |11.23           |2300                |25829               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja przerw roboczych                                    |mb    |136             |60                  |8160                |
+|37                                                                                                                                                                                                                                                                                                          |ZBIORNIK PPOZ                                                |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |FUNDAMENT ZBIORNIKA                                          |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |24.26           |180                 |4366.8              |
+|                                                                                                                                                                                                                                                                                                            |Płyty fundamentowe C30/37 W8                                 |m3    |71.33           |250                 |17832.5             |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |7.85            |2300                |18055               |
+|49                                                                                                                                                                                                                                                                                                          |AGREGAT PRĄDOTWÓRCZY                                         |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |ROBOTY FUNDAMENTOWE                                          |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Wykonanie warstwy ch.betonu C8/10 o gr. 10 cm                |m3    |1.26            |180                 |226.8               |
+|                                                                                                                                                                                                                                                                                                            |Płyta fundamentowa o gr. 35 cm z betonu C30/37 W8.           |m3    |3.65            |250                 |912.5               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie płyty fundamentowej - wsk. zazbrojenia 120 kg/m3.  |kg    |438             |2.3                 |1007.4              |
+|                                                                                                                                                                                                                                                                                                            |Kątownik/okucie po obwodzie fundamentu L40x40x4              |kg    |34.55           |100                 |3454.9999999999995  |
+|73                                                                                                                                                                                                                                                                                                          |PRZEPOMPOWNIE (sanitarna,deszczowa ,ppoż,pianowa)            |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |BUDYNEK PRZEPOMPOWNI                                         |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |4.3             |180                 |774                 |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |12.51           |480                 |6004.8              |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.63            |2300                |1449                |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |18.24           |150                 |2735.9999999999995  |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |35              |15                  |525                 |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna x2 pod ścianami murowanymi              |m2    |12.77           |50                  |638.5               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |20              |50                  |1000                |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |3.32            |1800                |5976                |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |1.28            |1800                |2304                |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.46            |2300                |1058                |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |138.97          |100                 |13897               |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |4.2             |60                  |252                 |
+|                                                                                                                                                                                                                                                                                                            |Posadzka PG2                                                 |      |                |                    |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |85.86           |18                  |1545.48             |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+------+----------------+--------------------+--------------------+"
+9,Konstrukcja,2025-05-27,Umowa,UnibudSchiesslMAJ-27.pdf,UnibudSchiesslMAJ-27.pdf,application/pdf,5,61,
+34,Prace wykończeniowe,2025-09-23,Umowa,UMOWA_260-2025-WRZESIEN-23-NIC_57455.pdf,UMOWA_260-2025-WRZESIEN-23-NIC_57455.pdf,application/pdf,54,13,"--- Strona 1 ---
+NICKEL
+Załącznik nr 8 do umowy nr 260/2025/wrzesień/23/NIC 57455 z dnia 23.09.2025 roku
+www.ptbnickel.pl
+LISTA CEN JEDNOSTKOWYCH
+BUDYNEK MAGAZYNOWY Z CZĘŚCIĄ BIUROWO-
+SOCJALNA, PORTIERNIA, POMPOWNIĄ,
+ZBIORNIKIEM P.POŻ, ZBIORNIKIEM RETENCYJNYM,
+WIATĄ ŚMIETNIKOWĄ, MUREM OPOROWYM WRAZ
+Z INSTALACJĄ FOTOWOLTAICZNĄ I
+INFRASTRUKTURĄ TECHNICZNĄ ul. Nad Strumykiem,
+62-080 Tarnowo Podgórne Towarzystwo Gospodarcze
+MEBLOPOL Sp. z o.o.
+FORMULARZ OFERTOWY
+LP
+Opis prac
+j.m.
+szacunkoa ilość cena jedn.
+szacunkowa wartość
+8
+ŚCIANY
+Tynki gipsowy wzmocniony
+m2
+606,06
+48,00
+29 090,88
+Tynki gipsowy wzmocniony - ościeża
+mb
+89,20
+48,00
+4 281,60
+Malowanie ścian
+m2
+606,06
+28,00
+16 969,68
+13
+INNE ELEMENT HALI
+Tynki gipsowy - stropy
+Malowanie stropów
+m2
+165,66
+48,00
+7 951,68
+m2
+165,66
+28,00
+4 638,48
+25
+POSADZKI
+Posadzka na gruncie PG1
+Folia PE
+m2
+527,15
+84,00
+44 280,60
+EPS100 gr 15cm
+m2
+527,15
+Folia PE
+m2
+527,15
+Jastrych gr 7cm
+m2
+527,15
+Posadzka na stropie P1/P2
+EPS100 gr 5cm
+m2
+1 182,90
+64.00
+75 705,60
+Folia PE
+m2
+1 182,90
+Jastrych gr 7cm
+m2
+1 182,90
+26
+TYNKI,GŁADZIE, OKŁADZINY, MALOWANIE
+Tynki gipsowe
+m2
+2 444,43
+45,00
+109 999,35
+Tynki gipsowe - ościeża
+mb
+513.75
+45,00
+23 118,75
+27
+SUFITY
+Tynk gipsowy
+m2
+33,9
+45.00
+1 525,50
+29
+PORTIERNIA
+Posadzka na gruncie PG1
+Folia PE
+m2
+16,65
+84,00
+1 398,60
+EPS100 gr 15cm
+m2
+16,65
+Folia PE
+m2
+16,65
+Jastrych gr 7cm
+m2
+16,65
+Wykończenie scian
+Tynki gipsowe
+Tynki gipsowe - ościeża
+m2
+37,12
+45,00
+mb
+11,33
+45,00
+1 670,40
+509,67
+Wykończenie sufitów
+Tynk gipsowy
+m2
+16,65
+45,00
+749,25
+PRZEPOMPOWNIE (sanitama,deszczowa
+73
+.ppoż.pianowa)
+Pulu
+Wykończenie ścian
+Tynk gipsowy wzmocniony
+m2
+129,92
+48,00
+6 236,16
+Malowanie
+m2
+129,92
+28,00
+3 637,76
+G
+NICKEL
+GRUPA
+PTB NICKEL Sp. z o.o. | ul. Obornicka 6b, Jelonek koło Poznania, 62-002 Suchy Las
+T: +48 61 895 68 00 | F: +48 61 812 50 81 | E: ptbnickel@ptbnickel.pl
+KRS: 0000177257 NIP: 781-176-05-53 | REGON: 300015831 | Kapitał Zakładowy: 12.050.000,00 zł
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań Nowe Miasto i Wilda w Poznaniu Wydział VIII KRS
+przygotował: Mateusz Bachanek | projekt: MEB | nr budowy: 260
+23 strona / 23"
+32,Docieplenia stropów,2025-09-29,Przetarg,Karbud-docieplenia.pdf,Karbud-docieplenia.pdf,application/pdf,52,62,"Paweł Palicki
+Od: Przemyslaw Staniszewski
+Wysłano: poniedziałek, 29 września 2025 16:20
+Do: Paweł Palicki
+Temat: FW: RE: Zapytanie ofertowe GOMEZ Poznań
+Dw ocieplenie wełną stropu oferta Karbud
+Pozdrawiam
+Przemysław Staniszewski
+Kierownik budowy
+_GSM 0048 508 632 490
+PTB Nickel Sp. z o.o.
+ul. Obornicka 6b, Jelonek
+62-002 Suchy Las
+_T. 0048 (0) 61 895-68-00
+_F. 0048 (0) 61 812-50-81
+www.ptbnickel.pl
+KRS: 0000177257
+NIP: 7811760553
+REGON: 300015831
+Kapitał Zakładowy 12 050 000 PLN
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań - Wydział VIII KRS
+From: karbud16@wp.pl <karbud16@wp.pl>
+Sent: Monday, September 29, 2025 5:54 AM
+To: Przemyslaw Staniszewski <przemyslaw.staniszewski@ptbnickel.pl>
+Subject: Odp: RE: Zapytanie ofertowe GOMEZ Poznań
+Ostrożnie Ta wiadomość została wysłana spoza twojej organizacji.
+sophospsmartbannerend
+Witam.
+Izolacja stropu oraz 110zl/m2
+Malowanie stropu farbą strukturalną 60zł/m2
+Izolacja słupów z malowaniem 170zł/m2
+Wycena na wełnie firmy rockwool-stroprock-G
+Dnia 14 września 2025 14:06 Przemyslaw Staniszewski napisał(a):
+Dzień dobry,
+Czy mogę liczyć na ofertę?
+Pozdrawiam
+1Przemysław Staniszewski
+Kierownik budowy
+_GSM 0048 508 632 490
+PTB Nickel Sp. z o.o.
+ul. Obornicka 6b, Jelonek
+62-002 Suchy Las
+_T. 0048 (0) 61 895-68-00
+_F. 0048 (0) 61 812-50-81
+www.ptbnickel.pl
+KRS: 0000177257
+NIP: 7811760553
+REGON: 300015831
+Kapitał Zakładowy 12 050 000 PLN
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań - Wydział VIII KRS
+From: Przemyslaw Staniszewski
+Sent: Wednesday, August 20, 2025 10:22 AM
+To: karbud16@wp.pl
+Subject: Zapytanie ofertowe GOMEZ Poznań
+Dzień dobry,
+W związku z przystąpieniem naszej firmy do przetargu na:
+""BUDOWA BUDYNKU HANDLOWO-USŁUGOWEGO Z GARAŻEM PODZIEMNYM NA TERENIE
+DZIAŁKI NR 8, ARK. 7, OBR. PODOLANY, POŁOŻONEJ PRZY UL. OBORNICKIEJ 269-271 W
+POZNANIU.""
+Proszę o ofertę na:
+Wykonanie izolacji termicznej stropu i ścian garażu podziemnego wraz z malowaniem:
+2Izolacja termiczna stropu z wełny mineralnej w systemie Izo-Strop gr. 10cm λ≤0,037 m2 924,52
+Malowanie stropu farbą strukturalną np. BOLIX STS15, kolor z palety BOLIX
+m2 226,50
+SPEKTRUM 300 - 43 A
+Izolacja termiczna ścian i słupów z wełny mineralnej w systemie Izo-Strop gr. 10cm
+λ≤0,037 - pas wys. 100cm + malowanie farbą antystatyczną zmywalną w kolorze RAL m2 212,35
+9007
+W załączniku rzut garażu oraz przekroje.
+Proszę o uwzględnienie gwarancji na 60 miesięcy.
+Ofertę prosiłbym o przesłanie do 29.08.2025
+Zgodnie z podpisaną przez nas umową o zachowaniu poufności, jesteśmy zobowiązaniu do
+zachowania informacji w tajemnicy i nie wykorzystywania ich w innym celu niż opracowanie
+oferty, a w przypadku niepodpisania umowy jesteśmy zobowiązani do zwrotu lub zniszczenia
+uzyskanych informacji, (powyższe dotyczy również naszych oferentów, stąd proszę o
+stosowanie się do powyższych zasad).
+Pozdrawiam
+Przemysław Staniszewski
+Kierownik budowy
+_GSM 0048 508 632 490
+PTB Nickel Sp. z o.o.
+ul. Obornicka 6b, Jelonek
+62-002 Suchy Las
+_T. 0048 (0) 61 895-68-00
+_F. 0048 (0) 61 812-50-81
+www.ptbnickel.pl
+KRS: 0000177257
+3NIP: 7811760553
+REGON: 300015831
+Kapitał Zakładowy 12 050 000 PLN
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań - Wydział VIII KRS
+4
+
+['Przemyslaw Staniszewski']	['poniedziałek, 29 września 2025 16:20']	['Paweł Palicki']	['FW: RE: Zapytanie ofertowe GOMEZ Poznań']
+['', None, None]	['', 'Ostrożnie Ta wiadomość została wysłana spoza twojej organizacji.', '']	['', None, None]
+['Izolacja termiczna stropu z wełny mineralnej w systemie Izo-Strop gr. 10cm λ≤0,037', 'm2']	['Malowanie stropu farbą strukturalną np. BOLIX STS15, kolor z palety BOLIX\nSPEKTRUM 300 - 43 A', 'm2']	['Izolacja termiczna ścian i słupów z wełny mineralnej w systemie Izo-Strop gr. 10cm\nλ≤0,037 - pas wys. 100cm + malowanie farbą antystatyczną zmywalną w kolorze RAL\n9007', 'm2']"
+33,Hydroizolacje,2025-09-15,Przetarg,BRANT-Hydroizolacje.pdf,BRANT-Hydroizolacje.pdf,application/pdf,53,62,"Paweł Palicki
+Od: pawel@e-hydroizolacje.com.pl
+Wysłano: wtorek, 16 września 2025 10:36
+Do: Paweł Palicki
+Temat: RE: FW: Gomez Poznań
+Załączniki: RE_ ARS-3 membrana DualProof.zip
+Ostrożnie Ta wiadomość została wysłana spoza twojej organizacji.
+Dzień dobry
+Uszczelnienie główne płyty i ściany to membrana łącząca się z betonem DualProof 1,2. Przerwy robocze płyty wąż
+iniekcyjny i profil pęczniejący. Połączenie płyta ściana blacha np. VB1.
+-----
+Miłego dnia
+Paweł Święcki
+Brant Hydroizolacje Sp. z o.o. S. k.
+ul. Wójtowska 19
+61-654 Poznań
+NIP 7811900273
+Tel. 48 699 659 043
+Biuro: ul. Główna 10, 61-005 Poznań
+h?ps://eu-central-1.protecAon.sophos.com?d=e-
+hydroizolacje.com.pl&u=d3d3LmUtaHlkcm9pem9sYWNqZS5jb20ucGw=&p=m&i=NjdlYmQwNDFiOWMxY2MzMzI3N
+WUzYzUz&t=THc3NE5QYnFBcEhJS3drNG1CcE9aV0N5ZFhyVmpsYnBSK1VxbzV3d21yMD0=&h=54163b64f48a4069aad
+e5bab970409d2&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q (h?ps://eu-
+central-1.protecAon.sophos.com?d=e-
+hydroizolacje.com.pl&u=aHR0cDovL3d3dy5lLWh5ZHJvaXpvbGFjamUuY29tLnBsLw==&p=m&i=NjdlYmQwNDFiOWMx
+Y2MzMzI3NWUzYzUz&t=Z1doUUQxK2xvcUxpYjFFL01oemcxZVdZS1ZyVXRmVWV6R1owQkxYcVAwaz0=&h=54163b64
+f48a4069aade5bab970409d2&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q)
+> 16.09.2025 08:37 CEST Paweł Palicki <pawel.palicki@ptbnickel.pl> napisał(a):
+>
+>
+> Dziękuje za ofertę.
+>
+> W ofercie musze wskazać przyjętą technologie uszczelnień.
+> Czy mógłby Pan krótko opisać co zostało przyjęte?
+>
+> Z poważaniem:
+>
+> Paweł Palicki
+>
+>
+> _GSM 504 139 950
+> PTB Nickel Sp. z o.o.
+> ul. Obornicka 6b, Jelonek
+> 62-002 Suchy Las
+> _T. 0048 (0) 61 895-68-00
+> _F. 0048 (0) 61 812-50-81
+> h?ps://eu-central-
+1.protecAon.sophos.com?d=ptbnickel.pl&u=d3d3LnB0Ym5pY2tlbC5wbA==&p=m&i=NjdlYmQwNDFiOWMxY2MzMzI
+13NWUzYzUz&t=STZTSWhtMHF4L0MyaWoyRUVpNkx5aWhFRHZMYzZYdVQyQjlJd3ZiaWRpQT0=&h=54163b64f48a40
+69aade5bab970409d2&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q
+> KRS: 0000177257
+> NIP: 781-176-05-53
+> REGON: 300015831
+> Kapitał Zakładowy 12 050 000 PLN
+>
+> -----Original Message-----
+> From: pawel@e-hydroizolacje.com.pl <pawel@e-hydroizolacje.com.pl>
+> Sent: Monday, September 15, 2025 5:59 PM
+> To: Paweł Palicki <pawel.palicki@ptbnickel.pl>
+> Subject: Re: FW: Gomez Poznań
+>
+> Ostrożnie Ta wiadomość została wysłana spoza twojej organizacji.
+>
+> Dzień dobry
+>
+> Panie Pawle, do przetargu mozna przyjąć koszty wykonania hydroizolacji w izolacji ciężkiej na poziomie:
+>
+> 1. Płyta ok. 110-120 zł/m2
+> 2. Ściany ok. 130 zł/m2
+> 3. Izolacja zbiornika od wewnątrz uzależniona od sposobu izolacji 120-160 zł/m2.
+>
+> Myślę o części z garażem podziemnym. W innych częściach budynku też występuje płyta, ławy fundamentowe,
+niskie ściany fundamentowe i można przyjąć że może będzie trzeba te elementy zabezpieczyć przeciwwilgociowo
+60zł/m2
+>
+> -----
+> Miłego dnia
+> Paweł Święcki
+> Brant Hydroizolacje Sp. z o.o. S. k.
+> ul. Wójtowska 19
+> 61-654 Poznań
+> NIP 7811900273
+> Tel. 48 699 659 043
+> Biuro: ul. Główna 10, 61-005 Poznań
+> h?ps://eu-central-1.protecAon.sophos.com?d=e-
+hydroizolacje.com.pl&u=d3d3LmUtaHlkcm9pem9sYWNqZS5jb20ucGw=&p=m&i=NjdlYmQwNDFiOWMxY2MzMzI3N
+WUzYzUz&t=THc3NE5QYnFBcEhJS3drNG1CcE9aV0N5ZFhyVmpsYnBSK1VxbzV3d21yMD0=&h=305f714e2d42484989c
+14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q (h?ps://eu-
+central-1.protecAon.sophos.com?d=e-
+hydroizolacje.com.pl&u=aHR0cDovL3d3dy5lLWh5ZHJvaXpvbGFjamUuY29tLnBsLw==&p=m&i=NjdlYmQwNDFiOWMx
+Y2MzMzI3NWUzYzUz&t=Z1doUUQxK2xvcUxpYjFFL01oemcxZVdZS1ZyVXRmVWV6R1owQkxYcVAwaz0=&h=305f714e
+2d42484989c14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q)
+>
+> > 15.09.2025 10:38 CEST Paweł Palicki <pawel.palicki@ptbnickel.pl> napisał(a):
+> >
+> >
+> > Paweł Palicki
+> >
+> >
+> > _GSM 504 139 950
+> > PTB Nickel Sp. z o.o.
+> > ul. Obornicka 6b, Jelonek
+> > 62-002 Suchy Las
+> > _T. 0048 (0) 61 895-68-00
+2> > _F. 0048 (0) 61 812-50-81
+> > h?ps://eu-central-
+1.protecAon.sophos.com?d=ptbnickel.pl&u=d3d3LnB0Ym5pY2tlbC5wbA==&p=m&i=NjdlYmQwNDFiOWMxY2MzMzI
+3NWUzYzUz&t=STZTSWhtMHF4L0MyaWoyRUVpNkx5aWhFRHZMYzZYdVQyQjlJd3ZiaWRpQT0=&h=305f714e2d4248
+4989c14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q
+(h?ps://eu-central-
+1.protecAon.sophos.com?d=ptbnickel.pl&u=aHR0cDovL3d3dy5wdGJuaWNrZWwucGwv&p=m&i=NjdlYmQwNDFiOW
+MxY2MzMzI3NWUzYzUz&t=YU5yN2M2WXdXNzFQMEtkZHh6MFdPOXdJNURhd3VsR3pmRjVRb3dxSWFNRT0=&h=30
+5f714e2d42484989c14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-
+AhY130b1uNY1jI2Q)
+> > KRS: 0000177257
+> > NIP: 781-176-05-53
+> > REGON: 300015831
+> > Kapitał Zakładowy 12 050 000 PLN
+> >
+> > From:Paweł Palicki
+> > Sent: Tuesday, September 2, 2025 10:36 AM
+> > To: 'pawel@e-hydroizolacje.com.pl' <pawel@e-hydroizolacje.com.pl>
+> > Subject: Gomez Poznań
+> >
+> > Dzień dobry.
+> >
+> > W związku z przystąpieniem do przetargu na budowę obiektu handlowo-usługowego w Poznaniu przy ul.
+Obornickiej zwracamy się do Państwa z prośba o przygotowanie oferty na wykonanie izolacji garażu oraz zbiornika
+podziemnego.
+> > Projekt w tym temacie jest niestety bardzo ubogi, dlatego trzeba dobrać jakieś skuteczne i akceptowalną
+ekonomicznie rozwiązanie.
+> > Ściany zewnętrzne garażu będą wykonywane w deskowaniu jednostronnym z ścianką berlińską od zewnątrz.
+Zbiornik klasycznie w wykpię szeroko przestrzennym.
+> > W załączeniu dostępna dokumentacja.
+> > Proszę o przesłanie oferty do 12.09.2025 r.
+> >
+> > Z góry dziękuję za odpowiedź.
+> >
+> > Z poważaniem:
+> >
+> > Paweł Palicki
+> >
+> >
+> > _GSM 504 139 950
+> > PTB Nickel Sp. z o.o.
+> > ul. Obornicka 6b, Jelonek
+> > 62-002 Suchy Las
+> > _T. 0048 (0) 61 895-68-00
+> > _F. 0048 (0) 61 812-50-81
+> > h?ps://eu-central-
+1.protecAon.sophos.com?d=ptbnickel.pl&u=d3d3LnB0Ym5pY2tlbC5wbA==&p=m&i=NjdlYmQwNDFiOWMxY2MzMzI
+3NWUzYzUz&t=STZTSWhtMHF4L0MyaWoyRUVpNkx5aWhFRHZMYzZYdVQyQjlJd3ZiaWRpQT0=&h=305f714e2d4248
+4989c14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-AhY130b1uNY1jI2Q
+(h?ps://eu-central-
+1.protecAon.sophos.com?d=ptbnickel.pl&u=aHR0cDovL3d3dy5wdGJuaWNrZWwucGwv&p=m&i=NjdlYmQwNDFiOW
+MxY2MzMzI3NWUzYzUz&t=YU5yN2M2WXdXNzFQMEtkZHh6MFdPOXdJNURhd3VsR3pmRjVRb3dxSWFNRT0=&h=30
+5f714e2d42484989c14Zbca6e6f90&s=AVNPUEhUT0NFTkNSWVBUSVaaYoms1T1gcz_WDSXDbi6rf-ph-
+AhY130b1uNY1jI2Q)
+> > KRS: 0000177257
+> > NIP: 781-176-05-53
+3> > REGON: 300015831
+> > Kapitał Zakładowy 12 050 000 PLN
+4
+
+['pawel@e-hydroizolacje.com.pl']	['wtorek, 16 września 2025 10:36']	['Paweł Palicki']	['RE: FW: Gomez Poznań']	['RE_ ARS-3 membrana DualProof.zip']"
+11,Konstrukcja żelbetowa,2024-12-12,Umowa,SAS-W-IN_TECH-PAVLO-2024-GRUDZIEN-12.pdf,SAS-W-IN_TECH-PAVLO-2024-GRUDZIEN-12.pdf,application/pdf,47,14,
+15,Konstrukcja żelbetowa,2024-02-09,Realizacja,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,5,16,
+16,Konstrukcja żelbetowa,2024-02-09,Realizacja,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,Zestawienie_ofert_zelbet_-_APP_FS_dla_Pawa.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,9,16,
+19,Konstrukcja żelbetowa,2025-09-04,Przetarg,GOMEZ-zest_zelbet.xlsx,GOMEZ-zest_zelbet.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,5,62,"1	Fundamenty				503631.89999999997	
+1.1	Chudy beton C8/10	m3	240	135	32400	
+1.2	Płyta fundamentowa garażu - beton C35/45 XD3 XC4 W8	m3	804.5999999999999	125	100574.99999999999	Bez zacieranie mechanicznego
+1.3	Płyta fundamentowa zbiornika - beton C35/45 XD2 XC4 W8	m3	290.06	125	36257.5	
+1.4	Stopy fundamentowe - beton C30/37 XC2	m3	90.12	460	41455.200000000004	
+1.5	Płyta fundamentowa - beton C30/37 XC2	m3	158.54	125	19817.5	
+1.6	Ława fundamentowa - beton C30/37 XC2	m3	38.89	520	20222.8	
+1.7	Zbrojenie fundamentów	kg	125839.19999999998	2	251678.39999999997	
+1.8	Obramowanie otworów kątownikiem L50x50x4	kg	12.9	95	1225.5	
+2	Rampa zjazdowa				40638.02	
+2.2	Chudy beton C8/10 gr. 10cm	m3	14.9	135	2011.5	
+2.3	Płyta rampy zjazdowej gr. 35cm - beton szczotkowany C35/45 XC4, XD3, XF4	m2	121.24999999999999	210	25462.499999999996	
+2.4	Taśma uszczelniającą do przerw roboczych  np.. NITRIFLEX TYP ASI 200 D 	mb	6	35	210	
+2.5	Zbrojenie odginane np.. BINDAX - N, typ B 80-12/15 h=15cm b=25cm l=48cm	mb	47.7	60	2862	
+2.6	Zbrojenie płyt rampy zjazdowej	kg	4089.4	2.3	9405.619999999999	
+2.7	Ława pod odwodnienie liniowe	m3	1.32	520	686.4	
+3	Ściany oporowe				103389.5	
+3.1	Chudy beton C8/10	m3	23.659999999999997	135	3194.0999999999995	
+3.2	Podstawa muru oporowego - beton C35/45 XC4 XD3 XF4	m3	67.83	520	35271.6	
+3.3	Ściana muru oporowego gr. 24cm - beton C35/45 XC4 XD3 XF4	m2	169.13	160	27060.8	
+3.4	Ściana muru oporowego gr. 50cm - beton C35/45 XC4 XD3 XF4	m2	81.9	170	13923.000000000002	
+3.5	Zbrojenie ścian	kg	11400	2.1	23940	
+3.6	Wykończenie i uszczelnienie dylatacji ściany	m	42.2	0	0	
+ 4	Izolacja fundamentów				8241	
+ 4.1	Warstwa poślizgowa - folia PE	m2	2747	3	8241	
+ 4.2	Izolacja bitumiczna pozioma i pionowa fundamentów i ścian cz. podziemnej	m2	2351	0	0	
+ 4.3	Izolacja termiczna ścian fundamentowych - XPS gr. 10cm	m2	236.25	0	0	
+ 4.4	Folia kubełkowa	m2	236.25	0	0	
+ 5	Konstrukcja  - część podziemna				781191.2264999999	
+ 5.1	Ściany żelbetowe gr. 20cm, wys. do 4,00m - beton C30/37 XC3	m2	8.36	160	1337.6	
+ 5.2	Ściany żelbetowe gr. 24cm, wys. do 4,00m - beton C30/37 XC3	m2	653.54	160	104566.4	Uwaga ogólna do ścian : 
+ 5.3	Ściany żelbetowe gr. 24cm, wys. do 5,00m - beton C30/37 XC3	m2	192.5	170	32725	Ściana dociskowa jednostronna jest droższa 
+ 5.4	Ściany żelbetowe łukowe gr. 24cm, wys. do 4,00m  - beton C30/37 XC3	m2	10.72	195	2090.4	od zwykłej ściany o 25% .
+ 5.5	Ściany żelbetowe gr. 25cm, wys. do 4,00m - beton C30/37 XC3	m2	6.73	160	1076.8000000000002	
+ 5.6	Ściany żelbetowe gr. 35cm, wys. do 4,00m - beton C30/37 XC3	m2	35.35	160	5656	
+ 5.7	Ściany żelbetowe gr. 39cm, wys. do 4,00m - beton C30/37 XC3	m2	7.81	160	1249.6	
+ 5.8	Ściany żelbetowe zbiornika gr. 30cm, wys. do 4,00m - beton C35/45 XC4, XD2, W8	m2	106.39	160	17022.4	
+ 5.9	Ściany żelbetowe zbiornika gr. 35cm, wys. do 4,00m - beton C35/45 XC4, XD2, W8	m2	176.06	160	28169.6	
+ 5.10	Strop nad zbiornikiem gr. 30cm - beton C35/45 XC3 XD3	m2	340	180	61200	
+ 5.11	Głowica/konsola słupa zbiornika - beton C35/45 XC3 XD3	m3	6.25	1500	9375	
+ 5.12	Strop nad garażem gr. 24cm - przekrój 7-7 - beton C30/37 XC3 XD1 	m2	2.52	180	453.6	
+ 5.13	Strop nad garażem gr. 35cm - beton C30/37 XC3 XD1	m2	1074.45	180	193401	
+ 5.14	Strop nad garażem gr. 50cm - beton C30/37 XC3 XD1	m2	137.95	180	24830.999999999996	
+ 5.15	Głowica/konsola słupa garażu - beton C30/37 XC3 XD1	m3	11.44	1500	17160	
+ 5.16	Podciąg żelbetowy 40x90cm - beton C30/37 XC3 XD1	m3	2.08	1500	3120	
+ 5.17	Belka/przełamanie płyty w miejscu doku przeładunkowego - beton C30/37 XC3 XD1	m3	2.76	1500	4140	
+ 5.18	Belka doku przeładunkowego - beton C30/37 XC3 XD3	m3	2.08	1500	3120	
+ 5.19	Belka/przełamanie płyty stropowej - przekrój 5-5 - beton C30/37 XC3 XD1	m3	3.96	1500	5940	
+ 5.20	Belka/przełamanie płyty stropowej - przekrój 6-6 - beton C30/37 XC3 XD1	m3	4.15	1500	6225.000000000001	
+ 5.21	Ściana attykowa - przekrój 7-7 - beton C30/37 XC3 XD1	m2	15	160	2400	
+ 5.22	Belka/przełamanie płyty stropowej - przekrój 10-10 - beton C30/37 XC3 XD1	m3	0.2	1500	300	
+ 5.23	Belka/przełamanie płyty stropowej - przekrój 10a-10a - beton C30/37 XC3 XD1	m3	0.8	1500	1200	
+ 5.24	Słupy prostokątne garażu - beton C30/37 XC3 XD1	m3	20.42	1200	24504.000000000004	
+ 5.25	Słupy prostokątne zbiornika - beton C35/45 XC4 XD2 W8	m3	5.355	1200	6426.000000000001	
+ 5.26	Zbrojenie ścian	kg	42671.965000000004	2.1	89611.12650000001	
+ 5.27	Zbrojenie stropu, belek i doku	kg	55434.5	2.3	127499.34999999999	
+ 5.28	Zbrojenie słupów	kg	3043.5000000000005	2.1	6391.350000000001	
+6	Konstrukcja - część nadziemna				2409017.6659999997	
+ 6.1	Ściany żelbetowe gr. 24cm, wys. do 5,00m - beton C30/37 XC3	m2	1808.33	170	307416.1	
+6.2	Ściany żelbetowe gr. 24cm, wys. do 6,00m - beton C30/37 XC3	m2	812.29	180	146212.19999999998	
+6.4	Ściany żelbetowe gr. 24cm, wys. do 8,00m - beton C30/37 XC3	m2	85.05	200	17010	
+6.5	Ściany żelbetowe łukowe gr. 24cm, wys. do 5,00m - beton C30/37 XC3	m2	19.7	205	4038.5	
+6.6	Ściana attykowa gr. 24cm 	m2	412.34	170	70097.8	
+6.7	Zbrojenie ścian	kg	57052.3	2.3	131220.29	
+6.8	Słupy prostokątne parteru - beton C30/37 XC3	m3	59.790000000000006	1300	77727.00000000001	
+6.9	Zbrojenie słupów parteru	kg	8579.900000000001	2.3	19733.77	
+6.10	Słupy prostokątne I piętra - beton C30/37 XC3	m3	47.59	1300	61867.00000000001	
+6.11	Zbrojenie słupów I piętra	kg	9585.9	2.3	22047.569999999996	
+6.12	Strop nad parterem gr. 32cm - beton C30/37 XC3	m2	2018.8000000000002	195	393666.00000000006	
+6.13	Strop nad parterem gr. 35cm - beton C30/37 XC3	m2	610.17	195	118983.15	
+6.14	Strop nad parterem gr. 40cm - beton C30/37 XC3	m2	323.36	195	63055.200000000004	
+6.15	Belka/przełamanie płyty stropowej - przekrój 1-1 - beton C30/37 XC3	m3	2.14	1500	3210	
+6.16	Attyka/belka krawędziowa - przekrój 1-1 - beton C30/37 XC3	m3	1.24	170	210.8	
+6.17	Zbrojenie stropu, belek nad parterem	kg	106086.92000000003	2.3	243999.91600000006	
+6.18	Strop nad I piętrem gr. 32cm - beton C30/37 XC3	m2	1396.55	195	272327.25	
+6.19	Strop nad I piętrem gr. 35cm - beton C30/37 XC3	m2	701.59	195	136810.05000000002	
+6.20	Strop nad I piętrem gr. 40cm - beton C30/37 XC3	m2	198.39	195	38686.049999999996	
+6.21	Strop nad I piętrem gr. 50cm - beton C30/37 XC3	m2	169.73	195	33097.35	
+6.22	Zbrojenie stropu nad I piętrem	kg	107652.90000000001	2.3	247601.67	
+7	Schody				19355.289999999997	
+ 7.1	Biega prefabrykowany B1, V=ok. 2,31m3 - beton C30/37 XC3	szt.	1	550	550	
+ 7.2	Biega prefabrykowany B2, V=ok. 2,60m3 - beton C30/37 XC3	szt.	2	550	1100	
+ 7.3	Biega prefabrykowany B3, V=ok. 2,42m3 - beton C30/37 XC3	szt.	1	550	550	
+ 7.4	Biega prefabrykowany B4, V=ok. 2,25m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.5	Biega prefabrykowany B5, V=ok. 2,13m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.6	Biega prefabrykowany B6, V=ok. 1,84m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.7	Biega prefabrykowany B7, V=ok. 2,35m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.8	Biega prefabrykowany B8, V=ok. 2,38m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.9	Biega prefabrykowany B9, V=ok. 2,17m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.10	Biega prefabrykowany B10, V=ok. 2,41m3 - beton C35/45 XC4 XD3 XF4	szt.	1	550	550	
+ 7.11	Podkładka elastomerowa typ SD gr. 10mm, szer. 100mm w osłonie z wełny skalnej gr. 10mm szer. min. 2x 30mm i gęstości min. 100kg/m3	mb	34.15	35	1195.25	
+ 7.12	Podlewka gr. 2cm z zaprawy np.. Ceresit CX15	m2	3.96	75	297	
+ 7.13	Spocznik monolityczny gr. 26cm S1 - beton C30/37 XC3	m2	5.25	380	1995	
+ 7.14	Spocznik monolityczny gr. 26cm S2 - beton C30/37 XC3	m2	4.91	380	1865.8	
+ 7.15	Spocznik monolityczny gr. 30cm S3 - beton C35/45 XC4 XD3 XF4	m2	9.58	380	3640.4	
+ 7.16	Spocznik monolityczny gr. 30cm S4 - beton C35/45 XC4 XD3 XF4	m2	2.32	380	881.5999999999999	
+ 7.17	Zbrojenie odginane np.. BINDAX-S, typ S 190-12/10	mb	9.27	60	556.1999999999999	
+ 7.18	Zbrojenie odginane np.. BINDAX-S, typ S 190-10/15	mb	3.56	60	213.6	
+ 7.19	Zbrojenie odginane np.. BINDAX-S, typ S 240-12/15	mb	6.32	60	379.20000000000005	
+ 7.20	Łącznik Isokorb T typ Q-P	mb	3.1500000000000004	30	94.50000000000001	
+ 7.21	Ścianka fundamentowa schodów gr. 34cm - beton C30/37 XC3	m2	1.82	160	291.2	
+ 7.22	Zbrojenie śćianek i spoczników	kg	1058.8	2.3	2435.24	
+ 7.23	Fragment schodów KL.3 - do wylania na budowie - beton C30/37 XC3	m3	0.02	515	10.3	
+8	Schody klatki KL2				5132.970000000001	
+ 8.2	Konstrukcja żelbetowa schodów - beton C30/37 XC3 - NA GRUNCIE	m2 rzut	9.13	515	4701.950000000001	
+ 8.3	Zbrojenie	kg	187.4	2.3	431.02	
+9	Schody zewnętrzne				49220.63	
+ 9.1	Schody SZ5 w osi 1/B - elewacja południowa				771.64	
+ 9.1.3	Konstrukcja żelbetowa schodów - beton C35/45 XC3 XD3 XF4 - NA GRUNCIE	m3	1.7	350	595	
+ 9.1.4	Zbrojenie	kg	76.8	2.3	176.64	
+ 9.2	Schody SZ4 w osi 1/C-D - elewacja południowa				3058.35	
+ 9.2.3	Chudy beton	m3	0.8	135	108	
+ 9.2.4	Konstrukcja żelbetowa schodów - beton C35/45 XC3 XD3 XF4  - NA GRUNCIE	m3	6.1	350	2135	
+ 9.2.5	Zbrojenie	kg	354.5	2.3	815.3499999999999	
+ 9.3	Schody SZ3 w osi 1/F-F` - elewacja wschodnia				604.89	
+ 9.3.3	Chudy beton	m3	0.1	135	13.5	
+ 9.3.4	Konstrukcja żelbetowa schodów - beton C35/45 XC3 XD3 XF4 - NA GRUNCIE	m3	1.3	350	455	
+ 9.3.5	Zbrojenie	kg	59.3	2.3	136.39	
+ 9.4	Schody SZ2 w osi 6-7/F-F` - elewacja wschodnia				813.01	
+ 9.4.3	Chudy beton	m3	0.1	135	13.5	
+ 9.4.4	Konstrukcja żelbetowa schodów - beton C35/45 XC3 XD3 XF4 - NA GRUNCIE	m3	1.8	350	630	
+ 9.4.5	Zbrojenie	kg	73.7	2.3	169.51	
+ 9.5	Schody SZ1 w osi 11-12/D-E - elewacja północna				43972.74	
+ 9.5.2	Beton podkładowy C8/10 gr.10cm	m2	155	135	20925	
+ 9.5.3	Płyta żelbetowa: 
+-Grubość 15 cm 
+-Beton C35/45 kl. ekspozycji XC3, XF3, XD3
+-Otulina 5,0 cm od dołu i 5,5cm od góry
+- Zbrojenie siatką Q523 (Ø10 oczko 15cm x 15cm)
+-Dylatacje - nie rzadziej, niż co 6m przez nacięcie na min. 1/3 grubości i wypełnienie masą trwale elastyczną np. sikaflex	m2	155	135	20925	
+ 9.5.5	Konstrukcja żelbetowa schodów - beton C35/45 XC3 XD3 XF4 - NA GRUNCIE	m3	4.2	350	1470	
+ 9.5.6	Zbrojenie	kg	283.8	2.3	652.74	
+					3919818.2024999997"
+20,Konstrukcja stalowa,2025-09-05,Umowa,UMOWA_251-2024-LISTOPAD-25-NIC_55437.pdf,UMOWA_251-2024-LISTOPAD-25-NIC_55437.pdf,application/pdf,46,14,"--- Strona 1 ---
+STALTECH-
+KONSTRUKCJE
+STALTECH-KONSTRUKCJE Sp. z o.o.
+ul. Wagrowska 2
+61-369 Poznań
+Poznań, 10 grudnia 2024r.
+Pan Krzysztof Zakrzewski
+PTB NICKIEL Sp. z o.o.
+ul. Obornicka 6b
+Jelonek k/Poznania
+62-002 Suchy Las
+tel 504 139 716
+OFERTA 161/ma/ aktualizacja3 / 2024
+W nawiązaniu do przesłanego zapytania ofertowego, mam przyjemność przedstawić
+Panu ofertę na prefabrykację, dostawę oraz montaż konstrukcji stalowej zgodnie z
+przekazanymi danymi w zapytaniu na budowę SAS w Wojkowicach:
+1. Konstrukcja stalowa:
+zakres
+1. Wykonanie konstrukcji stalowej:
+Prefabrykacja konstrukcji stalowej.
+Zabezpieczenie antykorozyjne przez oczyszczenie do Sa
+2,5, oraz malowanie zestawem farb epoksydowych RAL
+7035 C-2.
+Materiały złączne
+Dostawa na budowę.
+2. Montaż konstrukcji stalowej:
+Rozładunek na budowie.
+Montaż przy użyciu odpowiedniego sprzętu.
+ilośc [kg]
+cena jedn.
+[zł/kg]
+wartość [zł]
+37 995,00
+9,65 zł
+366 651,75 zł
+Dokumentacja odbiorowa (świadectwa, deklaracje,
+certyfikaty, atesty ii.) - 2 egzemplarze
+37 995,00
+2,75 zł
+104 486,25 zł
+Dokumentacja powykonawcza (dokumentacja
+odbiorowa, projekt powykonawczy- techniczny, operaty
+geodezyjne ii.) -2 egzemplarze
+RAZEM
+471 138,00 zł
+Dopłata do R30 1,85 zł/kg (ilość. 741,50 kg. Belki z IPE)
+Dopłata do R30 4,95 zł/kg (ilość. 1.690,00 kg. Wymiany Stolarnia i Hala)
+Elementy złączne - kołki
+9.780,00 zł. kpl.
+Ki
+NIP 782-23-89-890
+REGON 300562830
+KRS 0000279046
+a"
+10,Konstrukcja żelbetowa,2025-06-13,Umowa,GEMZAA-MEB-06-13_2.pdf,GEMZAA-MEB-06-13_2.pdf,application/pdf,3,13,"--- Strona 1 ---
+NICKEL
+Załącznik nr 8 do umowy nr 260/2025/czerwiec/13/NIC 56746 z dnia 13.06.2025 roku
+www.ptbnickel.pl
+TABELA CEN JEDNOSTKOWYCH
+FORMULARZ OFERTOWY
+LP
+Opis prac
+j.m.
+ilość
+szacunek
+Gemzała - robocizna
+c.j.
+Wartość
+4
+FUNDAMENTY HALA
+Podkłady betonowe C8/10
+Stopy fundamentowe C30/37 W8 - bez szalunków
+Ławy fundamentowe C30/37 W8 - bez szalunków
+Podwaliny żelbetowe gr 18cm C30/37 W8
+Zbrojenie fundamentów
+2222-
+m3
+66,75
+100,28
+6 693,82
+m3
+119,06
+273,50
+32 562,47
+m3
+74,22
+273,50
+20 298,90
+m2
+101,42
+173,21
+17 567,40
+t
+16,06
+2 200,00
+35 325,40
+KONSTRUKCJA ZELBETOWA +IZOLACJA
+5
+FUNDAMENTOW
+Podciągi żelbetowe monolityczne C30/37
+Trzpienie żelbetowe monolityczne C30/37
+Wieńce żelbetowe monolityczne C30/37
+Strop żelbetowy gr 20 cm C30/37 - filigran
+Strop żelbetowy gr 18 cm C30/37 - filigran
+Zbrojenie
+-33333
+m3
+2,91
+1 458,65
+4 244,66
+m3
+16,46
+1 458,65
+24 009,33
+m3
+37,07
+1 458,65
+54 072,04
+m2
+255,75
+127,63
+32 641,78
+m2
+110,72
+127,63
+14 131,37
+t
+10,94
+2 200,00
+24 068,00
+14 FUNDAMENTY CZĘŚĆ BIUROWO SOCJALNA
+Podkłady betonowe C8/10
+Ławy fundamentowe C30/37 W8
+Podwaliny żelbetowe gr 24cm C30/37 W8
+Zbrojenie fundamentów
+222-
+m3
+22,96
+100,28
+2 302,47
+m3
+69,42
+382,89
+26 580,56
+m2
+10,06
+173,21
+1 742,54
+t
+3,79
+2 200,00
+8 327,00
+KONSTRUKCJA ZELBETOWA +IZOLACJA
+15 FUNDAMENTOW
+Trzpienie żelbetowe monolityczne C30/37
+m3
+12,32
+1 458,65
+17 970,53
+Zbrojenie
+t
+1,23
+2 200,00
+2 706,00
+16 BELKI, PODCIĄGI, WIEŃCE, NADPROŻA, SCHODY
+Podciągi żelbetowe monolityczne C30/37
+m3
+8.91
+1 458,65
+12 996,54
+Wieńce żelbetowe monolityczne C30/37
+m3
+23,06
+1 458,65
+33 636,40
+Schody żelbetowe gr 15 cm C30/37
+m2
+31,03
+273,50
+8 486,59
+Zbrojenie
+t
+5,04
+2 200,00
+11 088,00
+18 STROPY
+Strop żelbetowy gr 20 cm C30/37 - filigran
+m2
+1 570,85
+Zbrojenie
+t
+21,20
+127,63
+2 200,00
+200 490,11
+46 640,00
+25 POSADZKI
+Posadzka na gruncie PG1
+Podkład betonowy C8/10 gr 10cm
+m2
+524,90
+10,03
+5 263,80
+29 PORTIERNIA
+KONSTRUKCJA
+Podkłady betonowe C8/10
+Ławy fundamentowe C30/37 W8
+Zbrojenie
+Podciągi żelbetowe monolityczne C30/37
+Wieńce żelbetowe monolityczne C30/37
+Strop żelbetowy gr 18 cm C30/37 - filigran
+Zbrojenie
+Posadzka na gruncie PG1
+PTB NICKEL Sp. z o.o.
+22-222-
+m3
+1,58
+100,28
+m3
+4,22
+382,89
+158,45
+1 615,82
+t
+0,17
+2 200,00
+374,00
+m3
+1,65
+1 458,65
+2 406,77
+m3
+0,34
+1 458,65
+495,94
+m2
+17,30
+127,63
+2 208,03
+t
+0,45
+2 200,00
+990,00
+NICKEL
+GRUPA
+ul. Obornicka 6b, Jelonek koło Poznania, 62-002 Suchy Las
+T: +48 61 895 68 00 | F: +48 61 812 50 81 | E: ptbnickel@ptbnickel.pl
+KRS: 0000177257 | NIP: 781-176-05-53 | REGON: 300015831 | Kapitał Zakładowy: 12.050.000,00 zł
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań Nowe Miasto i Wilda w Poznaniu Wydział VIII KRS
+przygotował: Mateusz Bachanek | projekt: MEB | nr budowy: 260
+23 strona / 24
+--- Strona 2 ---
+FORMULARZ OFERTOWY
+NICKEL
+www.ptbnickel.pl
+Gemzała - robocizna
+LP
+Opis prac
+j.m.
+ilość
+szacunek
+c.j.
+Wartość
+Podkład betonowy C8/10 gr 10cm
+m2
+16,65
+10,03
+166,97
+30 MURY OPOROWE
+Podkłady betonowe C8/10
+m3
+7,04
+100,28
+705,99
+Ławy fundamentowe C30/37 W8
+m3
+23,47
+382,89
+8 986,54
+Ściany żelbetowe gr. 20cm C30/37 W8
+m2
+73,68
+173,21
+12 762,43
+Zbrojenie
+t
+3,79
+2 200,00
+8 338,00
+36 ZBIORNIK RETENCYJNY
+Podkłady betonowe C8/10
+m3
+26,06
+100,28
+2 613,35
+Płyty fundamentowe C30/37 W8
+m3
+68,18
+100,28
+6 837,23
+Sciany żelbetowe gr 20cm C30/37 W8
+m2
+245,25
+173,21
+42 480,81
+Zbrojenie
+t
+11,23
+2 200,00
+24 706,00
+Izolacja przerw roboczych
+mb
+136,00
+37 ZBIORNIK PPOZ
+FUNDAMENT ZBIORNIKA
+Podkłady betonowe C8/10
+m3
+24,26
+Płyty fundamentowe C30/37 W8
+m3
+71,33
+100,28
+100,28
+2 432,84
+7 153,11
+Zbrojenie
+t
+7,85
+2 200,00
+17 270,00
+49 AGREGAT PRĄDOTWÓRCZY
+ROBOTY FUNDAMENTOWE
+Wykonanie warstwy ch.betonu C8/10 o gr. 10 cm
+m3
+1,26
+100,28
+126,36
+Płyta fundamentowa o gr. 35 cm z betonu C30/37 W8.
+m3
+3,65
+100,28
+366,03
+Zbrojenie płyty fundamentowej - wsk. zazbrojenia 120
+kg/m3.
+kg
+438,00
+2,20
+963,60
+73
+BUDYNEK PRZEPOMPOWNI
+PRZEPOMPOWNIE (sanitarna,deszczowa,ppoź, pianowa)
+Podkłady betonowe C8/10
+Ławy fundamentowe C30/37 W8
+Zbrojenie
+Wieńce żelbetowe monolityczne C30/37
+Trzpienie żelbetowe monolityczne C30/37
+Zbrojenie
+Ściana z bloczków Silikatowych gr 24 cm
+3-33-33
+m3
+4,30
+m3
+12,51
+100,28
+382,89
+431,21
+4 790,01
+t
+0,63
+2 200,00
+1 386,00
+m3
+3,32
+1 458,65
+4 842,71
+m3
+1,28
+1 458,65
+1 867,07
+t
+0,46
+2 200,00
+1 012,00
+m2
+138,97
+Posadzka PG2
+Podkład betonowy C8/10 gr 10cm
+m2
+85,86
+10,03
+861,02
+żelbet
+zbrojenie
+Gaast
+620 000,00
+183 194,00
+NICKEL
+GRUPA
+PTB NICKEL Sp. z o.o. | ul. Obornicka 6b, Jelonek koło Poznania, 62-002 Suchy Las
+T: +48 61 895 68 00 | F: +48 61 812 50 81 | E: ptbnickel@ptbnickel.pl
+KRS: 0000177257 | NIP: 781-176-05-53 | REGON: 300015831 | Kapitał Zakładowy: 12.050.000,00 zł
+Akta rejestrowe prowadzi Sąd Rejonowy Poznań Nowe Miasto i Wilda w Poznaniu Wydział VIII KRS
+przygotował: Mateusz Bachanek | projekt: MEB | nr budowy: 260
+24 strona / 24"
+14,Konstrukcja,2025-05-26,Realizacja,MEB_oferta_Szarata.xlsx,MEB_oferta_Szarata.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,9,13,"============================================================
+ARKUSZ: Arkusz1
+============================================================
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+------+----------------+---------------------+--------------------+
+|BUDYNEK MAGAZYNOWY Z CZĘŚCIĄ BIUROWO-SOCJALNĄ, PORTIERNIĄ, POMPOWNIĄ, ZBIORNIKIEM P.POŻ., ZBIORNIKIEM RETENCYJNYM, WIATĄ ŚMIETNIKOWĄ, MUREM OPOROWYM WRAZ Z  INSTALACJĄ FOTOWOLTAICZNĄ I INFRASTRUKTURĄ TECHNICZNĄ ul. Nad Strumykiem, 62-080 Tarnowo Podgórne Towarzystwo Gospodarcze MEBLOPOL Sp. z o.o.  |                                                             |      |                |                     |                    |
++============================================================================================================================================================================================================================================================================================================+=============================================================+======+================+=====================+====================+
+|FORMULARZ OFERTOWY                                                                                                                                                                                                                                                                                          |                                                             |      |                |                     |                    |
+|                                                                                                                                                                                                                                                                                                            |                                                             |      |                |Szarata - robocizna  |                    |
+|LP                                                                                                                                                                                                                                                                                                          |Opis prac                                                    |j.m.  |ilość szacunek  |c.j.                 |wartość             |
+|4                                                                                                                                                                                                                                                                                                           | FUNDAMENTY HALA                                             |      |                |                     |                    |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |66.75           |155                  |10346.25            |
+|                                                                                                                                                                                                                                                                                                            |Stopy fundamentowe C30/37 W8                                 |m3    |119.06          |360                  |42861.6             |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |74.22           |360                  |26719.2             |
+|                                                                                                                                                                                                                                                                                                            |Podwaliny żelbetowe gr 18cm C30/37 W8                        |m2    |101.42          |216                  |21906.72            |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie fundamentów                                        |t     |16.057          |2600                 |41748.2             |
+|5                                                                                                                                                                                                                                                                                                           |KONSTRUKCJA ZELBETOWA +IZOLACJA FUNDAMENTOW                  |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |330             |12                   |3960                |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna x2 pod ścianami murowanymi              |m2    |115             |18                   |2070                |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |130             |35                   |4550                |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |2.91            |1650                 |4801.5              |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |16.46           |1450                 |23867               |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |37.07           |1450                 |53751.5             |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 20 cm C30/37 - filigran                   |m2    |255.75          |150                  |38362.5             |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 18 cm C30/37 - filigran                   |m2    |110.72          |150                  |16608               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |10.94           |2900                 |31726               |
+|8                                                                                                                                                                                                                                                                                                           | ŚCIANY                                                      |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |164.16          |115                  |18878.399999999998  |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |2496.52         |90                   |224686.8            |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 18 cm                      |m2    |14.48           |90                   |1303.2              |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |46.2            |80                   |3696                |
+|14                                                                                                                                                                                                                                                                                                          |FUNDAMENTY CZĘŚĆ BIUROWO SOCJALNA                            |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |22.96           |155                  |3558.8              |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |69.42           |360                  |24991.2             |
+|                                                                                                                                                                                                                                                                                                            |Podwaliny żelbetowe gr 24cm C30/37 W8                        |m3    |10.06           |1200                 |12072               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie fundamentów                                        |t     |3.785           |2600                 |9841                |
+|15                                                                                                                                                                                                                                                                                                          |KONSTRUKCJA ZELBETOWA +IZOLACJA FUNDAMENTOW                  |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |160             |12                   |1920                |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna pod ścianami murowanymi                 |m2    |55.25           |18                   |994.5               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |38.65           |35                   |1352.75             |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |12.32           |1450                 |17864               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |1.23            |2900                 |3567                |
+|16                                                                                                                                                                                                                                                                                                          |BELKI, PODCIĄGI, WIEŃCE, NADPROŻA,SCHODY                     |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |8.91            |1650                 |14701.5             |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |23.06           |1450                 |33437               |
+|                                                                                                                                                                                                                                                                                                            |Schody żelbetowe gr 15 cm C30/37                             |m2    |31.03           |750                  |23272.5             |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |5.04            |2900                 |14616               |
+|17                                                                                                                                                                                                                                                                                                          | ŚCIANY                                                      |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |78.93           |115                  |9076.95             |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |1445.2          |90                   |130068              |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 12 cm                      |m2    |3.53            |90                   |317.7               |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |218.4           |80                   |17472               |
+|18                                                                                                                                                                                                                                                                                                          |STROPY                                                       |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 20 cm C30/37 - filigran                   |m2    |1570.85         |150                  |235627.5            |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |21.2            |3500                 |74200               |
+|25                                                                                                                                                                                                                                                                                                          |POSADZKI                                                     |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Posadzka na gruncie PG1                                      |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |524.9           |15                   |7873.5              |
+|29                                                                                                                                                                                                                                                                                                          |PORTIERNIA                                                   |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |KONSTRUKCJA                                                  |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |1.58            |155                  |244.9               |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |4.22            |360                  |1519.1999999999998  |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.17            |2600                 |442.00000000000006  |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |4.58            |115                  |526.7               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |10              |12                   |120                 |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna pod ścianami murowanymi                 |m2    |6.15            |18                   |110.7               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |10              |35                   |350                 |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |45.16           |90                   |4064.3999999999996  |
+|                                                                                                                                                                                                                                                                                                            |Podciągi żelbetowe monolityczne C30/37                       |m3    |1.65            |1650                 |2722.5              |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |0.34            |1450                 |493.00000000000006  |
+|                                                                                                                                                                                                                                                                                                            |Strop żelbetowy gr 18 cm C30/37 - filigran                   |m2    |17.3            |150                  |2595                |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.45            |2900                 |1305                |
+|                                                                                                                                                                                                                                                                                                            |Posadzka na gruncie PG1                                      |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |16.65           |18                   |299.7               |
+|30                                                                                                                                                                                                                                                                                                          |MURY OPOROWE                                                 |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |7.04            |155                  |1091.2              |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |23.47           |360                  |8449.199999999999   |
+|                                                                                                                                                                                                                                                                                                            |Ściany żelbetowe gr. 20cm  C30/37 W8                         |m2    |73.68           |200                  |14736.000000000002  |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |3.79            |2900                 |10991               |
+|32                                                                                                                                                                                                                                                                                                          |WIATA ŚMIETNIKOWA                                            |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |STOPY FUNDAMENTOWE                                           |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Wykonanie 10 stóp 40x40x80 cm C30/37 W8                      |      |                |370                  |0                   |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie ww. stóp fundamentowych 70 kg/m3.                  |      |                |2.9                  |0                   |
+|36                                                                                                                                                                                                                                                                                                          |ZBIORNIK RETENCYJNY                                          |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |26.06           |155                  |4039.2999999999997  |
+|                                                                                                                                                                                                                                                                                                            |Płyty fundamentowe C30/37 W8                                 |m3    |68.18           |120                  |8181.6              |
+|                                                                                                                                                                                                                                                                                                            |Sciany żelbetowe gr 20cm C30/37 W8                           |m2    |245.25          |200                  |49050               |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |11.23           |2600                 |29198               |
+|                                                                                                                                                                                                                                                                                                            |Izolacja przerw roboczych                                    |mb    |136             |25                   |3400                |
+|37                                                                                                                                                                                                                                                                                                          |ZBIORNIK PPOZ                                                |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |FUNDAMENT ZBIORNIKA                                          |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |24.26           |155                  |3760.3              |
+|                                                                                                                                                                                                                                                                                                            |Płyty fundamentowe C30/37 W8                                 |m3    |71.33           |120                  |8559.6              |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |7.85            |2600                 |20410               |
+|49                                                                                                                                                                                                                                                                                                          |AGREGAT PRĄDOTWÓRCZY                                         |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |ROBOTY FUNDAMENTOWE                                          |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Wykonanie warstwy ch.betonu C8/10 o gr. 10 cm                |m3    |1.26            |155                  |195.3               |
+|                                                                                                                                                                                                                                                                                                            |Płyta fundamentowa o gr. 35 cm z betonu C30/37 W8.           |m3    |3.65            |120                  |438                 |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie płyty fundamentowej - wsk. zazbrojenia 120 kg/m3.  |kg    |438             |2.6                  |1138.8              |
+|                                                                                                                                                                                                                                                                                                            |Kątownik/okucie po obwodzie fundamentu L40x40x4              |kg    |34.55           |                     |0                   |
+|73                                                                                                                                                                                                                                                                                                          |PRZEPOMPOWNIE (sanitarna,deszczowa ,ppoż,pianowa)            |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |BUDYNEK PRZEPOMPOWNI                                         |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkłady betonowe C8/10                                      |m3    |4.3             |155                  |666.5               |
+|                                                                                                                                                                                                                                                                                                            |Ławy fundamentowe C30/37 W8                                  |m3    |12.51           |360                  |4503.6              |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.63            |2600                 |1638                |
+|                                                                                                                                                                                                                                                                                                            |Sciany fundamentowe z bloczków betonowych gr 25cm            |m2    |18.24           |115                  |2097.6              |
+|                                                                                                                                                                                                                                                                                                            |Izolacja ścian fundamentowych murowanych np. dysperbit       |m2    |35              |12                   |420                 |
+|                                                                                                                                                                                                                                                                                                            |Papa termozgrzewalna x2 pod ścianami murowanymi              |m2    |12.77           |18                   |229.85999999999999  |
+|                                                                                                                                                                                                                                                                                                            |Izolacja termiczna scian fundamentowych aqua 12 cm           |m2    |20              |35                   |700                 |
+|                                                                                                                                                                                                                                                                                                            |Wieńce żelbetowe monolityczne C30/37                         |m3    |3.32            |1450                 |4814                |
+|                                                                                                                                                                                                                                                                                                            |Trzpienie żelbetowe monolityczne C30/37                      |m3    |1.28            |1450                 |1856                |
+|                                                                                                                                                                                                                                                                                                            |Zbrojenie                                                    |t     |0.46            |2600                 |1196                |
+|                                                                                                                                                                                                                                                                                                            |Ściana z bloczków Silikatowych gr 24 cm                      |m2    |138.97          |90                   |12507.3             |
+|                                                                                                                                                                                                                                                                                                            |Nadproża prefabrykowane                                      |mb    |4.2             |80                   |336                 |
+|                                                                                                                                                                                                                                                                                                            |Posadzka PG2                                                 |      |                |                     |0                   |
+|                                                                                                                                                                                                                                                                                                            |Podkład betonowy C8/10 gr 10cm                               |m2    |85.86           |15                   |1287.9              |
+|                                                                                                                                                                                                                                                                                                            |                                                             |      |                |Razem:               |1419350.93          |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+------+----------------+---------------------+--------------------+"

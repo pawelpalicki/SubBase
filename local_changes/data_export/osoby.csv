@@ -1,0 +1,77 @@
+id_osoby,imie,nazwisko,stanowisko,e_mail,telefon,id_firmy
+1,Bartosz,Jurga,,jurga@irmal.pl,518-022-600,1
+2,Marcin,Darecki,,darecki@irmal.pl,537-720-001,1
+3,Lidia,Tymińska,Dział Marketingu i Ofertowania,l.tyminska@palgaz.com.pl,664-914-908,2
+4,Marcin,Tobys,Dział Techniczny,m.tobys@palgaz.com.pl,515-343-248,2
+5,Leszek,Gemzała,właściciel,leszek.gemzala@vp.pl,,3
+6,Tomasz,Durkiewicz,właściciel,durkiewicz.tomasz@op.pl,693-861-092,4
+7,Maciej,Kaczmarek,właściciel,maciej.kaczmarek@unibud.net.pl,516-105-001,5
+8,Toni,Hachem,,toni.hachem@unibud1.home.pl,516-105-003,5
+9,Marek,Jakubowski,właściciel,jakubowski@intech.poznan.pl,506-106-675,6
+10,Michał,Banasiak,Prokurent,"michal@matpolspzoo.com.pl, ",508-389-746,7
+11,Kamila,Lach-Jaskuła,Dyrektor ds. Inwestycji,kamila@matpolspzoo.com.pl,730-673-700,7
+12,Roman,Szarata,wlaściciel,roman.szarata@gmail.com,,8
+13,Magdalena,Szarata,,magdalenaszarata@wp.pl,,8
+14,Tomasz,Szarata,właściciel,tomaszszarata@wp.pl,608-013-589,9
+15,Daniel,Witczak,,dwitczak7@gmail.com,607-045-628,10
+16,Wojciech,Knyspel,właściciel,w.knyspel@gmail.com,531-501-201,11
+17,Mariusz,Panek,,panek@zelbet.com.pl,784-076-098,12
+18,Wiktor,Warmuz,,pphu_vector@onet.eu,604-076-533,13
+19,Tomasz,Galiński,,,605-657-983,14
+20,Jacek,Jakubiak,,jacek602103@wp.pl,602-103-185,15
+21,Marek,Piniem,prezes,piniek.marek@abbau-polska.com,502-384-784,16
+22,Krzysztof,Sikora,,sikora.krzysztof@abbau-polska.com,514-505-905,16
+23,Tomasz,Bąbelek,,,601-794-841,17
+24,Andrzej,Witowski,prezes,awbautex@gmail.com,,18
+25,Piotr,Chronowski,Koordynacja i realizacja kontraktów,piotr.chronowski@awbautex.pl,534-805-040,18
+26,,,,monbudmr@gmail.com,607-717-554,19
+27,Jerzy,Kubacki,,jurbet@op.pl,505-069-521,20
+28,Andrzej,Skrzypek,,andskr@op.pl,782-020-167,21
+29,Andrzej,Welka,,andrzej.welka@ptbtranzyt.pl,882-124-449,22
+30,Jakub,Kraśniewski,Ofertowanie - Poznań,tranzyt@ptbtranzyt.pl,606-250-067,22
+31,Włodzimierz,Kraśniewski,Ofertowanie - Warszawa,tranzyt@ptbtranzyt.pl,606-240-067,22
+32,Marcin,Wieczorek,,marcin@drogbetwieczorek.pl,606-683-221,23
+33,Radosław,Rajek,,radoslaw.rajek@drogbet.com.pl,602-230-562,24
+34,Ryszard,Kopacz,dyrektor produkcji,ryszardkopacz@budwug.pl,608-074-253,25
+35,,,,biuro@trans-kop.pl,669-110-441,26
+36,Tomasz,Wysoczański,,biuro@trans-kop.pl,601-726-481,27
+37,Roman,Blaszczyk,prokurent,budinz@op.pl,606-290-050,27
+38,Mariusz,Blaszczyk,,,,27
+39,Stanisław,Zawada,właściciel,st.zawada@wp.pl,,28
+40,Janusz,Krasicki,właściciel,krys-bud.januszkrasicki@wp.pl,790-789-360,29
+41,Jakub,Ogórkiewicz,,budbau.ogorkiewicz@op.pl,660-670-756,30
+42,Mateusz,Rusztyk,właściciel,budbau@op.pl,,30
+43,Dariusz,Górecki,właściciel,dariuszgorecki1979@wp.pl,609-190-161,31
+44,,,,granbud@op.pl,600-445-526,32
+45,Łukasz,Bialic,,l.bialic@kobiinvest.pl,602-484-760,33
+46,Maciej,Szajowski,Właściciel,biuro@firmaszajowski.pl,601-566-829,34
+47,Grzegorz,Dombka,,,502-381-521,35
+48,Przemysław,Dombka,,,502-049-684,35
+49,Arkadiusz,Muslewski,,arekmuslewski@interia.pl,608-394-558,36
+54,Martek,Ratajczak,,marek@grac.com.pl,600-855-540,38
+55,Krzysztof,Ratajczak,,krzysztof@grac.com.pl,602-697-240,38
+56,Gracjan,Ratajczak,,,604-484-778,38
+57,Marta,Rut-Ratajczak,Ofertowanie,marta@grac.com.pl,,38
+58,Mikołaj,Szkudlarz,właściciel,mszkudlarz@emsuf.com,668-336-615,39
+59,Przemysław,Kaliński,,przemo.kalinski@gmail.com,509-526-303,40
+60,Maciej,Chlebanowski,,,602-309-129,41
+61,Krzysztof,Białas,,krzysztof.bialas@chlebanowski.com.pl,604-642-883,41
+62,Maciej,Baser,Prezes Zarządu,,604-925-664,42
+63,Jan,Zagrobelny,Kierownik Działu Realizacji,,883-602-039,42
+64,Sławomir,Gorzelany,Kierownik Działu Sprzedaży,,530-101-249,42
+65,Krzysztof,Kosicki,Dyrektor,krzysztof.kosicki@insbud-polnoc.pl,501-804-817,43
+66,Marek,Waligóra,Z-ca Dyrektora,marek.waligora@insbud-polnoc.pl,517-691-815,43
+67,Łukasz,Szamałek,,l.szamalek@monrem.pl,512-301-911,45
+68,Dariusz,Durski,kierownik robót,d.durski@monrem.pl,500-106-816,45
+79,Luiza,Krygier,Kierownik ds. Transportu,transport@robokop.pl,+48 608 444 816,48
+81,Krzysztof,Nowak,Właściciel,krzysztof.nowak_n.k.bud@wp.pl,693419827,49
+85,Tadeusz,Ziomek,,biuro@firmaziomek.pl,502-136-352,37
+86,Patryk,Ziomek,,patryk@firmaziomek.pl,519-180-732,37
+87,Karol,Ziomek,,karol@firmaziomek.pl,502-164-576,37
+88,Juliusz,Gimbut,,j.gimbut@firmaziomek.pl,507-017-258,37
+89,Jarosław,Rakowski,Właściciel,posadzki.jt@op.pl,600448994,50
+90,Łukasz,Wieczorek,,,783 414 801,51
+91,Dawid,Siodła,,,512133040,51
+92,Marian,Jarzemski,kierownik produkcji,,533313136,51
+93,Paweł,Święcki ,Właściciel,pawel@e-hydroizolacje.com.pl,699 659 043,53
+95,Łukasz,Bialic,Prezes Zarządu,btbhome.biuro@gmail.com,602 484 760,54

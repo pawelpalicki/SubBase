@@ -63,7 +63,6 @@ scipy==1.16.0
 setuptools==80.9.0
 shapely==2.1.1
 SQLAlchemy==2.0.40
-sympy==1.14.0
 terminaltables==3.1.10
 tifffile==2025.6.11
 # torch==2.7.1
